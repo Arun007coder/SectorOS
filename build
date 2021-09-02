@@ -6,7 +6,7 @@ Build="$PWD"/Build/
 
 iswrng=false
 
-if [ $1 == "-r" ] || [ $1 == "--run" ] ; then
+if [ "$1" == "-r" ] || [ "$1" == "--run" ] ; then
 
     iswrng=false
     if ( ls "$PWD" | grep -i Build ); then 
@@ -17,7 +17,7 @@ if [ $1 == "-r" ] || [ $1 == "--run" ] ; then
 
     mv boot.bin "$Build"
 
-    pushd $Build || exit
+    pushd "$Build" || exit
     qemu-system-i386 -fda boot.bin
     dd if=/dev/zero of=boot.img bs=1024 count=1440
     dd if=boot.bin of=boot.img seek=0 count=1 conv=notrunc
@@ -28,7 +28,7 @@ else
     iswrng=true
 fi
 
-if [ $1 == "-b" ] || [ $1 == "--build" ] ; then
+if [ "$1" == "-b" ] || [ "$1" == "--build" ] ; then
 
     iswrng=false
     if ( ls "$PWD" | grep -i Build ); then 
@@ -40,7 +40,7 @@ if [ $1 == "-b" ] || [ $1 == "--build" ] ; then
 
     mv boot.bin "$Build"
 
-    pushd $Build || exit
+    pushd "$Build" || exit
     dd if=/dev/zero of=boot.img bs=1024 count=1440
     dd if=boot.bin of=boot.img seek=0 count=1 conv=notrunc
     qrencode -r boot.bin -8 -o bootFDD.png
@@ -49,7 +49,7 @@ else
     iswrng=true
 fi
 
-if [ $1 == "-h" ] || [ $1 == "--help" ]; then
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     iswrng=true
 fi
 
