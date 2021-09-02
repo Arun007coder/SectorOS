@@ -38,6 +38,6 @@ jobs:
       - name: save artifact
         uses: actions/upload-artifact@v2
         with:
-          name: BootOS- '$git_hash' .zip
+          name: BootOS.zip
           path: /home/runner/work/BootOS/BootOS/Build
           retention-days: 10
