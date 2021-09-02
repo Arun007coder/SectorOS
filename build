@@ -12,15 +12,15 @@ if [ "$1" == "-r" ] || [ "$1" == "--run" ] ; then
     if ( ls "$PWD" | grep -i Build ); then 
         mkdir -pv "$Build"
     fi
-    sudo apt install nasm
-    nasm -f bin -o boot.bin "$ASMFILE"
+    sudo apt-get install nasm
+    nasm -f bin -o BootOS.bin "$ASMFILE"
 
-    mv boot.bin "$Build"
+    mv BootOS.bin "$Build"
 
     pushd "$Build" || exit
-    qemu-system-i386 -fda boot.bin
-    dd if=/dev/zero of=boot.img bs=1024 count=1440
-    dd if=boot.bin of=boot.img seek=0 count=1 conv=notrunc
+    qemu-system-i386 -fda BootOS.bin
+    dd if=/dev/zero of=BootOS.img bs=1024 count=1440
+    dd if=BootOS.bin of=BootOS.img seek=0 count=1 conv=notrunc
     qrencode -r boot.bin -8 -o bootFDD.png
     popd || exit
 
@@ -35,15 +35,15 @@ if [ "$1" == "-b" ] || [ "$1" == "--build" ] ; then
         mkdir -pv "$Build"
     fi
 
-    sudo apt install nasm
-    nasm -f bin -o boot.bin "$ASMFILE"
+    sudo apt-get install nasm
+    nasm -f bin -o BootOS.bin "$ASMFILE"
 
-    mv boot.bin "$Build"
+    mv BootOS.bin "$Build"
 
     pushd "$Build" || exit
-    dd if=/dev/zero of=boot.img bs=1024 count=1440
-    dd if=boot.bin of=boot.img seek=0 count=1 conv=notrunc
-    qrencode -r boot.bin -8 -o bootFDD.png
+    dd if=/dev/zero of=BootOS.img bs=1024 count=1440
+    dd if=BootOS.bin of=BootOS.img seek=0 count=1 conv=notrunc
+    qrencode -r BootOS.bin -8 -o bootFDD.png
     popd || exit
 else
     iswrng=true
