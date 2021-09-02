@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: BuildOS
 
 # Controls when the workflow will run
 on:
@@ -34,5 +34,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: BootOS-'$git_hash'.zip
-          path: /home/runner/work/BootOS/Build/
+          path: /home/runner/work/BootOS/Build
           retention-days: 10
