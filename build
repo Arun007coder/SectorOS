@@ -8,10 +8,11 @@ iswrng=false
 
 if [ $1 == "-r" ] || [ $1 == "--run" ] ; then
 
+    iswrng=false
     if ( ls "$PWD" | grep -i Build ); then 
         mkdir -pv "$Build"
     fi
-
+    sudo apt install nasm
     nasm -f bin -o boot.bin "$ASMFILE"
 
     mv boot.bin "$Build"
@@ -28,10 +29,13 @@ else
 fi
 
 if [ $1 == "-b" ] || [ $1 == "--build" ] ; then
+
+    iswrng=false
     if ( ls "$PWD" | grep -i Build ); then 
         mkdir -pv "$Build"
     fi
 
+    sudo apt install nasm
     nasm -f bin -o boot.bin "$ASMFILE"
 
     mv boot.bin "$Build"
