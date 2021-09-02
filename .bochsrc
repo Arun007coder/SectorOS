@@ -1,0 +1,3 @@
+floppya: 1_44="/home/arun007coder/VSCODE/Projects/os/TOS/Build/boot.bin", status=inserted
+boot: floppy
+clock: sync=realtime, time0=local, rtc_sync=1

@@ -1,0 +1,20 @@
+      {
+            "label": "open emulicious",
+            "type": "shell",
+            "command": "./emu",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "./buildnasm",
+            "args": [
+                "${workspaceFolderBasename}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
