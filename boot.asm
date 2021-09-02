@@ -25,9 +25,9 @@ call ptr_str ;; Prints Text4 variable
 call read_HDD ;; Reads the active drive for a byte in the second sector and prints it 
 call get_input ;; To get input from the keyboard
 
-%include 'print_Text.inc'
-%include 'print_Keys.inc'
-%include 'fetch_str.inc'
+%include 'print_Text.asm'
+%include 'print_Keys.asm'
+%include 'fetch_str.asm'
 Text: db 'Welcome to ComOS primitive kernel', 0x0A, 0x0D, 0
 Text2: db 'Basic keyboard input is working', 0x0A, 0x0D, 0
 Text3: db 'Trying to read second sector of the Drive' , 0x0A, 0x0D, 0
