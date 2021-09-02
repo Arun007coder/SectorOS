@@ -1,17 +1,54 @@
 #!/bin/bash
 
+ASMFILE=boot.asm
+
 Build="$PWD"/Build/
 
-if ( ls "$PWD" | grep -i Build ); then 
-    mkdir -pv "$Build"
+iswrng=false
+
+if [ $1 == "-r" ] || [ $1 == "--run" ] ; then
+
+    if ( ls "$PWD" | grep -i Build ); then 
+        mkdir -pv "$Build"
+    fi
+
+    nasm -f bin -o boot.bin "$ASMFILE"
+
+    mv boot.bin "$Build"
+
+    pushd $Build || exit
+    qemu-system-i386 -fda boot.bin
+    dd if=/dev/zero of=boot.img bs=1024 count=1440
+    dd if=boot.bin of=boot.img seek=0 count=1 conv=notrunc
+    qrencode -r boot.bin -8 -o bootFDD.png
+    popd || exit
+
+else
+    iswrng=true
 fi
 
-nasm -f bin -o boot.bin boot.asm
+if [ $1 == "-b" ] || [ $1 == "--build" ] ; then
+    if ( ls "$PWD" | grep -i Build ); then 
+        mkdir -pv "$Build"
+    fi
 
-mv boot.bin "$Build"
+    nasm -f bin -o boot.bin "$ASMFILE"
 
-pushd $Build || exit
-qemu-system-i386 -fda boot.bin
-dd if=/dev/zero of=boot.img bs=1024 count=1440
-dd if=boot.bin of=boot.img seek=0 count=1 conv=notrunc
-qrencode -r boot.bin -8 -o bootFDD.png
+    mv boot.bin "$Build"
+
+    pushd $Build || exit
+    dd if=/dev/zero of=boot.img bs=1024 count=1440
+    dd if=boot.bin of=boot.img seek=0 count=1 conv=notrunc
+    qrencode -r boot.bin -8 -o bootFDD.png
+    popd || exit
+else
+    iswrng=true
+fi
+
+if [ $1 == "-h" ] || [ $1 == "--help" ]; then
+    iswrng=true
+fi
+
+if [ $iswrng == "true" ]; then
+    printf "\nNASM Builder \n  \n-r --r : To run the created image using QEMU \n  \n-b --build : To build the asm file without running it \n  \n-h --help : To display this message\n"
+fi

@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "BuildOS",
+            "label": "RunOS",
             "type": "shell",
             "options": {
                 "statusbar": {
@@ -14,7 +14,14 @@
                     "backgroundColor": "statusBarItem.warningBackground"
                 }
             },
-            "command": "./build"
+            "command": "./build",
+            "args": ["-r"]
+        },
+        {
+            "label": "BuildOS",
+            "type": "shell",
+            "command": "./build",
+            "args": ["-b"]
         }
     ]
 }
