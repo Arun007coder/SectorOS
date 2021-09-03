@@ -22,7 +22,7 @@ call ptr_str ;; Prints Text3 variable
 
 mov bx, Text4
 call ptr_str ;; Prints Text4 variable
-call read_HDD ;; Reads the active drive for a byte in the second sector and prints it 
+call read_HDD ;; Reads the active drive for a byte in the second sector and prints it
 call get_input ;; To get input from the keyboard
 
 %include 'print_Text.asm'

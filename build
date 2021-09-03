@@ -37,8 +37,10 @@ if [ "$1" == "-b" ] || [ "$1" == "--build" ] ; then
     fi
 
     nasm -f bin -o "$BuildName".bin "$ASMFILE"
+    nasm -f bin -o "$BuildName".com "$ASMFILE"
 
     mv "$BuildName".bin "$Build"
+    mv "$BuildName".com "$Build"
 
     pushd "$Build" || exit
     dd if=/dev/zero of="$BuildName".img bs=1024 count=1440

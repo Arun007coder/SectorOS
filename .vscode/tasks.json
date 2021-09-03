@@ -15,13 +15,22 @@
                 }
             },
             "command": "./build",
-            "args": ["-r"]
+            "args": [
+                "-r"
+            ]
         },
         {
             "label": "BuildOS",
             "type": "shell",
             "command": "./build",
-            "args": ["-b"]
+            "args": [
+                "-b"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
