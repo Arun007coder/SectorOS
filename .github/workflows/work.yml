@@ -25,10 +25,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       
-      - name: gith
-        env: 
-          git_hash : 0
-        run: echo ${GITHUB_SHA::6} >> "$git_hash"
+      - name: installing NASM
+        run: ./build -i
 
       # Runs a single command using the runners shell
       - name: Build
