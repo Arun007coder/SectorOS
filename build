@@ -4,7 +4,7 @@ ASMFILE=boot.asm
 
 Build="$PWD"/Build/
 
-BuildName=BootOS
+BuildName=SectorOS
 
 iswrng=false
 
