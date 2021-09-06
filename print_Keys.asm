@@ -1,8 +1,15 @@
+Buffer: times 10 db 'a'
+
 get_input: ;; TODO:Add Commands
    mov ax, 0
    int 0x16
+   mov bx, Buffer
+   mov [bx], al
+   inc bx
    cmp al, 27
    je shutdown
+   cmp al, 13
+   je print_Tex
    cmp al, 9
    je echo1
    mov ah, 0x0e
@@ -26,9 +33,16 @@ echo1:
    int 0x10
    jmp get_input
 
-beep:
-   mov ax, 2305h
-   int 0x15
+print_Tex:
    mov ah, 0x0E
-   int 0x10
-   jmp get_input
+   mov bx, Buffer 
+   .lop:
+      mov al, [bx]
+      cmp al, 13
+      je ex
+      int 0x10
+      add bx, 1
+      jmp .lop
+
+ex:
+    jmp get_input
