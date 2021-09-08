@@ -1,6 +1,4 @@
 get_input: ;; TODO:Add Commands
-   Buffer: times 10 db 0
-   shell:  db '$: ', 0
    jmp setcursor
    setcursor:
       mov ah, 0x02   ; Set Cursor location
@@ -8,16 +6,11 @@ get_input: ;; TODO:Add Commands
       mov dh, 0x18   ; Row 24
       mov dl, 0x00   ; Column 0
       int     0x10
-      mov ah, 0x0E
-      mov bx, shell
-      call ptr_str
-      jmp input_loop
+      call print_shell
    input_loop:
       mov ax, 0
       int 0x16
-      mov bx, Buffer
-      mov [bx], al
-      inc bx
+      mov byte [Buffer], al
       cmp al, 27
       je shutdown
       cmp al, 13
@@ -35,6 +28,8 @@ clear_scr:
    mov ah, 0x0B ;; Change the colour of the background
    mov bh, 0x00
    mov bl, 0x01
+   mov dh, 0x00
+   mov byte [CursorPOS], dh
    int 0x10
    jmp get_input
 
@@ -47,16 +42,29 @@ echo1:
 
 print_Tex:
    pusha
+   mov dh, byte [CursorPOS]
+   inc dh
+   cmp dh , 0x18
+   je clear_scr
+   mov ah, 0x02   ; Set Cursor location
+   mov bh, 0x00   ; Page number
+   ;;mov dh, 0x04   ; Row 4
+   int     0x10
+   mov byte [CursorPOS], dh
    mov ah, 0x0E
-   mov bx, Buffer
-   .lop:
-      mov al, [bx]
-      int 0x10
-      add bx, 1
-      cmp al, 13
-      je ext
-      jmp .lop
+   mov bx, Buffer1
+   call ptr_str
+   jmp setcursor
 
-   ext:
-      popa
-      jmp input_loop
+
+print_shell:
+   mov ah, 0x0E
+   mov bx, shell
+   call ptr_str
+   jmp input_loop
+   
+
+Buffer1: db "Hello this is a test echo", 0
+Buffer: times 10 db 0
+shell:  db '$: ', 0
+CursorPOS: db 0x05
