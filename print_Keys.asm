@@ -36,7 +36,7 @@ clear_scr:
 echo1:
    mov ah, 0x0B ;; Change the colour of the background
    mov bh, 0x00
-   mov bl, 0x05
+   mov bl, 0x00
    int 0x10
    jmp get_input
 
