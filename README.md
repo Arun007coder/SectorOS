@@ -2,8 +2,6 @@
 
 A Simple program which runs from the boot sector
 
-It can read keyboard input
-
 Proper shutdown is implemented. To call shutdown, press `escape` key on keyboard
 
 ## Building
