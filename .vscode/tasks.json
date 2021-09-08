@@ -17,7 +17,11 @@
             "command": "./build",
             "args": [
                 "-r"
-            ]
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
         },
         {
             "label": "BuildOS",
