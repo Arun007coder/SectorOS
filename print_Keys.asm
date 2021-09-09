@@ -12,7 +12,7 @@ get_input: ;; TODO:Add Commands
       int 0x16
       mov byte [Buffer], al
       cmp al, 27
-      je shutdown
+      je shut
       cmp al, 13
       je print_Tex
       cmp al, 9
@@ -64,7 +64,18 @@ print_shell:
    jmp input_loop
    
 
-Buffer1: db "Hello this is a test echo", 0
-Buffer: times 10 db 0
+shut:
+   shu:
+      mov dh, byte [CursorPOS]
+      inc dh
+      mov ah, 0x02
+      int     0x10
+      mov ah, 0x0E
+      mov bx, Buffer1
+      call ptr_str
+      jmp shutdown
+
+Buffer1: db "This is test", 0
+Buffer: db 0
 shell:  db '$: ', 0
 CursorPOS: db 0x05
