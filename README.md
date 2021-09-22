@@ -1,27 +1,25 @@
 # SectorOS
 
-A Simple program which runs from the boot sector
-
-Proper shutdown is implemented. To call shutdown, press `escape` key on keyboard
+A Simple operating system
 
 ## Building
 
 To build the project, First Run:
 
 ```shell
-./build -I
+make mykernel.iso
 ```
 
-To install required tools. Then run:
+to build the project. The output will be in the Build folder.  
+
+To run the OS in qemu, Run:
 
 ```shell
-./build -b
+make run
 ```
 
-to build the project. The output will be in the Build folder.
+To clean all output files, Run:
 
-## Known Issues
-
-* Reading Storage medium does not return a value in Floppy disk image
-* Keyboard input will work but the background colour is always black in a real machine and in vmware workstation
-  
+```shell
+make clean
+```
