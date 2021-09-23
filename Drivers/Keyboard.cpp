@@ -193,6 +193,7 @@ void KeyboardDriver::clear_key_buffer()
 
 void KeyboardDriver::CLI()
 {
+    printf("\n");
     if(key_buffer[0] == "e")
     {
         for (int i = 2; key_buffer[i] != "\n"; i++)
@@ -202,7 +203,8 @@ void KeyboardDriver::CLI()
     }
     else if (key_buffer[0] == "h" & key_buffer[1] == "e" & key_buffer[2] == "l" & key_buffer[3] == "p")
     {
-        printf("\nHelp:\ne <message> : to print the message in the console \nhelp : to show this message \nRSHIFT : to clear the keyboard buffer\n");
+        printf("Help:\ne <message> : to print the message in the console \nhelp : to show this message \nRSHIFT : to clear the keyboard buffer");
     }
+    printf("\n");
     clear_key_buffer();
 }
