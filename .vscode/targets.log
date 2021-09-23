@@ -1,6 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make: *** No rule to make target 'all'.  Stop.
- 
 # GNU Make 4.2.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2016 Free Software Foundation, Inc.
@@ -8,7 +6,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Sep 22 22:11:08 2021
+# Make data base, printed on Thu Sep 23 07:38:31 2021
 
 # Variables
 
@@ -43,11 +41,11 @@ CURDIR := /home/arun/VSCODE/Projects/os/TOS
 # makefile
 SHELL = /bin/sh
 # environment
-SNAP_DATA = /var/snap/code/74
+SNAP_DATA = /var/snap/code/75
 # environment
 VSCODE_NLS_CONFIG = {"locale":"en-gb","availableLanguages":{},"_languagePackSupport":true}
 # environment
-_ = /snap/code/74/usr/share/code/code
+_ = /snap/code/75/usr/share/code/code
 # environment
 QT_AUTO_SCREEN_SCALE_FACTOR = 0
 # makefile (from 'Makefile', line 5)
@@ -79,7 +77,7 @@ VSCODE_CWD = /home/arun
 # environment
 XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
 # environment
-GSETTINGS_SCHEMA_DIR = /snap/code/74/usr/share/glib-2.0/schemas
+GSETTINGS_SCHEMA_DIR = /snap/code/75/usr/share/glib-2.0/schemas
 # default
 MAKE_HOST := x86_64-pc-linux-gnu
 # environment
@@ -89,17 +87,17 @@ GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
 XCURSOR_THEME = Win 10
 # environment
-SESSION_MANAGER = local/arun-ThinkCentre-M72e:@/tmp/.ICE-unix/2241,unix/arun-ThinkCentre-M72e:/tmp/.ICE-unix/2241
+SESSION_MANAGER = local/arun-ThinkCentre-M72e:@/tmp/.ICE-unix/2524,unix/arun-ThinkCentre-M72e:/tmp/.ICE-unix/2524
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
 GDK_PIXBUF_MODULE_FILE = /home/arun/snap/code/common/.cache/gdk-pixbuf-loaders.cache
 # environment
-SNAP = /snap/code/74
+SNAP = /snap/code/75
 # environment
 PERLBREW_SHELLRC_VERSION = 0.92
 # environment
-SNAP_VERSION = 83bd43bc
+SNAP_VERSION = 7f6ab548
 # environment
 VSCODE_LOG_STACK = false
 # environment
@@ -107,7 +105,7 @@ DISABLE_WAYLAND = 1
 # environment
 VSCODE_CRASH_REPORTER_START_OPTIONS = {"companyName":"Microsoft","productName":"VSCode","submitURL":"appcenter://code?aid=fba07a4d-84bd-4fc8-a125-9640fc8ce171&uid=4b795889-30eb-41b2-a74f-c30684ebb7c8&iid=4b795889-30eb-41b2-a74f-c30684ebb7c8&sid=4b795889-30eb-41b2-a74f-c30684ebb7c8","uploadToServer":true}
 # environment
-GDK_PIXBUF_MODULEDIR = /snap/code/74/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
+GDK_PIXBUF_MODULEDIR = /snap/code/75/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -115,7 +113,7 @@ LS_COLORS =
 # environment
 XDG_SESSION_DESKTOP = KDE
 # environment
-SSH_AUTH_SOCK = /tmp/ssh-ttTC32sPFmWz/agent.1629
+SSH_AUTH_SOCK = /tmp/ssh-62Q5KfwwdgvN/agent.1827
 # automatic
 %F = $(notdir $%)
 # environment
@@ -135,7 +133,7 @@ KDE_SESSION_VERSION = 5
 # environment
 XDG_SEAT = seat0
 # environment
-SSH_AGENT_PID = 2085
+SSH_AGENT_PID = 2264
 # environment
 PERLBREW_PERL = perl-5.28.0
 # environment
@@ -151,7 +149,7 @@ LESSCLOSE = /usr/bin/lesspipe %s %s
 # environment
 VSCODE_CLI = 1
 # environment
-VSCODE_CODE_CACHE_PATH = /home/arun/.config/Code/CachedData/83bd43bc519d15e50c4272c6cf5c1479df196a4d
+VSCODE_CODE_CACHE_PATH = /home/arun/.config/Code/CachedData/7f6ab5485bbc008386c4386d08766667e155244e
 # environment
 LOGNAME = arun
 # environment
@@ -183,19 +181,19 @@ MAKE = $(MAKE_COMMAND)
 # default
 MAKECMDGOALS := all
 # environment
-SNAP_USER_DATA = /home/arun/snap/code/74
+SNAP_USER_DATA = /home/arun/snap/code/75
 # environment
 SHLVL = 0
 # makefile (from 'Makefile', line 2)
 ASPARAMS = --32
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-1b657808-3560-407a-bf5c-a65a2fee4c09.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-35d580ec-2b75-41d4-87b3-50e7d8f7f6a3.sock
 # environment
 XDG_SESSION_ID = 1
 # environment
 USER = arun
 # environment
-SNAP_REVISION = 74
+SNAP_REVISION = 75
 # makefile
 .DEFAULT_GOAL := mykernel.bin
 # environment
@@ -217,7 +215,7 @@ LANGUAGE = en_IN:en
 # environment
 XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-a4440b6a-1.60.1-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-a4440b6a-1.60.2-main.sock
 # environment
 BAMF_DESKTOP_FILE_HINT = /var/lib/snapd/desktop/applications/code_code.desktop
 # makefile
@@ -269,7 +267,7 @@ CHROME_DESKTOP = code-url-handler.desktop
 # environment
 LANG = C
 # environment
-VSCODE_PID = 21728
+VSCODE_PID = 5392
 # environment
 PERLBREW_MANPATH = /home/arun/perl5/perlbrew/perls/perl-5.28.0/man
 # environment
@@ -278,15 +276,17 @@ KDE_SESSION_UID = 1000
 # Load=131/1024=13%, Rehash=0, Collisions=14/157=9%
 
 # Pattern-specific Variable Values
- 
 
 # No pattern-specific variable values.
+ 
+make: *** No rule to make target 'all'.  Stop.
+ 
 
 # Directories
 
-# . (device 2057, inode 9832164): 16 files, no impossibilities.
+# . (device 2057, inode 9832164): 14 files, no impossibilities.
 
-# 16 files, no impossibilities in 1 directories.
+# 14 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -435,9 +435,9 @@ install: mykernel.bin
 # strcache buffers: 1 (0) / strings = 36 / storage = 336 B / avg = 9 B
 # current buf: size = 8162 B / used = 336 B / count = 36 / avg = 9 B
 
-# strcache performance: lookups = 53 / hit rate = 32%
+# strcache performance: lookups = 51 / hit rate = 29%
 # hash-table stats:
-# Load=36/8192=0%, Rehash=0, Collisions=1/53=2%
-# Finished Make data base on Wed Sep 22 22:11:08 2021
+# Load=36/8192=0%, Rehash=0, Collisions=1/51=2%
+# Finished Make data base on Thu Sep 23 07:38:31 2021
 
  

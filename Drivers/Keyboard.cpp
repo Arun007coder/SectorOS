@@ -17,6 +17,7 @@ CommandPort(0x64)
     DataPort.WriteToPort(status);
 
     DataPort.WriteToPort(0xF4);
+    clear_key_buffer();
 }
 
 KeyboardDriver::~KeyboardDriver()
@@ -65,14 +66,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
             case 0x19: printf("p"); break;
             case 0x1A: printf("["); break;
             case 0x1B: printf("]"); break;
-            case 0x1C:
-                for (int i = 0; key_buffer[i] != "\n"; i++)
-                {
-                    printf(key_buffer[i]);
-                }
-                clear_key_buffer();
-                
-             break;
+            case 0x1C: CLI();       break;
             case 0x1E: printf("a"); break;
             case 0x1F: printf("s"); break;
             case 0x20: printf("d"); break;
@@ -195,4 +189,20 @@ void KeyboardDriver::clear_key_buffer()
     }
     keybufferpoint = 0;
     
+}
+
+void KeyboardDriver::CLI()
+{
+    if(key_buffer[0] == "e")
+    {
+        for (int i = 2; key_buffer[i] != "\n"; i++)
+        {
+            printf(key_buffer[i]);
+        }
+    }
+    else if (key_buffer[0] == "h" & key_buffer[1] == "e" & key_buffer[2] == "l" & key_buffer[3] == "p")
+    {
+        printf("\nHelp:\ne <message> : to print the message in the console \nhelp : to show this message \nRSHIFT : to clear the keyboard buffer\n");
+    }
+    clear_key_buffer();
 }
