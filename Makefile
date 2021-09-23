@@ -31,10 +31,13 @@ mykernel.iso: mykernel.bin
 	grub-mkrescue --output=$@ iso
 	rm -rf iso
 
+move: mykernel.iso
+	mv mykernel.iso iso_files/mykernel.iso
+
 run: mykernel.iso
 	(killall qemu-system-i386 && sleep 1) || true
 	qemu-system-i386 -cdrom mykernel.iso
 
 .PHONY: clean
-clean:
+clean: move
 	rm -f $(objects) mykernel.bin mykernel.iso

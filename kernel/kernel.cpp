@@ -9,11 +9,14 @@ static uint8_t cursorx;
 void printf(char* str)
 {
     static uint8_t x=0, y=0;
+    uint8_t curx;
+    uint8_t cury;
 
     static uint16_t* VideoMemory = (uint16_t*)0xb8000;
 
     for(int i = 0; str[i] != '\0'; ++i)
     {
+        cursorx = x;
 
         switch(str[i])
         {
@@ -21,6 +24,17 @@ void printf(char* str)
                 y++;
                 x = 0;
             break;
+            case '\5':
+                for(y = 0; y < 25; y++)
+                    for(x = 0; x < 80; x++)
+                        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
+
+                x = 0;
+                y = 0;
+            break;
+            case '\3':
+                for(x = cursorx - 0x02; x == cursorx +2 ; x++)
+                    VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | 'a';
             default:
                 VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | str[i];
                 x++;

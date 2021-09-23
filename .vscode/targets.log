@@ -1,4 +1,6 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target 'all'.  Stop.
+ 
 # GNU Make 4.2.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2016 Free Software Foundation, Inc.
@@ -6,7 +8,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Sep 23 07:38:31 2021
+# Make data base, printed on Thu Sep 23 15:29:58 2021
 
 # Variables
 
@@ -187,7 +189,7 @@ SHLVL = 0
 # makefile (from 'Makefile', line 2)
 ASPARAMS = --32
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-35d580ec-2b75-41d4-87b3-50e7d8f7f6a3.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-138b4ccb-0306-47bc-a0ce-d06544a2b5a5.sock
 # environment
 XDG_SESSION_ID = 1
 # environment
@@ -278,16 +280,14 @@ KDE_SESSION_UID = 1000
 # Pattern-specific Variable Values
 
 # No pattern-specific variable values.
- 
-make: *** No rule to make target 'all'.  Stop.
- 
 
 # Directories
 
-# . (device 2057, inode 9832164): 14 files, no impossibilities.
+# . (device 2057, inode 9832164): 15 files, no impossibilities.
 
-# 14 files, no impossibilities in 1 directories.
+# 15 files, no impossibilities in 1 directories.
 
+ 
 # Implicit Rules
 
 %.o: %.cpp
@@ -323,7 +323,7 @@ all:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2021-09-22 22:00:24.389240848
+#  Last modified 2021-09-23 15:29:20.608130025
 #  File has been updated.
 #  Successfully updated.
 
@@ -392,16 +392,16 @@ run: mykernel.iso
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 35):
+#  recipe to execute (from 'Makefile', line 38):
 	(killall qemu-system-i386 && sleep 1) || true
 	qemu-system-i386 -cdrom mykernel.iso
 
-clean:
+clean: move
 #  Phony target (prerequisite of .PHONY).
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 40):
+#  recipe to execute (from 'Makefile', line 43):
 	rm -f $(objects) mykernel.bin mykernel.iso
 
 # Not a target:
@@ -409,6 +409,13 @@ CPU/Interrupts.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
+
+move: mykernel.iso
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 35):
+	mv mykernel.iso iso_files/mykernel.iso
 
 mykernel.bin: LILO/linker.ld LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Keyboard.o CPU/interruptstab.o kernel/kernel.o
 #  Implicit rule search has not been done.
@@ -425,19 +432,19 @@ install: mykernel.bin
 	sudo cp $< /boot/mykernel.bin
 
 # files hash-table stats:
-# Load=18/1024=2%, Rehash=0, Collisions=0/41=0%
+# Load=19/1024=2%, Rehash=0, Collisions=0/44=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 36 / storage = 336 B / avg = 9 B
-# current buf: size = 8162 B / used = 336 B / count = 36 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 38 / storage = 358 B / avg = 9 B
+# current buf: size = 8162 B / used = 358 B / count = 38 / avg = 9 B
 
-# strcache performance: lookups = 51 / hit rate = 29%
+# strcache performance: lookups = 56 / hit rate = 32%
 # hash-table stats:
-# Load=36/8192=0%, Rehash=0, Collisions=1/51=2%
-# Finished Make data base on Thu Sep 23 07:38:31 2021
+# Load=38/8192=0%, Rehash=0, Collisions=1/56=2%
+# Finished Make data base on Thu Sep 23 15:29:58 2021
 
  

@@ -97,6 +97,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
             case 0x5B: break;
             case 0x38: printf(" LALT "); break;
             case 0x39: printf(" "); break;
+            case 0x0E: printf("\3"); break;
 
             
 
@@ -194,16 +195,29 @@ void KeyboardDriver::clear_key_buffer()
 void KeyboardDriver::CLI()
 {
     printf("\n");
-    if(key_buffer[0] == "e")
+    if(key_buffer[0] == "e" & key_buffer[1] == "c" & key_buffer[2] == "h" & key_buffer[3] == "o")
     {
-        for (int i = 2; key_buffer[i] != "\n"; i++)
+        for (int i = 5; key_buffer[i] != "\n"; i++)
         {
             printf(key_buffer[i]);
         }
     }
     else if (key_buffer[0] == "h" & key_buffer[1] == "e" & key_buffer[2] == "l" & key_buffer[3] == "p")
     {
-        printf("Help:\ne <message> : to print the message in the console \nhelp : to show this message \nRSHIFT : to clear the keyboard buffer");
+        printf("Help:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : \nh to halt the computer");
+    }
+    else if (key_buffer[0] == "c" & key_buffer[1] == "l" & key_buffer[2] == "e" & key_buffer[3] == "a" & key_buffer[4] == "r")
+    {
+        printf("\5");
+        printf("screen cleared");
+    }
+    else if (key_buffer[0] == "s" & key_buffer[1] == "d")
+    {
+        if(key_buffer[3] == "h")
+        {
+            printf("Halting the computer...");
+            __asm__ volatile("hlt");
+        }
     }
     printf("\n");
     clear_key_buffer();
