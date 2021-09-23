@@ -3,6 +3,7 @@ make: Entering directory '/home/arun/VSCODE/Projects/os/TOS'
 as --32 -o LILO/loader.o LILO/loader.s
 gcc -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -c -o kernel/gdt.o kernel/gdt.cpp
 gcc -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -c -o Drivers/IOPorts.o Drivers/IOPorts.cpp
+ 
 gcc -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -c -o CPU/Interrupts.o CPU/Interrupts.cpp
 gcc -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -c -o Drivers/Keyboard.o Drivers/Keyboard.cpp
 as --32 -o CPU/interruptstab.o CPU/interruptstab.s

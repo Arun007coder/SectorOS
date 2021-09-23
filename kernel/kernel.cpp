@@ -97,7 +97,6 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
-    printf("\n\n");
     printf("Welcome to SectorOS Monolithic kernel \nInterrupt descriptor table loaded \n"); //TODO: To make a Command Line Interface
 
     GlobalDescriptorTable gdt;

@@ -66,13 +66,13 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
             case 0x1A: printf("["); break;
             case 0x1B: printf("]"); break;
             case 0x1C:
-                for (int i = 0; key_buffer[i] != '\n'; ++i )
+                for (int i = 0; key_buffer[i] != "\n"; i++)
                 {
-                    printfchar(key_buffer[i]);
+                    printf(key_buffer[i]);
                 }
                 clear_key_buffer();
+                
              break;
-
             case 0x1E: printf("a"); break;
             case 0x1F: printf("s"); break;
             case 0x20: printf("d"); break;
@@ -97,10 +97,10 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
             case 0x33: printf(","); break;
             case 0x34: printf("."); break;
             case 0x35: printf("/"); break;
-            case 0x36: printf(" RSHIFT "); break;
+            case 0x36: clear_key_buffer(); break;
 
             case 0x1D: printf(" CTRL "); break;
-            case 0x5B: printf(" WIN "); break;
+            case 0x5B: break;
             case 0x38: printf(" LALT "); break;
             case 0x39: printf(" "); break;
 
@@ -120,67 +120,67 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
     return esp;
 }
 
-char KeyboardDriver::KeycodeToASCII(uint8_t Keycode)
+char* KeyboardDriver::KeycodeToASCII(uint8_t Keycode)
 {
-    char result;
+    char* result;
     if (Keycode < 0x80)
     {
         switch (Keycode)
         {
             case 0xFA: break;
             case 0x45: case 0xC5: break;
-            case 0x29: result = '`'; break;
-            case 0x02: result = '1'; break;
-            case 0x03: result = '2'; break;
-            case 0x04: result = '3'; break;
-            case 0x05: result = '4'; break;
-            case 0x06: result = '5'; break;
-            case 0x07: result = '6'; break;
-            case 0x08: result = '7'; break;
-            case 0x09: result = '8'; break;
-            case 0x0A: result = '9'; break;
-            case 0x0B: result = '0'; break;
-            case 0x0C: result = '-'; break;
-            case 0x0D: result = '='; break;
+            case 0x29: result = "`"; break;
+            case 0x02: result = "1"; break;
+            case 0x03: result = "2"; break;
+            case 0x04: result = "3"; break;
+            case 0x05: result = "4"; break;
+            case 0x06: result = "5"; break;
+            case 0x07: result = "6"; break;
+            case 0x08: result = "7"; break;
+            case 0x09: result = "8"; break;
+            case 0x0A: result = "9"; break;
+            case 0x0B: result = "0"; break;
+            case 0x0C: result = "-"; break;
+            case 0x0D: result = "="; break;
 
-            //?case 0x0F: printf('   '); break;
-            case 0x10: result = 'q'; break;
-            case 0x11: result = 'w'; break;
-            case 0x12: result = 'e'; break;
-            case 0x13: result = 'r'; break;
-            case 0x14: result = 't'; break;
-            case 0x15: result = 'y'; break;
-            case 0x16: result = 'u'; break;
-            case 0x17: result = 'i'; break;
-            case 0x18: result = 'o'; break;
-            case 0x19: result = 'p'; break;
-            case 0x1A: result = '['; break;
-            case 0x1B: result = ']'; break;
-            case 0x1C: result = '\n'; break;
+            //?case 0x0F: printf("   "); break;
+            case 0x10: result = "q"; break;
+            case 0x11: result = "w"; break;
+            case 0x12: result = "e"; break;
+            case 0x13: result = "r"; break;
+            case 0x14: result = "t"; break;
+            case 0x15: result = "y"; break;
+            case 0x16: result = "u"; break;
+            case 0x17: result = "i"; break;
+            case 0x18: result = "o"; break;
+            case 0x19: result = "p"; break;
+            case 0x1A: result = "["; break;
+            case 0x1B: result = "]"; break;
+            case 0x1C: result = "\n"; break;
 
-            case 0x1E: result = 'a'; break;
-            case 0x1F: result = 's'; break;
-            case 0x20: result = 'd'; break;
-            case 0x21: result = 'f'; break;
-            case 0x22: result = 'g'; break;
-            case 0x23: result = 'h'; break;
-            case 0x24: result = 'j'; break;
-            case 0x25: result = 'k'; break;
-            case 0x26: result = 'l'; break;
-            case 0x27: result = ';'; break;
-            //?case 0x28: result = '''; break;
+            case 0x1E: result = "a"; break;
+            case 0x1F: result = "s"; break;
+            case 0x20: result = "d"; break;
+            case 0x21: result = "f"; break;
+            case 0x22: result = "g"; break;
+            case 0x23: result = "h"; break;
+            case 0x24: result = "j"; break;
+            case 0x25: result = "k"; break;
+            case 0x26: result = "l"; break;
+            case 0x27: result = ";"; break;
+            //?case 0x28: result = ""'; break;
 
-            case 0x2C: result = 'z'; break;
-            case 0x2D: result = 'x'; break;
-            case 0x2E: result = 'c'; break;
-            case 0x2F: result = 'v'; break;
-            case 0x30: result = 'v'; break;
-            case 0x31: result = 'n'; break;
-            case 0x32: result = 'm'; break;
-            case 0x33: result = ','; break;
-            case 0x34: result = '.'; break;
-            case 0x35: result = '/'; break;
-            case 0x39: result = ' '; break;
+            case 0x2C: result = "z"; break;
+            case 0x2D: result = "x"; break;
+            case 0x2E: result = "c"; break;
+            case 0x2F: result = "v"; break;
+            case 0x30: result = "v"; break;
+            case 0x31: result = "n"; break;
+            case 0x32: result = "m"; break;
+            case 0x33: result = ","; break;
+            case 0x34: result = "."; break;
+            case 0x35: result = "/"; break;
+            case 0x39: result = " "; break;
         }
     }
     return result;
@@ -191,7 +191,7 @@ void KeyboardDriver::clear_key_buffer()
     char* zeros = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\a";
     for (int i = 0; zeros[i] != '\a'; i++)
     {
-        key_buffer[i] = '\0';
+        key_buffer[i] = "\0";
     }
     keybufferpoint = 0;
     

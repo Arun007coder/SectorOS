@@ -13,9 +13,9 @@ public:
     KeyboardDriver(InterruptManager* manager);
     ~KeyboardDriver();
     virtual uint32_t HandleInterrupt(uint32_t esp);
-    char KeycodeToASCII(uint8_t Keycode);
-    char key_buffer[256];
-    void clear_key_buffer();
+    char* KeycodeToASCII(uint8_t Keycode);
+    char* key_buffer[256]; // Max number keystroke to save in the buffer is 256 Chars
+    void clear_key_buffer(); // To clear the keystrokes in the keyboard buffer
 };
 
 #endif
