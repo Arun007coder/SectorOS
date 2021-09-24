@@ -23,3 +23,5 @@ To clean all output files, Run:
 ```shell
 make clean
 ```
+
+You can get prebuilt iso from `Build_files` folder

@@ -24,7 +24,7 @@ mykernel.iso: mykernel.bin
 	echo 'set timeout=3' >> iso/boot/grub/grub.cfg
 	echo 'set default=0' >> iso/boot/grub/grub.cfg
 	echo '' >> iso/boot/grub/grub.cfg
-	echo 'menuentry "COMos" { '>> iso/boot/grub/grub.cfg
+	echo 'menuentry "SectorOS" { '>> iso/boot/grub/grub.cfg
 	echo 'multiboot /boot/mykernel.bin' >> iso/boot/grub/grub.cfg
 	echo 'boot' >> iso/boot/grub/grub.cfg
 	echo '}' >> iso/boot/grub/grub.cfg
@@ -32,7 +32,7 @@ mykernel.iso: mykernel.bin
 	rm -rf iso
 
 move: mykernel.iso
-	mv mykernel.iso iso_files/mykernel.iso
+	mv *.iso *.bin iso_files/
 
 run: mykernel.iso
 	(killall qemu-system-i386 && sleep 1) || true
