@@ -1,2 +1,4 @@
 .vscode/targets.log
 .vscode/configurationCache.log
+out/
+.vscode
