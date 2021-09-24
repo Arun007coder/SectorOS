@@ -204,7 +204,14 @@ void KeyboardDriver::CLI()
     }
     else if (key_buffer[0] == "h" & key_buffer[1] == "e" & key_buffer[2] == "l" & key_buffer[3] == "p")
     {
-        printf("Help:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : \nh to halt the computer");
+        if(key_buffer[5] == "\0")
+        {
+            printf("Help:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer");
+        }
+        else if(key_buffer[5] == "s" & key_buffer[6] == "d")
+        {
+            printf("sd <options> : \nh to halt the computer");
+        }
     }
     else if (key_buffer[0] == "c" & key_buffer[1] == "l" & key_buffer[2] == "e" & key_buffer[3] == "a" & key_buffer[4] == "r")
     {
