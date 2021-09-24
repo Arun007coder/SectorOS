@@ -32,7 +32,7 @@ mykernel.iso: mykernel.bin
 	rm -rf iso
 
 move: mykernel.iso
-	mv *.iso *.bin iso_files/
+	mv *.iso mykernel.bin Build_files/
 
 run: mykernel.iso
 	(killall qemu-system-i386 && sleep 1) || true
