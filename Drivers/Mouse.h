@@ -4,23 +4,36 @@
 #include "../Includes/types.h"
 #include "IOPorts.h"
 #include "../CPU/Interrupts.h"
+#include "Driver.h"
 
-class MouseDriver : public InterruptHandler // Driver for mouse
-{
-    port8BIT DataPort;
-    port8BIT CommandPort;
+    class MouseEventHandler
+    {
+    public:
+        MouseEventHandler();
+        virtual void OnActivate();
+        virtual void OnMouseDown(uint8_t button);
+        virtual void OnMouseUp(uint8_t button);
+        virtual void OnMouseMove(int x, int y);
+    };
 
-    uint8_t buffer[3];
-    uint8_t offset;
-    uint8_t buttons;
 
-    int8_t x, y;
+    class MouseDriver : public InterruptHandler, public Driver
+    {
+        port8BIT DataPort;
+        port8BIT CommandPort;
 
-public:
-    MouseDriver(InterruptManager* manager);
-    ~MouseDriver();
-    virtual uint32_t HandleInterrupt(uint32_t esp);
+        uint8_t buffer[3];
+        uint8_t offset;
+        uint8_t buttons;
 
-};
+        MouseEventHandler* handler;
+
+    public:
+        MouseDriver(InterruptManager* manager, MouseEventHandler* handler);
+        ~MouseDriver();
+        virtual uint32_t HandleInterrupt(uint32_t esp);
+        virtual void Activate();
+
+    };
 
 #endif
