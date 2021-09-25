@@ -3,6 +3,8 @@
 static int keybufferpoint = 1;
 char ASCII;
 static bool isShift = false;
+void printf(char*);
+void printfchar(char st);
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager)
 :InterruptHandler(0x21, manager),
@@ -17,16 +19,15 @@ CommandPort(0x64)
     CommandPort.WriteToPort(0x60); // set state
     DataPort.WriteToPort(status);
 
+    clear_key_buffer();
     DataPort.WriteToPort(0xF4);
+    printf("$: ");
     clear_key_buffer();
 }
 
 KeyboardDriver::~KeyboardDriver()
 {
 }
-
-void printf(char*);
-void printfchar(char st);
 
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 {
@@ -39,7 +40,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
     switch (key)
     {
         case 0xFA: break;
-        case 0x45: case 0xC5: case 0x61: break;
+        case 0x45: case 0xC5: case 0x61: clear_key_buffer(); break;
         case 0x29:if (!isShift) printf("`"); else printf("~"); break;
         case 0x02:if (!isShift) printf("1"); else printf("!"); break;
         case 0x03:if (!isShift) printf("2"); else printf("@"); break;
@@ -231,6 +232,11 @@ void KeyboardDriver::CLI()
             __asm__ volatile("hlt");
         }
     }
+    else
+    {
+        printf("Unknown Command. Type help in console to get all the commands");
+    }
     printf("\n");
+    printf("$: ");
     clear_key_buffer();
 }

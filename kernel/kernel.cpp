@@ -6,6 +6,7 @@
 
 static uint8_t cursory;
 static uint8_t cursorx;
+static bool isMouse = false;
 
 void printf(char* str)
 {
@@ -112,7 +113,7 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
-    printf("Welcome to SectorOS Monolithic kernel \nInterrupt descriptor table loaded \n");
+    printf("Welcome to SectorOS Monolithic kernel \nInterrupt descriptor table loaded \n \n");
 
     GlobalDescriptorTable gdt;
 
@@ -120,7 +121,8 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     interrupts.Activate();
 
     KeyboardDriver KeyboardDriver(&interrupts);
-    MouseDriver MouseDriver(&interrupts);
+    if (isMouse)
+        MouseDriver MouseDriver(&interrupts);
 
     while(1);
 }

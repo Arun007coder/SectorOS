@@ -45,3 +45,6 @@ stop:
 .PHONY: clean
 clean: move
 	rm -f $(objects) mykernel.bin mykernel.iso
+
+clear:
+	rm -f $(objects) mykernel.bin mykernel.iso
