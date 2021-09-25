@@ -2,7 +2,7 @@ GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-excep
 ASPARAMS = --32
 LDPARAMS = -melf_i386
 
-objects = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Keyboard.o CPU/interruptstab.o kernel/kernel.o
+objects = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Keyboard.o Drivers/Mouse.o CPU/interruptstab.o kernel/kernel.o
 
 %.o: %.cpp
 	gcc $(GCCPARAMS) -c -o $@ $<
@@ -17,6 +17,7 @@ install: mykernel.bin
 	sudo cp $< /boot/mykernel.bin
 
 mykernel.iso: mykernel.bin
+	cp mykernel.bin Build_files/
 	mkdir iso
 	mkdir iso/boot
 	mkdir iso/boot/grub/
@@ -35,8 +36,11 @@ move: mykernel.iso
 	mv *.iso mykernel.bin Build_files/
 
 run: mykernel.iso
-	(killall qemu-system-i386 && sleep 1) || true
-	qemu-system-i386 -cdrom mykernel.iso
+	(killall VirtualBoxVM && sleep 2) || true
+	VBoxManage startvm 'SectorOS'
+
+stop:
+	killall VirtualBoxVM
 
 .PHONY: clean
 clean: move

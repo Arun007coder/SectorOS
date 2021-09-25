@@ -5,7 +5,7 @@
 #include "IOPorts.h"
 #include "../CPU/Interrupts.h"
 
-class KeyboardDriver : public InterruptHandler
+class KeyboardDriver : public InterruptHandler // Driver for keyboard
 {
     port8BIT DataPort;
     port8BIT CommandPort;

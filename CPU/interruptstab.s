@@ -79,7 +79,7 @@ int_bottom:
     push (interruptnumber)
     call _ZN16InterruptManager15HandleInterruptEhj
     add %esp, 6
-    mov %eax, %esp # den stack wechseln
+    mov %eax, %esp
 
     pop %gs
     pop %fs

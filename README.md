@@ -24,4 +24,4 @@ To clean all output files, Run:
 make clean
 ```
 
-You can get prebuilt iso from `Build_files` folder
+You can get prebuilt iso and kernel from `Build_files` folder

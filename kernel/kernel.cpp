@@ -2,6 +2,7 @@
 #include "gdt.h"
 #include"../CPU/Interrupts.h"
 #include "../Drivers/Keyboard.h"
+#include "../Drivers/Mouse.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
@@ -119,6 +120,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     interrupts.Activate();
 
     KeyboardDriver KeyboardDriver(&interrupts);
+    MouseDriver MouseDriver(&interrupts);
 
     while(1);
 }
