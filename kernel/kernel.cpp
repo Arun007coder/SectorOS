@@ -3,6 +3,7 @@
 #include"../CPU/Interrupts.h"
 #include "../Drivers/Keyboard.h"
 #include "../Drivers/Mouse.h"
+#include "../Drivers/Driver.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
@@ -99,6 +100,77 @@ void printfchar(char st)
         }
 }
 
+void printHex(uint8_t key)
+{
+    char* foo = "00";
+    char* hex = "0123456789ABCDEF";
+    foo[0] = hex[(key >> 4) & 0xF];
+    foo[1] = hex[key & 0xF];
+    printf(foo);
+}
+
+
+class PrintKeyboardEventHandler : public KeyboardEventHandler
+{
+public:
+    void OnKeyDown(char c)
+    {
+        char* foo = " ";
+        foo[0] = c;
+        printf(foo);
+    }
+};
+
+class MouseToConsole : public MouseEventHandler
+{
+    int8_t x, y;
+public:
+
+    MouseToConsole()
+    {
+    }
+
+    /*
+    virtual void OnMouseUp(uint8_t button)
+    {
+        if (button == 0x01)
+            printf("you clicked");
+        else if (button == 0x03)
+            printf("hhh");
+    }
+    */
+
+    virtual void OnActivate()
+    {
+        uint16_t* VideoMemory = (uint16_t*)0xb8000;
+        x = 40;
+        y = 12;
+        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
+                            | (VideoMemory[80*y+x] & 0xF000) >> 4
+                            | (VideoMemory[80*y+x] & 0x00FF);        
+    }
+
+    virtual void OnMouseMove(int xoffset, int yoffset)
+    {
+        static uint16_t* VideoMemory = (uint16_t*)0xb8000;
+        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
+                            | (VideoMemory[80*y+x] & 0xF000) >> 4
+                            | (VideoMemory[80*y+x] & 0x00FF);
+
+        x += xoffset;
+        if(x >= 80) x = 79;
+        if(x < 0) x = 0;
+        y += yoffset;
+        if(y >= 25) y = 24;
+        if(y < 0) y = 0;
+
+        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4
+                            | (VideoMemory[80*y+x] & 0xF000) >> 4
+                            | (VideoMemory[80*y+x] & 0x00FF);
+    }
+
+};
+
 
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
@@ -113,16 +185,28 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
-    printf("Welcome to SectorOS Monolithic kernel \nInterrupt descriptor table loaded \n \n");
+    printf("Welcome to SectorOS Monolithic kernel \n");
 
     GlobalDescriptorTable gdt;
 
     InterruptManager interrupts(0x20, &gdt);
+
+    DriverManager drvmgr;
+    printf("\nSYSMSG: Initializing Hardwares [Stage 1]...");
+    PrintKeyboardEventHandler kbhandler;
+    KeyboardDriver KeyboardDriver(&interrupts, &kbhandler);
+    drvmgr.AddDriver(&KeyboardDriver);
+
+    MouseToConsole msmgr;
+    MouseDriver MouseDriver(&interrupts, &msmgr);
+    drvmgr.AddDriver(&MouseDriver);
+
+    printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
+    drvmgr.activateall();
+
+    printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n \n");
     interrupts.Activate();
 
-    KeyboardDriver KeyboardDriver(&interrupts);
-    if (isMouse)
-        MouseDriver MouseDriver(&interrupts);
-
+    printf("$: ");
     while(1);
 }

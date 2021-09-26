@@ -3,6 +3,7 @@
 
 
 void printf(char* str);
+void printHex(uint8_t key);
 
 InterruptHandler::InterruptHandler(uint8_t interrupt, InterruptManager* interruptManager)
 {
@@ -31,7 +32,6 @@ InterruptManager* InterruptManager::ActiveInterruptManager = 0;
 void InterruptManager::SetInterruptDescriptorTableEntry(uint8_t interrupt,
     uint16_t CodeSegment, void (*handler)(), uint8_t DescriptorPrivilegeLevel, uint8_t DescriptorType)
 {
-
     interruptDescriptorTable[interrupt].handlerAddressLowBits = ((uint32_t) handler) & 0xFFFF;
     interruptDescriptorTable[interrupt].handlerAddressHighBits = (((uint32_t) handler) >> 16) & 0xFFFF;
     interruptDescriptorTable[interrupt].gdt_codeSegmentSelector = CodeSegment;
@@ -130,10 +130,12 @@ uint16_t InterruptManager::HardwareInterruptOffset()
 
 void InterruptManager::Activate()
 {
+    printf("SYSMSG: Activating interrupt descriptor table...\n");
     if(ActiveInterruptManager != 0)
         ActiveInterruptManager -> Deactivate();
     ActiveInterruptManager = this;
     asm("sti");
+    printf("SYSMSG: Interrupt descriptor table activated\n \n");
 }
 
 void InterruptManager::Deactivate()
@@ -156,18 +158,15 @@ uint32_t InterruptManager::HandleInterrupt(uint8_t interrupt, uint32_t esp)
 
 uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
 {
-    char* foo = "UNHANDLED INTERRUPT 0x00";
-    char* hex = "0123456789ABCDEF";
-
-    foo[22] = hex[(interrupt >> 4) & 0xF];
-    foo[23] = hex[interrupt & 0xF];
+    char* foo = " SYSMSG: UNHANDLED INTERRUPT 0x";
     if (handlers[interrupt] != 0)
     {
         esp = handlers[interrupt] -> HandleInterrupt(esp);
 
-    } else if(interrupt != 0x20)
+    } else if(interrupt != 0x20 & interrupt != 0x0D)
     {
         printf(foo);
+        printHex(interrupt);
     }
 
     if(0x20 <= interrupt && interrupt < 0x30)

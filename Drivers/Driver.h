@@ -22,6 +22,7 @@
         DriverManager();
         ~DriverManager();
         void AddDriver(Driver*);
+        void activateall();
 
     };
 
