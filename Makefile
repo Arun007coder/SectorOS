@@ -2,7 +2,7 @@ GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-excep
 ASPARAMS = --32
 LDPARAMS = -melf_i386
 
-objects = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Driver.o Drivers/Keyboard.o Drivers/Mouse.o CPU/interruptstab.o kernel/kernel.o
+objects = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Keyboard.o Drivers/Mouse.o CPU/interruptstab.o kernel/kernel.o
 
 %.o: %.cpp
 	gcc $(GCCPARAMS) -c -o $@ $<
