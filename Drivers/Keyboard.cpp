@@ -5,6 +5,7 @@ static bool isShift = false;
 void printf(char*);
 void printfchar(char st);
 void printHex(uint8_t key);
+void printint(int num);
 
 KeyboardEventHandler::KeyboardEventHandler()
 {
@@ -107,7 +108,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
         case 0x2D:if (!isShift) handler->onKeyDown('x'); else handler->onKeyDown('X'); break;
         case 0x2E:if (!isShift) handler->onKeyDown('c'); else handler->onKeyDown('C'); break;
         case 0x2F:if (!isShift) handler->onKeyDown('v'); else handler->onKeyDown('V'); break;
-        case 0x30:if (!isShift) handler->onKeyDown('v'); else handler->onKeyDown('B'); break;
+        case 0x30:if (!isShift) handler->onKeyDown('b'); else handler->onKeyDown('B'); break;
         case 0x31:if (!isShift) handler->onKeyDown('n'); else handler->onKeyDown('N'); break;
         case 0x32:if (!isShift) handler->onKeyDown('m'); else handler->onKeyDown('M'); break;
         case 0x33:if (!isShift) handler->onKeyDown(','); else handler->onKeyDown('<'); break;
@@ -148,56 +149,82 @@ char* KeyboardDriver::KeycodeToASCII(uint8_t Keycode)
         {
             case 0xFA: break;
             case 0x45: case 0xC5: break;
-            case 0x29:if (!isShift) result = "`"; break;
-            case 0x02:if (!isShift) result = "1"; break;
-            case 0x03:if (!isShift) result = "2"; break;
-            case 0x04:if (!isShift) result = "3"; break;
-            case 0x05:if (!isShift) result = "4"; break;
-            case 0x06:if (!isShift) result = "5"; break;
-            case 0x07:if (!isShift) result = "6"; break;
-            case 0x08:if (!isShift) result = "7"; break;
-            case 0x09:if (!isShift) result = "8"; break;
-            case 0x0A:if (!isShift) result = "9"; break;
-            case 0x0B:if (!isShift) result = "0"; break;
-            case 0x0C:if (!isShift) result = "-"; break;
-            case 0x0D:if (!isShift) result = "="; break;
+            case 0x29:
+            result = "`"; break;
+            case 0x02:
+            result = "1"; break;
+            case 0x03:
+            result = "2"; break;
+            case 0x04:
+            result = "3"; break;
+            case 0x05:
+            result = "4"; break;
+            case 0x06:
+            result = "5"; break;
+            case 0x07:
+            result = "6"; break;
+            case 0x08:
+            result = "7"; break;
+            case 0x09:
+            result = "8"; break;
+            case 0x0A:
+            result = "9"; break;
+            case 0x0B:
+            result = "0"; break;
+            case 0x0C:
+            result = "-"; break;
+            case 0x0D:
+            result = "="; break;
 
-            case 0x10:if (!isShift) result = "q";  break;
-            case 0x11:if (!isShift) result = "w";  break;
-            case 0x12:if (!isShift) result = "e";  break;
-            case 0x13:if (!isShift) result = "r";  break;
-            case 0x14:if (!isShift) result = "t";  break;
-            case 0x15:if (!isShift) result = "y";  break;
-            case 0x16:if (!isShift) result = "u";  break;
-            case 0x17:if (!isShift) result = "i";  break;
-            case 0x18:if (!isShift) result = "o";  break;
-            case 0x19:if (!isShift) result = "p";  break;
-            case 0x1A:if (!isShift) result = "[";  break;
-            case 0x1B:if (!isShift) result = "]";  break;
-            case 0x1C:if (!isShift) result = "\n"; break;
+            case 0x10:
+            result = "q";  break;
+            case 0x11:
+            result = "w";  break;
+            case 0x12:
+            result = "e";  break;
+            case 0x13:
+            result = "r";  break;
+            case 0x14:
+            result = "t";  break;
+            case 0x15:
+            result = "y";  break;
+            case 0x16:
+            result = "u";  break;
+            case 0x17:
+            result = "i";  break;
+            case 0x18:
+            result = "o";  break;
+            case 0x19:
+            result = "p";  break;
+            case 0x1A:
+            result = "[";  break;
+            case 0x1B:
+            result = "]";  break;
+            case 0x1C:
+            result = "\n"; break;
 
-            case 0x1E:if (!isShift) result = "a"; break;
-            case 0x1F:if (!isShift) result = "s"; break;
-            case 0x20:if (!isShift) result = "d"; break;
-            case 0x21:if (!isShift) result = "f"; break;
-            case 0x22:if (!isShift) result = "g"; break;
-            case 0x23:if (!isShift) result = "h"; break;
-            case 0x24:if (!isShift) result = "j"; break;
-            case 0x25:if (!isShift) result = "k"; break;
-            case 0x26:if (!isShift) result = "l"; break;
-            case 0x27:if (!isShift) result = ";"; break;
+            case 0x1E: result = "a"; break;
+            case 0x1F: result = "s"; break;
+            case 0x20: result = "d"; break;
+            case 0x21: result = "f"; break;
+            case 0x22: result = "g"; break;
+            case 0x23: result = "h"; break;
+            case 0x24: result = "j"; break;
+            case 0x25: result = "k"; break;
+            case 0x26: result = "l"; break;
+            case 0x27: result = ";"; break;
 
-            case 0x2C:if (!isShift) result = "z"; break;
-            case 0x2D:if (!isShift) result = "x"; break;
-            case 0x2E:if (!isShift) result = "c"; break;
-            case 0x2F:if (!isShift) result = "v"; break;
-            case 0x30:if (!isShift) result = "v"; break;
-            case 0x31:if (!isShift) result = "n"; break;
-            case 0x32:if (!isShift) result = "m"; break;
-            case 0x33:if (!isShift) result = ","; break;
-            case 0x34:if (!isShift) result = "."; break;
-            case 0x35:if (!isShift) result = "/"; break;
-            case 0x39: result = " "; break;
+            case 0x2C:result = "z"; break;
+            case 0x2D:result = "x"; break;
+            case 0x2E:result = "c"; break;
+            case 0x2F:result = "v"; break;
+            case 0x30:result = "b"; break;
+            case 0x31:result = "n"; break;
+            case 0x32:result = "m"; break;
+            case 0x33:result = ","; break;
+            case 0x34:result = "."; break;
+            case 0x35:result = "/"; break;
+            case 0x39:result = " "; break;
         }
     }
     return result;
@@ -228,7 +255,7 @@ void KeyboardDriver::CLI()
     {
         if(key_buffer[5] == "\0")
         {
-            printf("Help:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer");
+            printf("Help:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer \nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number");
         }
         else if(key_buffer[5] == "s" & key_buffer[6] == "d")
         {
@@ -247,6 +274,31 @@ void KeyboardDriver::CLI()
             printf("Halting the computer...");
             __asm__ volatile("hlt");
         }
+    }
+    else if(key_buffer[0] == "a" & key_buffer[1] == "d" & key_buffer[2] == "d" & key_buffer[3] == "1" )
+    {
+        char* arg1;
+        char *arg2;
+        arg1 = key_buffer[5];
+        arg2 = key_buffer[7];
+        int resint;
+        int x = arg1[0] - '0';
+        int y = arg2[0] - '0';
+        resint = x + y;
+        printint(resint);
+        
+    }
+    else if(key_buffer[0] == "s" && key_buffer[1] == "u" & key_buffer[2] == "b" & key_buffer[3] == "1")
+    {
+        char* arg1;
+        char *arg2;
+        arg1 = key_buffer[5];
+        arg2 = key_buffer[7];
+        int resint;
+        int x = arg1[0] - '0';
+        int y = arg2[0] - '0';
+        resint = x - y;
+        printint(resint);
     }
     else
     {

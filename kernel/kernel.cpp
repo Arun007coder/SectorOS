@@ -64,6 +64,34 @@ void printf(char* str)
     }
 }
 
+void printint(int num)
+{
+    switch (num)
+    {
+    case 0:printf("0"); break;
+    case 1:printf("1"); break;
+    case 2:printf("2"); break;
+    case 3:printf("3"); break;
+    case 4:printf("4"); break;
+    case 5:printf("5"); break;
+    case 6:printf("6"); break;
+    case 7:printf("7"); break;
+    case 8:printf("8"); break;
+    case 9:printf("9"); break;
+
+    case 10:printf("10"); break;
+    case 11:printf("11"); break;
+    case 12:printf("12"); break;
+    case 13:printf("13"); break;
+    case 14:printf("14"); break;
+    case 15:printf("15"); break;
+    case 16:printf("16"); break;
+    case 17:printf("17"); break;
+    case 18:printf("18"); break;
+    case 19:printf("19"); break;
+    }
+}
+
 void printfchar(char st)
 {
     static uint8_t x=0, y=0;
