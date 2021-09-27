@@ -28,6 +28,7 @@ DataPort(0x60),
 CommandPort(0x64)
 {
     this->handler = handler;
+    clear_key_buffer();
 }
 
 KeyboardDriver::~KeyboardDriver()
@@ -44,15 +45,14 @@ void KeyboardDriver::activate()
     CommandPort.WriteToPort(0x60); // set state
     DataPort.WriteToPort(status);
 
-    clear_key_buffer();
     DataPort.WriteToPort(0xF4);
-    clear_key_buffer();
+    
 }
 
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 {
     uint8_t key = DataPort.ReadFromPort();
-    if(key < 0x80){
+    if(key < 0x80 & key != 0x2A & key != 0x36 & key != 0x3A & key != 0x0E ){
         key_buffer[keybufferpoint] = KeycodeToASCII(key);
         keybufferpoint++;
     }
@@ -123,11 +123,9 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
         }
         break; //Capital letters are blocked because it crashes the os
 
-        case 0x5B: break;
-        case 0x38: clear_key_buffer(); break;
-        case 0x39: handler->onKeyDown(' '); break;
         case 0x0E: printf("\3"); break;
 
+        case 0x39: handler->onKeyDown(' '); break;
             
         default:
             if (key < 0x80){
