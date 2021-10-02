@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: install tools
+      run: sudo apt install xorriso && sudo apt install grub-common
     - name: make clean
       run: make clean
       
