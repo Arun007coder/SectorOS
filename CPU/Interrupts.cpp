@@ -163,7 +163,11 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
     {
         esp = handlers[interrupt] -> HandleInterrupt(esp);
 
+<<<<<<< HEAD
     } else if(interrupt != 0x20 && interrupt != 0x25)
+=======
+    } else if(interrupt != 0x20 & interrupt != 0x25)
+>>>>>>> fb29c4482f5b009def1874fddc6e6dfcb4a7d89f
     {
         printf(foo);
         printHex(interrupt);
