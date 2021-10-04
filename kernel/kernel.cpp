@@ -207,8 +207,6 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     InterruptManager interrupts(0x20, &gdt);
 
-    uint32_t magic = 0x1BADB002;
-
     DriverManager drvmgr;
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 1]...");
