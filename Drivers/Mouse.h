@@ -4,7 +4,7 @@
 #include "../Includes/types.h"
 #include "IOPorts.h"
 #include "../CPU/Interrupts.h"
-#include "Driver.h";
+#include "Driver.h"
 
 class MouseEventHandler
 {
@@ -31,6 +31,7 @@ public:
     MouseDriver(InterruptManager* manager, MouseEventHandler* handler);
     ~MouseDriver();
     virtual uint32_t HandleInterrupt(uint32_t esp);
+    // To activate the Mouse driver
     virtual void activate();
 
 };

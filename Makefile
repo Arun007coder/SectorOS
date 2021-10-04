@@ -37,8 +37,8 @@ move: mykernel.iso
 
 run: mykernel.iso
 	(killall VirtualBoxVM && sleep 2) || true
-	VBoxManage startvm 'SectorOS'
-	##qemu-system-i386 mykernel.iso
+	##VBoxManage startvm 'SectorOS'
+	qemu-system-i386 -boot d -cdrom mykernel.iso
 
 stop:
 	killall VirtualBoxVM

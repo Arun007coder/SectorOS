@@ -7,7 +7,7 @@
 
 static uint8_t cursory;
 static uint8_t cursorx;
-static bool isMouse = false;
+static bool useMouse = false;
 
 void printf(char* str)
 {
@@ -137,18 +137,6 @@ void printHex(uint8_t key)
     printf(foo);
 }
 
-
-class PrintKeyboardEventHandler : public KeyboardEventHandler
-{
-public:
-    void OnKeyDown(char c)
-    {
-        char* foo = " ";
-        foo[0] = c;
-        printf(foo);
-    }
-};
-
 class MouseToConsole : public MouseEventHandler
 {
     int8_t x, y;
@@ -213,27 +201,36 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
-    printf("Welcome to SectorOS Monolithic kernel \n");
+    printf("Welcome to SectorOS Monolithic kernel \nhttps://github.com/Arun007coder/SectorOS \n");
 
     GlobalDescriptorTable gdt;
 
     InterruptManager interrupts(0x20, &gdt);
 
-    DriverManager drvmgr;
-    printf("\nSYSMSG: Initializing Hardwares [Stage 1]...");
-    PrintKeyboardEventHandler kbhandler;
-    KeyboardDriver KeyboardDriver(&interrupts, &kbhandler);
-    drvmgr.AddDriver(&KeyboardDriver);
+    uint32_t magic = 0x1BADB002;
 
-    MouseToConsole msmgr;
-    MouseDriver MouseDriver(&interrupts, &msmgr);
-    drvmgr.AddDriver(&MouseDriver);
+    DriverManager drvmgr;
+
+    printf("\nSYSMSG: Initializing Hardwares [Stage 1]...");
+    KeyboardDriver KeyboardDriver(&interrupts);
+    drvmgr.AddDriver(&KeyboardDriver);
+    
+    if (useMouse)
+    {
+        MouseToConsole msmgr;
+        MouseDriver MouseDriver(&interrupts, &msmgr);
+        drvmgr.AddDriver(&MouseDriver); 
+    }
+    else
+        printf("\nSYSMSG: Cannot initialize mouse driver. This driver is disabled by default.");
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
     drvmgr.activateall();
 
-    printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n \n");
+    printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
     interrupts.Activate();
+
+    printf("Run help to get the list of commands which is implemented \n \n");
 
     printf("$: ");
     while(1);
