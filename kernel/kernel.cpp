@@ -69,8 +69,9 @@ void printf(char* str)
             case '\3':
                 for(int i = 0; i != 2; i++)
                     x = cursorx;
-                    if (str[x] != '\0')
+                    if (x != 2){
                         x--;
+                    }
                     VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
             break;
             default:
@@ -238,7 +239,7 @@ extern "C" void callConstructors()
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
     ColourPrint(0);
-    printf("Welcome to SectorOS Monolithic kernel                                  Type: CLI \nhttps://github.com/Arun007coder/SectorOS \n");
+    printf("Welcome to SectorOS Monolithic kernel                                  Type: CLIhttps://github.com/Arun007coder/SectorOS \n");
 
     GlobalDescriptorTable gdt;
 

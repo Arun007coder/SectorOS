@@ -103,7 +103,10 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
         }
         break; //Capital letters are blocked because it crashes the os
 
-        case 0x0E: printf("\3"); keybufferpoint--; break;
+        case 0x0E: printf("\3"); 
+            if(keybufferpoint != 0)
+                keybufferpoint--; 
+            break;
 
         case 0x39: printf(" "); break;
             
