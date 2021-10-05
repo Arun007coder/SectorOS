@@ -7,6 +7,7 @@
 
 static uint8_t cursory;
 static uint8_t cursorx;
+<<<<<<< HEAD
 static bool useMouse = true;
 bool isused;
 
@@ -36,6 +37,16 @@ void ColourPrint(int type)
         break;
 
     }
+=======
+static bool useMouse = false;
+
+void ColourPrint()
+{
+    static uint16_t* VideoMemory = (uint16_t*)0xb8000;
+    static uint8_t x=0, y=0;
+    for(x = 0; x < 80; x++)
+        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x040720) | ' ';
+>>>>>>> 607d94a6d834f18805af177f202e2fbbd5cf5e3a
 }
 
 void printf(char* str)
@@ -237,8 +248,12 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
+<<<<<<< HEAD
     ColourPrint(0);
     printf("Welcome to SectorOS Monolithic kernel                                  Type: CLI \nhttps://github.com/Arun007coder/SectorOS \n");
+=======
+    printf("Welcome to SectorOS Monolithic kernel \nhttps://github.com/Arun007coder/SectorOS \n");
+>>>>>>> 607d94a6d834f18805af177f202e2fbbd5cf5e3a
 
     GlobalDescriptorTable gdt;
 
@@ -250,6 +265,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     KeyboardDriver KeyboardDriver(&interrupts);
     drvmgr.AddDriver(&KeyboardDriver);
     
+<<<<<<< HEAD
 
     MouseToConsole msmgr;
     MouseDriver MouseDriver(&interrupts, &msmgr);
@@ -261,6 +277,16 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     {
         printf("\nSYSMSG: Cannot initialize mouse driver. This driver is disabled by default.");
     }
+=======
+    if (useMouse)
+    {
+        MouseToConsole msmgr;
+        MouseDriver MouseDriver(&interrupts, &msmgr);
+        drvmgr.AddDriver(&MouseDriver); 
+    }
+    else
+        printf("\nSYSMSG: Cannot initialize mouse driver. This driver is disabled by default.");
+>>>>>>> 607d94a6d834f18805af177f202e2fbbd5cf5e3a
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
     drvmgr.activateall();
@@ -270,6 +296,10 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("Run help to get the list of commands which is implemented \n \n");
 
+<<<<<<< HEAD
     printf("$:\0");
+=======
+    printf("$: ");
+>>>>>>> 607d94a6d834f18805af177f202e2fbbd5cf5e3a
     while(1);
 }
