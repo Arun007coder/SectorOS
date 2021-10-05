@@ -35,12 +35,14 @@ mykernel.iso: mykernel.bin
 move: mykernel.iso
 	mv *.iso mykernel.bin Build_files/
 
-run: mykernel.iso
-	(killall VirtualBoxVM && sleep 2) || true
-	VBoxManage startvm 'SectorOS'
-	##qemu-system-i386 mykernel.iso
+runQEMU: mykernel.iso
+	qemu-system-i386 -boot d -cdrom mykernel.iso
 
-stop:
+runVBOX: mykernel.iso
+	(killall VirtualBoxVM && sleep 1) || true
+	VBoxManage startvm 'SectorOS'
+
+stopVBOX:
 	killall VirtualBoxVM
 
 .PHONY: clean

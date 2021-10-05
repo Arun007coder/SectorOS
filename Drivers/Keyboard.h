@@ -6,29 +6,24 @@
 #include "../CPU/Interrupts.h"
 #include "Driver.h"
 
-class KeyboardEventHandler
-{
-public:
-    KeyboardEventHandler();
-
-    virtual void onKeyDown(char);
-    virtual void onKeyUp(char);
-};
-
 class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyboard
 {
     port8BIT DataPort;
     port8BIT CommandPort;
-    void CLI();
+    // To interpret and execute the command
+    void CommandInterpreter();
 
-    KeyboardEventHandler* handler;
 public:
-    KeyboardDriver(InterruptManager* manager, KeyboardEventHandler *handler);
+    KeyboardDriver(InterruptManager* manager);
     ~KeyboardDriver();
     virtual uint32_t HandleInterrupt(uint32_t esp);
+    // To change the keycode to ascii to write it into string
     char* KeycodeToASCII(uint8_t Keycode);
-    char* key_buffer[256]; // Max number keystroke to save in the buffer is 256 Chars
-    void clear_key_buffer(); // To clear the keystrokes in the keyboard buffer
+    // To Save the keystrokes in memory to use them later. Max number keystroke to save in the buffer is 256 Chars
+    char* key_buffer[256];
+    // To clear the keystrokes in the keyboard buffer
+    void clear_key_buffer(); 
+    // To activate the keyboard driver
     virtual void activate();
 };
 

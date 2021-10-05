@@ -7,7 +7,36 @@
 
 static uint8_t cursory;
 static uint8_t cursorx;
-static bool isMouse = false;
+static bool useMouse = true;
+bool isused;
+
+void ColourPrint(int type)
+{
+    static uint16_t* VideoMemory = (uint16_t*)0xb8000;
+    uint8_t x; //crx;
+    uint8_t y; //cry;
+    switch (type)
+    {
+        case 0:
+                for(x = 0; x < 80; x++)
+                    VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0x0F00) << 4 | ' ';
+        break;
+
+        case 1:
+                if (!isused){
+                    for(x = 0; x < 80; x++)
+                        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xF000) >> 4 | ' ';
+                        isused = true;
+                }
+                else
+                {
+                    isused = false;
+                }
+                
+        break;
+
+    }
+}
 
 void printf(char* str)
 {
@@ -28,6 +57,8 @@ void printf(char* str)
                 x = 0;
             break;
             case '\5':
+                ColourPrint(1);
+                isused = true;
                 for(y = 0; y < 25; y++)
                     for(x = 0; x < 80; x++)
                         VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
@@ -36,8 +67,12 @@ void printf(char* str)
                 y = 0;
             break;
             case '\3':
-                for(x = cursorx - 0x02; x == cursorx +2 ; x++)
-                    VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | 'a';
+                for(int i = 0; i != 2; i++)
+                    x = cursorx;
+                    if (str[x] != '\0')
+                        x--;
+                    VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
+            break;
             default:
                 VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | str[i];
                 x++;
@@ -53,10 +88,11 @@ void printf(char* str)
 
         if(y >= 25)
         {
+            ColourPrint(1);
+            isused = true;
             for(y = 0; y < 25; y++)
                 for(x = 0; x < 80; x++)
                     VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
-
             x = 0;
             y = 0;
         }
@@ -137,18 +173,6 @@ void printHex(uint8_t key)
     printf(foo);
 }
 
-
-class PrintKeyboardEventHandler : public KeyboardEventHandler
-{
-public:
-    void OnKeyDown(char c)
-    {
-        char* foo = " ";
-        foo[0] = c;
-        printf(foo);
-    }
-};
-
 class MouseToConsole : public MouseEventHandler
 {
     int8_t x, y;
@@ -213,28 +237,39 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
-    printf("Welcome to SectorOS Monolithic kernel \n");
+    ColourPrint(0);
+    printf("Welcome to SectorOS Monolithic kernel                                  Type: CLI \nhttps://github.com/Arun007coder/SectorOS \n");
 
     GlobalDescriptorTable gdt;
 
     InterruptManager interrupts(0x20, &gdt);
 
     DriverManager drvmgr;
+
     printf("\nSYSMSG: Initializing Hardwares [Stage 1]...");
-    PrintKeyboardEventHandler kbhandler;
-    KeyboardDriver KeyboardDriver(&interrupts, &kbhandler);
+    KeyboardDriver KeyboardDriver(&interrupts);
     drvmgr.AddDriver(&KeyboardDriver);
+    
 
     MouseToConsole msmgr;
     MouseDriver MouseDriver(&interrupts, &msmgr);
-    drvmgr.AddDriver(&MouseDriver);
+    if (useMouse = true)
+    {
+        drvmgr.AddDriver(&MouseDriver); 
+    }
+    else
+    {
+        printf("\nSYSMSG: Cannot initialize mouse driver. This driver is disabled by default.");
+    }
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
     drvmgr.activateall();
 
-    printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n \n");
+    printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
     interrupts.Activate();
 
-    printf("$: ");
+    printf("Run help to get the list of commands which is implemented \n \n");
+
+    printf("$:\0");
     while(1);
 }
