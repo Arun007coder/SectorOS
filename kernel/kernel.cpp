@@ -25,7 +25,7 @@ void ColourPrint(int type)
         case 1:
                 if (!isused){
                     for(x = 0; x < 80; x++)
-                        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xF000) >> 4 | ' ';
+                        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) >> 4 | ' ';
                         isused = true;
                 }
                 else
@@ -69,7 +69,7 @@ void printf(char* str)
             case '\3':
                 for(int i = 0; i != 2; i++)
                     x = cursorx;
-                    if (x != 2){
+                    if (x != 3){
                         x--;
                     }
                     VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
@@ -271,6 +271,6 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("Run help to get the list of commands which is implemented \n \n");
 
-    printf("$:\0");
+    printf("$: ");
     while(1);
 }

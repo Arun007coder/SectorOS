@@ -19,8 +19,7 @@ public:
     virtual uint32_t HandleInterrupt(uint32_t esp);
     // To change the keycode to ascii to write it into string
     char* KeycodeToASCII(uint8_t Keycode);
-    // To Save the keystrokes in memory to use them later. Max number keystroke to save in the buffer is 256 Chars
-    char* key_buffer[256];
+    char* key_buffer[256]; // To Save the keystrokes in memory to use them later. Max number keystroke to save in the buffer is 256 Chars
     // To clear the keystrokes in the keyboard buffer
     void clear_key_buffer(); 
     // To activate the keyboard driver

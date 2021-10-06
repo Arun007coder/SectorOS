@@ -228,9 +228,16 @@ void KeyboardDriver::CommandInterpreter()
     printf("\n");
     if(key_buffer[0] == "e" & key_buffer[1] == "c" & key_buffer[2] == "h" & key_buffer[3] == "o")
     {
-        for (int i = 5; key_buffer[i] != "\n"; i++)
+        if (key_buffer[4] == "\0")
         {
-            printf(key_buffer[i]);
+            printf("cannot print null character");
+        }
+        else
+        {
+            for (int i = 5; key_buffer[i] != "\n"; i++)
+            {
+                printf(key_buffer[i]);
+            }
         }
     }
     else if (key_buffer[0] == "h" & key_buffer[1] == "e" & key_buffer[2] == "l" & key_buffer[3] == "p")
@@ -239,9 +246,12 @@ void KeyboardDriver::CommandInterpreter()
         {
             printf("sd <options> : \nh to halt the computer");
         }
+        else if(key_buffer[5] == "1")
+            printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
+        else if(key_buffer[5] == "2")
+            printf("Help page 2:\nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number");
         else
-            printf("Help:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer \nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number");
-
+            printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
     }
     else if (key_buffer[0] == "c" & key_buffer[1] == "l" & key_buffer[2] == "e" & key_buffer[3] == "a" & key_buffer[4] == "r")
     {
