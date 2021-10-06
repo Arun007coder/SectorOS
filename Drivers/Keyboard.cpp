@@ -2,10 +2,13 @@
 
 static int keybufferpoint = 0;
 static bool isShift = false;
+static bool isTxtMode = false;
+static bool isCTRLed = false;
 void printf(char*);
 void printfchar(char st);
 void printHex(uint8_t key);
 void printint(int num);
+void ColourPrint(int type);
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager)
 :InterruptHandler(0x21, manager),
@@ -34,7 +37,7 @@ void KeyboardDriver::activate()
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 {
     uint8_t key = DataPort.ReadFromPort(); // The variable where a single keystroke is stored
-    if(key < 0x80 & key != 0x2A & key != 0x36 & key != 0x3A & key != 0x0E & key != 0x38 & key != 0x1D ){
+    if(key < 0x80 & key != 0x3A & key != 0x2A & key != 0x2A & key != 0x36 & key != 0x3A & key != 0x0E & key != 0x38 & key != 0x1D ){
         key_buffer[keybufferpoint] = KeycodeToASCII(key);
         keybufferpoint++;
     }
@@ -42,7 +45,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
     {
         case 0xFA: break;
         case 0x45: case 0xC5: case 0x61: clear_key_buffer(); break;
-        case 0x1D: case 0x38: break; // It is used by Vmware workstation player to lose focus
+        //case 0x1D: case 0x38: break; // It is used by Vmware workstation player to lose focus
         case 0x29:if (!isShift) printf("`"); else printf("~"); break;
         case 0x02:if (!isShift) printf("1"); else printf("!"); break;
         case 0x03:if (!isShift) printf("2"); else printf("@"); break;
@@ -69,7 +72,11 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
         case 0x19:if (!isShift) printf("p"); else printf("P"); break;
         case 0x1A:if (!isShift) printf("["); else printf("{"); break;
         case 0x1B:if (!isShift) printf("]"); else printf("}"); break;
-        case 0x1C: CommandInterpreter(); break; //Enter
+        case 0x1C: if(!isTxtMode)
+                        CommandInterpreter();
+                   else
+                        printf("\n");
+        break; //Enter
         case 0x1E:if (!isShift) printf("a"); else printf("A"); break;
         case 0x1F:if (!isShift) printf("s"); else printf("S"); break;
         case 0x20:if (!isShift) printf("d"); else printf("D"); break;
@@ -82,10 +89,22 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
         case 0x27:if (!isShift) printf(";"); else printf(":"); break;
         case 0x28:if (!isShift) printf("E"); else printf("e"); break;
         //case 0x2B:if (!isShift) printf("\ "); else printf("|"); break; 
-        case 0x2A: isShift = false; break;
+        case 0x2A: isShift = true; break;
         case 0x2C:if (!isShift) printf("z"); else printf("Z"); break;
         case 0x2D:if (!isShift) printf("x"); else printf("X"); break;
-        case 0x2E:if (!isShift) printf("c"); else printf("C"); break;
+        case 0x2E:
+            if(isTxtMode){
+
+                if(!isCTRLed)
+                    if (!isShift) printf("c"); else printf("C"); 
+                else
+                    returnHScreen();
+            }
+            else
+            {
+                if (!isShift) printf("c"); else printf("C");
+            }
+        break;
         case 0x2F:if (!isShift) printf("v"); else printf("V"); break;
         case 0x30:if (!isShift) printf("b"); else printf("B"); break;
         case 0x31:if (!isShift) printf("n"); else printf("N"); break;
@@ -93,22 +112,61 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
         case 0x33:if (!isShift) printf(","); else printf("<"); break;
         case 0x34:if (!isShift) printf("."); else printf(">"); break;
         case 0x35:if (!isShift) printf("/"); else printf("?"); break;
-        case 0x36: isShift = false; break;
+        case 0x36: isShift = true; break;
         case 0xAA: case 0xB6: isShift = false; break;
         case 0x3A: if(isShift){
             isShift = false;
         }
         else{
-            isShift = false;
+            isShift = true;
         }
         break; //Capital letters are blocked because it crashes the os
 
-        case 0x0E: printf("\3"); 
+        case 0x1D:
+            isCTRLed = true;
+        break;
+        case 0x9D: //LeftCTRL return code
+            isCTRLed = false;
+        break;
+        case 0x0E:
+            if(!isTxtMode)
+                printf("\3");
+            else
+                printf("\f"); 
             if(keybufferpoint != 0)
                 keybufferpoint--; 
             break;
 
         case 0x39: printf(" "); break;
+
+        
+        case 0x48 : 
+            if(isTxtMode)
+                printf("\7");
+        break;
+
+        case 0x50 : 
+            if(isTxtMode)
+                printf("\2"); 
+        break;
+
+        case 0x4B : 
+            if(isTxtMode)
+                printf("\4");
+            else
+                printf("\4"); 
+                if(keybufferpoint != 0)
+                    keybufferpoint--;
+        break;
+
+        case 0x4D : 
+            if(isTxtMode)
+                printf("\6");
+            else
+                printf("\6"); 
+                if(keybufferpoint != 0)
+                    keybufferpoint++;
+         break;
             
         default: // To tell that a unmapped key is pressed on the keyboard
             if (key < 0x80){
@@ -131,82 +189,56 @@ char* KeyboardDriver::KeycodeToASCII(uint8_t Keycode)
         {
             case 0xFA: break;
             case 0x45: case 0xC5: break;
-            case 0x29:
-            result = "`"; break;
-            case 0x02:
-            result = "1"; break;
-            case 0x03:
-            result = "2"; break;
-            case 0x04:
-            result = "3"; break;
-            case 0x05:
-            result = "4"; break;
-            case 0x06:
-            result = "5"; break;
-            case 0x07:
-            result = "6"; break;
-            case 0x08:
-            result = "7"; break;
-            case 0x09:
-            result = "8"; break;
-            case 0x0A:
-            result = "9"; break;
-            case 0x0B:
-            result = "0"; break;
-            case 0x0C:
-            result = "-"; break;
-            case 0x0D:
-            result = "="; break;
+            case 0x29:if (!isShift) result = "`"; else result = "~"; break;
+            case 0x02:if (!isShift) result = "1"; else result = "!"; break;
+            case 0x03:if (!isShift) result = "2"; else result = "@"; break;
+            case 0x04:if (!isShift) result = "3"; else result = "#"; break;
+            case 0x05:if (!isShift) result = "4"; else result = "$"; break;
+            case 0x06:if (!isShift) result = "5"; else result = "%"; break;
+            case 0x07:if (!isShift) result = "6"; else result = "^"; break;
+            case 0x08:if (!isShift) result = "7"; else result = "&"; break;
+            case 0x09:if (!isShift) result = "8"; else result = "*"; break;
+            case 0x0A:if (!isShift) result = "9"; else result = "("; break;
+            case 0x0B:if (!isShift) result = "0"; else result = ")"; break;
+            case 0x0C:if (!isShift) result = "-"; else result = "_"; break;
+            case 0x0D:if (!isShift) result = "="; else result = "+"; break;
 
-            case 0x10:
-            result = "q";  break;
-            case 0x11:
-            result = "w";  break;
-            case 0x12:
-            result = "e";  break;
-            case 0x13:
-            result = "r";  break;
-            case 0x14:
-            result = "t";  break;
-            case 0x15:
-            result = "y";  break;
-            case 0x16:
-            result = "u";  break;
-            case 0x17:
-            result = "i";  break;
-            case 0x18:
-            result = "o";  break;
-            case 0x19:
-            result = "p";  break;
-            case 0x1A:
-            result = "[";  break;
-            case 0x1B:
-            result = "]";  break;
-            case 0x1C:
-            result = "\n"; break;
+            case 0x10:if (!isShift) result = "q"; else result = "Q"; break;
+            case 0x11:if (!isShift) result = "w"; else result = "W"; break;
+            case 0x12:if (!isShift) result = "e"; else result = "E"; break;
+            case 0x13:if (!isShift) result = "r"; else result = "R"; break;
+            case 0x14:if (!isShift) result = "t"; else result = "T"; break;
+            case 0x15:if (!isShift) result = "y"; else result = "Y"; break;
+            case 0x16:if (!isShift) result = "u"; else result = "U"; break;
+            case 0x17:if (!isShift) result = "i"; else result = "I"; break;
+            case 0x18:if (!isShift) result = "o"; else result = "O"; break;
+            case 0x19:if (!isShift) result = "p"; else result = "P"; break;
+            case 0x1A:if (!isShift) result = "["; else result = "{"; break;
+            case 0x1B:if (!isShift) result = "]"; else result = "}"; break;
+            case 0x1C:if (!isShift) result = "\n"; else result = "\n"; break;
 
-            case 0x1E: result = "a"; break;
-            case 0x1F: result = "s"; break;
-            case 0x20: result = "d"; break;
-            case 0x21: result = "f"; break;
-            case 0x22: result = "g"; break;
-            case 0x23: result = "h"; break;
-            case 0x24: result = "j"; break;
-            case 0x25: result = "k"; break;
-            case 0x26: result = "l"; break;
-            case 0x27: result = ";"; break;
+            case 0x1E:if (!isShift) result = "a"; else result = "A"; break;
+            case 0x1F:if (!isShift) result = "s"; else result = "S"; break;
+            case 0x20:if (!isShift) result = "d"; else result = "D"; break;
+            case 0x21:if (!isShift) result = "f"; else result = "F"; break;
+            case 0x22:if (!isShift) result = "g"; else result = "G"; break;
+            case 0x23:if (!isShift) result = "h"; else result = "H"; break;
+            case 0x24:if (!isShift) result = "j"; else result = "J"; break;
+            case 0x25:if (!isShift) result = "k"; else result = "K"; break;
+            case 0x26:if (!isShift) result = "l"; else result = "L"; break;
+            case 0x27:if (!isShift) result = ";"; else result = ":"; break;
 
-            case 0x2C:result = "z"; break;
-            case 0x2D:result = "x"; break;
-            case 0x2E:result = "c"; break;
-            case 0x2F:result = "v"; break;
-            case 0x30:result = "b"; break;
-            case 0x31:result = "n"; break;
-            case 0x32:result = "m"; break;
-            case 0x33:result = ","; break;
-            case 0x34:result = "."; break;
-            case 0x35:result = "/"; break;
-            case 0x39:result = " "; break;
+            case 0x2C:if (!isShift) result = "z"; else result = "Z"; break;
+            case 0x2D:if (!isShift) result = "x"; else result = "X"; break;
+            case 0x2E:if (!isShift) result = "c"; else result = "C"; break;
+            case 0x2F:if (!isShift) result = "v"; else result = "V"; break;
+            case 0x30:if (!isShift) result = "v"; else result = "B"; break;
+            case 0x31:if (!isShift) result = "n"; else result = "N"; break;
+            case 0x32:if (!isShift) result = "m"; else result = "M"; break;
+            case 0x33:if (!isShift) result = ","; else result = "<"; break;
+            case 0x34:if (!isShift) result = "."; else result = ">"; break;
+            case 0x35:if (!isShift) result = "/"; else result = "?"; break;
+            case 0x39:if (!isShift) result = " "; else result = " "; break;
         }
     }
     return result;
@@ -256,7 +288,8 @@ void KeyboardDriver::CommandInterpreter()
     else if (key_buffer[0] == "c" & key_buffer[1] == "l" & key_buffer[2] == "e" & key_buffer[3] == "a" & key_buffer[4] == "r")
     {
         printf("\5");
-        printf("screen cleared");
+        ColourPrint(0);
+        printf("SectorOS Monolithic kernel                                          Type: Shell");
     }
     else if (key_buffer[0] == "s" & key_buffer[1] == "d")
     {
@@ -311,11 +344,36 @@ void KeyboardDriver::CommandInterpreter()
         printHex(total);
         */
     }
+    else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
+    {
+        printf("Entering Text editing mode. Please wait....");
+        for(int i = 999999999; i != 0; i--);
+        ColourPrint(1);
+        printf("\5");
+        //ColourPrint(0);
+        printf("welcome to SectorOS text mode.\nThis is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
+        isTxtMode = true;
+    }
     else
     {
         printf("Unknown Command. Type help in console to get all the commands");
     }
-    printf("\n");
-    printf("$: ");
+    if(!isTxtMode){
+        printf("\n");
+        printf("$: ");
+    }
     clear_key_buffer();
+}
+
+void KeyboardDriver::returnHScreen()
+{
+    clear_key_buffer();
+    printf("\5");
+    ColourPrint(0);
+    printf("Welcome to SectorOS Monolithic kernel                               Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
+
+    printf("Run help to get the list of commands which is implemented \n \n");
+
+    printf("$: ");
+    isTxtMode = false;
 }
