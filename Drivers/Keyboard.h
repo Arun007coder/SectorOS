@@ -24,6 +24,8 @@ public:
     void clear_key_buffer(); 
     // To activate the keyboard driver
     virtual void activate();
+    // To print text like when booting up 
+    void returnHScreen();
 };
 
 #endif

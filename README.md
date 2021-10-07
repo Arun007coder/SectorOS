@@ -25,7 +25,3 @@ make clean
 ```
 
 You can get prebuilt iso and kernel from `Build_files` folder
-
-## Bugs
-
-printing capital letters through echo command crashes the os for unknown reason. So shift keys and caps lock are non functional until this bug is removed

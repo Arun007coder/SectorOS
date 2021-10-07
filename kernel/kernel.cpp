@@ -74,6 +74,37 @@ void printf(char* str)
                     }
                     VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
             break;
+            case '\f':
+                for(int i = 0; i != 2; i++)
+                    x = cursorx;
+                    x--;
+                    if(x == 0 && y != 0)
+                    {
+                        x = 0;
+                        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
+                        y--;
+                        x = 79;
+                    }
+                    VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
+            break;
+            case '\7':
+                    y--;
+            break;
+
+            case '\4':
+                    x--;
+            break;
+
+            case '\2':
+                if (y != 25)
+                    y++;
+            break;
+
+            case '\6':
+                if (x != 80)
+                    x++;
+            break;
+
             default:
                 VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | str[i];
                 x++;
@@ -96,6 +127,8 @@ void printf(char* str)
                     VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
             x = 0;
             y = 0;
+            ColourPrint(0);
+            printf("SectorOS Monolithic kernel                                          Type: Shell ");
         }
         
     }
@@ -239,7 +272,7 @@ extern "C" void callConstructors()
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
     ColourPrint(0);
-    printf("Welcome to SectorOS Monolithic kernel                                  Type: CLIhttps://github.com/Arun007coder/SectorOS \n");
+    printf("Welcome to SectorOS Monolithic kernel                                Type: Shellhttps://github.com/Arun007coder/SectorOS \n");
 
     GlobalDescriptorTable gdt;
 
