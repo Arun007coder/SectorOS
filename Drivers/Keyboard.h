@@ -10,6 +10,9 @@ class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyb
 {
     port8BIT DataPort;
     port8BIT CommandPort;
+
+    //port8BIT UserDataPort;
+    //port8BIT UserCommandPort;
     // To interpret and execute the command
     void CommandInterpreter();
 
@@ -26,6 +29,10 @@ public:
     virtual void activate();
     // To print text like when booting up 
     void returnHScreen();
+
+    //void debugport(uint16_t portno, uint8_t writedat, int porttype, int action);
+
+    bool isTxtMode;
 };
 
 #endif

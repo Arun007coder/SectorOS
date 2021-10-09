@@ -2,8 +2,10 @@
 #include "Interrupts.h"
 
 
+
 void printf(char* str);
 void printHex(uint8_t key);
+void printTime();
 
 InterruptHandler::InterruptHandler(uint8_t interrupt, InterruptManager* interruptManager)
 {
@@ -167,6 +169,10 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
     {
         printf(foo);
         printHex(interrupt);
+    }
+    else if(interrupt = 0x20)
+    {
+        printTime();
     }
 
     if(0x20 <= interrupt && interrupt < 0x30)

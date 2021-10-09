@@ -1,20 +1,22 @@
 #include "Keyboard.h"
+#include "RTC.h"
 
 static int keybufferpoint = 0;
 static bool isShift = false;
-static bool isTxtMode = false;
 static bool isCTRLed = false;
 void printf(char*);
 void printfchar(char st);
 void printHex(uint8_t key);
-void printint(int num);
+char* INTTOCHARPOINT(int num);
 void ColourPrint(int type);
+bool txtcolor;
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager)
 :InterruptHandler(0x21, manager),
 DataPort(0x60),
 CommandPort(0x64)
 {
+    isTxtMode = false;
 }
 
 KeyboardDriver::~KeyboardDriver()
@@ -312,7 +314,7 @@ void KeyboardDriver::CommandInterpreter()
         int x = arg1[0] - '0';
         int y = arg2[0] - '0';
         resint = x + y;
-        printint(resint);
+        printf(INTTOCHARPOINT(resint));
         
     }
     else if(key_buffer[0] == "s" && key_buffer[1] == "u" & key_buffer[2] == "b" & key_buffer[3] == "1")
@@ -325,12 +327,10 @@ void KeyboardDriver::CommandInterpreter()
         int x = arg1[0] - '0';
         int y = arg2[0] - '0';
         resint = x - y;
-        printint(resint);
+        printf(INTTOCHARPOINT(resint));
     }
     else if(key_buffer[0] == "m" & key_buffer[1] == "e" & key_buffer[2] == "m")
     {
-        printf("function not implemented");
-        /*
         port8BIT port(0x70);
         port8BIT inport(0x71);
 
@@ -344,19 +344,69 @@ void KeyboardDriver::CommandInterpreter()
     
         total = lowmem | highmem << 8;
 
-        printHex(total);
-        */
+        printf(INTTOCHARPOINT(total));
     }
     else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
     {
         printf("Entering Text editing mode. Please wait....");
         for(int i = 999999999; i != 0; i--);
-        ColourPrint(1);
         printf("\5");
-        //ColourPrint(0);
-        printf("welcome to SectorOS text mode.\nThis is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
+        if(txtcolor){
+            ColourPrint(1);
+            txtcolor = false;
+        }
+        else
+        {
+            ColourPrint(0);
+            txtcolor = true;
+        }
+        
+        RTC rtclock;
+        rtclock.read_rtc();
+        printf("welcome to SectorOS text mode "); printf(INTTOCHARPOINT(rtclock.day));printf("/");printf(INTTOCHARPOINT(rtclock.month));printf("/");printf(INTTOCHARPOINT(rtclock.year));printf("                             Type: Text\n");printf("This is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
         isTxtMode = true;
     }
+    /*
+    else if(key_buffer[0] == "o" & key_buffer[1] == "u" & key_buffer[2] == "t" & key_buffer[3] == "p" & key_buffer[4] == "o" & key_buffer[5] == "r" & key_buffer[6] == "t")
+    {
+        char* arg1 = key_buffer[10];
+        uint16_t portno = *arg1 - '0';
+        port8BIT dp(portno);
+        port8BIT cp(portno);
+        if(key_buffer[8] == "c")
+        {
+            printHex(cp.ReadFromPort());
+        }
+        else if (key_buffer[8] == "d")
+        {
+            printHex(dp.ReadFromPort());
+        }
+        else{
+            printf("debug");
+        }
+    }
+    */
+    /*
+    else if(key_buffer[0] == "i" & key_buffer[1] == "n" & key_buffer[2] == "p" & key_buffer[3] == "o" & key_buffer[4] == "r" & key_buffer[5] == "t")
+    {
+        char* arg2 = key_buffer[11];
+        uint16_t portno = *arg2 - '0';
+        port8BIT dp(portno);
+        port8BIT cp(portno);
+        char* arg1 = key_buffer[9];
+        uint8_t data = *arg1 - '0';
+        if(key_buffer[7] == "c")
+        {
+            cp.WriteToPort(data);
+            printf("data writen to dataport");
+        }
+        else if(key_buffer[7] == "d")
+        {
+            dp.WriteToPort(data);
+            printf("data written to dataport");
+        }
+    }
+    */
     else
     {
         printf("Unknown Command. Type help in console to get all the commands");
@@ -372,11 +422,16 @@ void KeyboardDriver::returnHScreen()
 {
     clear_key_buffer();
     printf("\5");
-    ColourPrint(0);
-    printf("Welcome to SectorOS Monolithic kernel                               Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
+    //ColourPrint(1);
+    //ColourPrint(0);
+    RTC rtclock;
+    rtclock.read_rtc();
+    //printf("Welcome to SectorOS Monolithic kernel                               Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
+    printf("SectorOS Monolithic kernel "); printf(INTTOCHARPOINT(rtclock.day));printf("/");printf(INTTOCHARPOINT(rtclock.month));printf("/");printf(INTTOCHARPOINT(rtclock.year));printf("                               Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
     printf("Run help to get the list of commands which is implemented \n \n");
 
     printf("$: ");
     isTxtMode = false;
 }
+

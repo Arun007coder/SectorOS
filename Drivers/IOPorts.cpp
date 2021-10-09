@@ -1,5 +1,7 @@
 #include "IOPorts.h"
 
+void printf(char*);
+
 port::port(uint16_t portnumber)
 {
     this->portnumber = portnumber;
@@ -19,11 +21,13 @@ port8BIT::~port8BIT()
 {
 }
 
+// 8BIT outportb
 void port8BIT::WriteToPort(uint8_t data)
 {
     __asm__ volatile("outb %0, %1" : : "a" (data), "Nd" (portnumber));
 }
 
+// 8BIT inportb
 uint8_t port8BIT::ReadFromPort()
 {
     uint8_t result;

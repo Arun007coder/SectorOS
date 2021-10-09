@@ -4,15 +4,17 @@
 #include "../Drivers/Keyboard.h"
 #include "../Drivers/Mouse.h"
 #include "../Drivers/Driver.h"
+#include "../Drivers/RTC.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
 static bool useMouse = true;
 bool isused;
+bool isTxtMode;
+static uint16_t* VideoMemory = (uint16_t*)0xb8000;
 
 void ColourPrint(int type)
 {
-    static uint16_t* VideoMemory = (uint16_t*)0xb8000;
     uint8_t x; //crx;
     uint8_t y; //cry;
     switch (type)
@@ -38,13 +40,15 @@ void ColourPrint(int type)
     }
 }
 
+
+
 void printf(char* str)
 {
     static uint8_t x=0, y=0;
     uint8_t curx;
     uint8_t cury;
 
-    static uint16_t* VideoMemory = (uint16_t*)0xb8000;
+    //static uint16_t* VideoMemory = (uint16_t*)0xb8000;
 
     for(int i = 0; str[i] != '\0'; ++i)
     {
@@ -78,17 +82,26 @@ void printf(char* str)
                 for(int i = 0; i != 2; i++)
                     x = cursorx;
                     x--;
-                    if(x == 0 && y != 0)
+                    if(x == 0 & y != 0)
                     {
                         x = 0;
                         VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
                         y--;
                         x = 79;
                     }
+                    else if(y == 0)
+                    {
+                        y = 1;
+                    }
                     VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
             break;
             case '\7':
+                if(y != 0)
                     y--;
+                else if(y == 0)
+                {
+                    y = 1;
+                }
             break;
 
             case '\4':
@@ -134,39 +147,122 @@ void printf(char* str)
     }
 }
 
-void printint(int num)
+char* INTTOCHARPOINT(int num)
 {
+    char* res;
     switch (num)
     {
-    case 0:printf("0"); break;
-    case 1:printf("1"); break;
-    case 2:printf("2"); break;
-    case 3:printf("3"); break;
-    case 4:printf("4"); break;
-    case 5:printf("5"); break;
-    case 6:printf("6"); break;
-    case 7:printf("7"); break;
-    case 8:printf("8"); break;
-    case 9:printf("9"); break;
-
-    case 10:printf("10"); break;
-    case 11:printf("11"); break;
-    case 12:printf("12"); break;
-    case 13:printf("13"); break;
-    case 14:printf("14"); break;
-    case 15:printf("15"); break;
-    case 16:printf("16"); break;
-    case 17:printf("17"); break;
-    case 18:printf("18"); break;
-    case 19:printf("19"); break;
+    case 0:res = "00"; break;
+    case 1:res = "01"; break;
+    case 2:res = "02"; break;
+    case 3:res = "03";break;
+    case 4:res = "04";break;
+    case 5:res = "05";break;
+    case 6:res = "06";break;
+    case 7:res = "07";break;
+    case 8:res = "08";break;
+    case 9:res  =  "09";break;
+    case 10:res  =  "10"; break;
+    case 11:res = "11"; break;
+    case 12:res = "12"; break;
+    case 13:res = "13"; break;
+    case 14:res = "14"; break;
+    case 15:res = "15"; break;
+    case 16:res = "16"; break;
+    case 17:res = "17"; break;
+    case 18:res = "18"; break;
+    case 19:res = "19"; break;
+    case 20:res = "20"; break;
+    case 21:res = "21"; break;
+    case 22:res = "22"; break;
+    case 23:res = "23"; break;
+    case 24:res = "24"; break;
+    case 25:res = "25"; break;
+    case 26:res = "26"; break;
+    case 27:res = "26"; break;
+    case 28:res = "28"; break;
+    case 29:res = "29"; break;
+    case 30:res = "30"; break;
+    case 31:res = "31"; break;
+    case 32:res = "32"; break;
+    case 33:res = "33"; break;
+    case 34:res = "34"; break;
+    case 35:res = "35"; break;
+    case 36:res = "36"; break;
+    case 37:res = "37"; break;
+    case 38:res = "38"; break;
+    case 39:res = "39"; break;
+    case 40:res = "40"; break;
+    case 41:res = "41"; break;
+    case 42:res = "42"; break;
+    case 43:res = "43"; break;
+    case 44:res = "44"; break;
+    case 45:res = "45"; break;
+    case 46:res = "46"; break;
+    case 47:res = "47"; break;
+    case 48:res = "48"; break;
+    case 49:res = "49"; break;
+    case 50:res = "50"; break;
+    case 51:res = "51"; break;
+    case 52:res = "52"; break;
+    case 53:res = "53"; break;
+    case 54:res = "54"; break;
+    case 55:res = "55"; break;
+    case 56:res = "56"; break;
+    case 57:res = "57"; break;
+    case 58:res = "58"; break;
+    case 59:res = "59"; break;
+    case 60:res = "60"; break;
+    case 2021:res = "2021"; break;
     }
+
+    return res;
+
+}
+
+void printTime()
+{
+    uint8_t x = 51;
+    uint8_t y = 0;
+    RTC rtclock;
+    rtclock.read_rtc();
+    char* strH = INTTOCHARPOINT(rtclock.hour);
+    char dd = ':';
+    char* strM = INTTOCHARPOINT(rtclock.minute);
+    char* strS = INTTOCHARPOINT(rtclock.second);
+
+
+    for(int i = 0; i != 3; ++i)
+    {
+        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | strH[i];
+        x++;
+    }
+
+        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | dd;
+        x++;
+
+    for(int i = 0; i != 3; ++i)
+    {
+        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | strM[i];
+        x++;
+    }
+
+        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ',';
+        x++;
+
+    for(int i = 0; i != 3; ++i)
+    {
+        VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | strS[i];
+        x++;
+    }
+
 }
 
 void printfchar(char st)
 {
     static uint8_t x=0, y=0;
 
-    static uint16_t* VideoMemory = (uint16_t*)0xb8000;
+    //static uint16_t* VideoMemory = (uint16_t*)0xb8000;
 
         switch(st)
         {
@@ -226,7 +322,7 @@ public:
     }
     */
 
-    virtual void OnActivate()
+        virtual void OnActivate()
     {
         uint16_t* VideoMemory = (uint16_t*)0xb8000;
         x = 40;
@@ -272,7 +368,10 @@ extern "C" void callConstructors()
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
     ColourPrint(0);
-    printf("Welcome to SectorOS Monolithic kernel                                Type: Shellhttps://github.com/Arun007coder/SectorOS \n");
+    RTC rtclock;
+    rtclock.read_rtc();
+    printTime();
+    printf("Welcome to SectorOS Monolithic kernel "); printf(INTTOCHARPOINT(rtclock.day));printf("/");printf(INTTOCHARPOINT(rtclock.month));printf("/");printf(INTTOCHARPOINT(rtclock.year));printf("                     Type: Shellhttps://github.com/Arun007coder/SectorOS \n");
 
     GlobalDescriptorTable gdt;
 
@@ -282,6 +381,8 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 1]...");
     KeyboardDriver KeyboardDriver(&interrupts);
+    
+
     drvmgr.AddDriver(&KeyboardDriver);
     
 
