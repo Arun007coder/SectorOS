@@ -10,6 +10,7 @@ void printHex(uint8_t key);
 char* INTTOCHARPOINT(int num);
 void ColourPrint(int type);
 bool txtcolor;
+void reboot();
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager)
 :InterruptHandler(0x21, manager),
@@ -281,7 +282,7 @@ void KeyboardDriver::CommandInterpreter()
     {
         if(key_buffer[5] == "s" & key_buffer[6] == "d")
         {
-            printf("sd <options> : \nh to halt the computer");
+            printf("sd <options> : \nh : to halt the computer\nr : To reboot he computer\nsv : If running in virtualbox. then shutdown");
         }
         else if(key_buffer[5] == "1")
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
@@ -302,6 +303,16 @@ void KeyboardDriver::CommandInterpreter()
         {
             printf("Halting the computer...");
             __asm__ volatile("hlt");
+        }
+        else if(key_buffer[3] == "s" & key_buffer[4] == "v")
+        {
+            port32BIT pt(0x4004);
+            pt.WriteToPort(0x3400);
+
+        }
+        else if(key_buffer[3] == "r")
+        {
+            reboot();
         }
     }
     else if(key_buffer[0] == "a" & key_buffer[1] == "d" & key_buffer[2] == "d" & key_buffer[3] == "1" )
@@ -351,6 +362,7 @@ void KeyboardDriver::CommandInterpreter()
         printf("Entering Text editing mode. Please wait....");
         for(int i = 999999999; i != 0; i--);
         printf("\5");
+        /*
         if(txtcolor){
             ColourPrint(1);
             txtcolor = false;
@@ -360,6 +372,9 @@ void KeyboardDriver::CommandInterpreter()
             ColourPrint(0);
             txtcolor = true;
         }
+        */
+
+
         
         RTC rtclock;
         rtclock.read_rtc();

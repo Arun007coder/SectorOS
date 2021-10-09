@@ -1,11 +1,10 @@
 
 #include "Interrupts.h"
 
-
-
 void printf(char* str);
 void printHex(uint8_t key);
 void printTime();
+void reboot();
 
 InterruptHandler::InterruptHandler(uint8_t interrupt, InterruptManager* interruptManager)
 {
@@ -165,10 +164,16 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
     {
         esp = handlers[interrupt] -> HandleInterrupt(esp);
 
-    } else if(interrupt != 0x20 && interrupt != 0x25 && interrupt != 0x27 )
+    } else if(interrupt != 0x20 && interrupt != 0x25 && interrupt != 0x27 & interrupt != 0x0D )
     {
         printf(foo);
         printHex(interrupt);
+    }
+    else if(interrupt == 0x0D)
+    {
+        printf("SYSMSG:: EXCEPTION: GENERAL PROTECTION FAULT");
+        for(int i = 999999999; i != 0; i--);
+        reboot();
     }
     else if(interrupt = 0x20)
     {

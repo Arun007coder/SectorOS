@@ -5,6 +5,7 @@
 #include "../Drivers/Mouse.h"
 #include "../Drivers/Driver.h"
 #include "../Drivers/RTC.h"
+#include "../Hardcom/pci.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
@@ -40,8 +41,6 @@ void ColourPrint(int type)
     }
 }
 
-
-
 void printf(char* str)
 {
     static uint8_t x=0, y=0;
@@ -61,7 +60,7 @@ void printf(char* str)
                 x = 0;
             break;
             case '\5':
-                ColourPrint(1);
+                //ColourPrint(1);
                 isused = true;
                 for(y = 0; y < 25; y++)
                     for(x = 0; x < 80; x++)
@@ -133,18 +132,29 @@ void printf(char* str)
 
         if(y >= 25)
         {
-            ColourPrint(1);
+            //ColourPrint(1);
             isused = true;
             for(y = 0; y < 25; y++)
                 for(x = 0; x < 80; x++)
                     VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
             x = 0;
             y = 0;
-            ColourPrint(0);
+            //ColourPrint(0);
             printf("SectorOS Monolithic kernel                                          Type: Shell ");
         }
         
     }
+}
+
+void reboot()
+{
+    printf("\nRebooting...");
+    for(int cx = 99999999999; cx != 0; cx--);
+    uint8_t good = 0x02;
+    port8BIT pt(0x64);
+    while (good & 0x02)
+        good = pt.ReadFromPort();
+    pt.WriteToPort(0xFE);
 }
 
 char* INTTOCHARPOINT(int num)
@@ -390,12 +400,15 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     MouseDriver MouseDriver(&interrupts, &msmgr);
     if (useMouse = true)
     {
-        drvmgr.AddDriver(&MouseDriver); 
+        drvmgr.AddDriver(&MouseDriver);
     }
     else
     {
         printf("\nSYSMSG: Cannot initialize mouse driver. This driver is disabled by default.");
     }
+
+    PCI PCICONT;
+    PCICONT.SelectDrivers(&drvmgr);
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
     drvmgr.activateall();
