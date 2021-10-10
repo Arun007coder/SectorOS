@@ -1,5 +1,4 @@
 #include "Keyboard.h"
-#include "RTC.h"
 
 static int keybufferpoint = 0;
 static bool isShift = false;
@@ -7,10 +6,12 @@ static bool isCTRLed = false;
 void printf(char*);
 void printfchar(char st);
 void printHex(uint8_t key);
+void PrintDate();
 char* INTTOCHARPOINT(int num);
 void ColourPrint(int type);
 bool txtcolor;
-void reboot();
+
+PowerControl power;
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager)
 :InterruptHandler(0x21, manager),
@@ -287,32 +288,28 @@ void KeyboardDriver::CommandInterpreter()
         else if(key_buffer[5] == "1")
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
         else if(key_buffer[5] == "2")
-            printf("Help page 2:\nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number\ntxt : To enter the text mode. You cannot save files ");
+            printf("Help page 2:\nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number\ntxt : To enter the text mode. You cannot save files\nmul1 <num1> <num2> : To multiply 2 numbers. ");
         else
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
     }
     else if (key_buffer[0] == "c" & key_buffer[1] == "l" & key_buffer[2] == "e" & key_buffer[3] == "a" & key_buffer[4] == "r")
     {
         printf("\5");
-        ColourPrint(0);
-        printf("SectorOS Monolithic kernel                                          Type: Shell");
+        printf("SectorOS Monolithic kernel ");PrintDate();printf("                               Type: Shell\n");
     }
     else if (key_buffer[0] == "s" & key_buffer[1] == "d")
     {
         if(key_buffer[3] == "h")
         {
-            printf("Halting the computer...");
-            __asm__ volatile("hlt");
+            power.halt();
         }
         else if(key_buffer[3] == "s" & key_buffer[4] == "v")
         {
-            port32BIT pt(0x4004);
-            pt.WriteToPort(0x3400);
-
+            power.StopVirtualBox();
         }
         else if(key_buffer[3] == "r")
         {
-            reboot();
+            power.reboot();
         }
     }
     else if(key_buffer[0] == "a" & key_buffer[1] == "d" & key_buffer[2] == "d" & key_buffer[3] == "1" )
@@ -340,6 +337,23 @@ void KeyboardDriver::CommandInterpreter()
         resint = x - y;
         printf(INTTOCHARPOINT(resint));
     }
+    else if(key_buffer[0] == "m" & key_buffer[1] == "u" & key_buffer[2] == "l" & key_buffer[3] == "1" )
+    {
+        char* arg1;
+        char* arg2;
+        arg1 = key_buffer[5];
+        arg2 = key_buffer[7];
+
+        int res;
+
+        int x = arg1[0] - '0';
+        int y = arg2[0] - '0';
+
+        res = x * y;
+
+        printf(INTTOCHARPOINT(res));
+    }
+    /*
     else if(key_buffer[0] == "m" & key_buffer[1] == "e" & key_buffer[2] == "m")
     {
         port8BIT port(0x70);
@@ -356,7 +370,7 @@ void KeyboardDriver::CommandInterpreter()
         total = lowmem | highmem << 8;
 
         printf(INTTOCHARPOINT(total));
-    }
+    }*/
     else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
     {
         printf("Entering Text editing mode. Please wait....");
@@ -378,7 +392,7 @@ void KeyboardDriver::CommandInterpreter()
         
         RTC rtclock;
         rtclock.read_rtc();
-        printf("welcome to SectorOS text mode "); printf(INTTOCHARPOINT(rtclock.day));printf("/");printf(INTTOCHARPOINT(rtclock.month));printf("/");printf(INTTOCHARPOINT(rtclock.year));printf("                             Type: Text\n");printf("This is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
+        printf("welcome to SectorOS text mode ");PrintDate(); printf("                             Type: Text ");printf("This is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
         isTxtMode = true;
     }
     /*
@@ -439,11 +453,11 @@ void KeyboardDriver::returnHScreen()
     printf("\5");
     //ColourPrint(1);
     //ColourPrint(0);
-    RTC rtclock;
-    rtclock.read_rtc();
     //printf("Welcome to SectorOS Monolithic kernel                               Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
-    printf("SectorOS Monolithic kernel "); printf(INTTOCHARPOINT(rtclock.day));printf("/");printf(INTTOCHARPOINT(rtclock.month));printf("/");printf(INTTOCHARPOINT(rtclock.year));printf("                               Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
+    printf("SectorOS Monolithic kernel ");
+    PrintDate();
+    printf("                               Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
     printf("Run help to get the list of commands which is implemented \n \n");
 
     printf("$: ");

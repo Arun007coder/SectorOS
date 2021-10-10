@@ -5,6 +5,7 @@ void printf(char* str);
 void printHex(uint8_t key);
 void printTime();
 void reboot();
+PowerControl Power;
 
 InterruptHandler::InterruptHandler(uint8_t interrupt, InterruptManager* interruptManager)
 {
@@ -171,9 +172,11 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
     }
     else if(interrupt == 0x0D)
     {
-        printf("SYSMSG:: EXCEPTION: GENERAL PROTECTION FAULT");
+        printf("\5");
+        printf("SYSMSG:: EXCEPTION: GENERAL PROTECTION FAULT. REBOOTING...\n");
+        printf("An exception has occured in the system during execution which cannot fix itself.The computer will restart in a moment.");
         for(int i = 999999999; i != 0; i--);
-        reboot();
+        Power.reboot();
     }
     else if(interrupt = 0x20)
     {

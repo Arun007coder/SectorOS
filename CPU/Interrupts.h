@@ -5,6 +5,7 @@
     #include "../kernel/gdt.h"
     #include "../Includes/types.h"
     #include "../Drivers/IOPorts.h"
+    #include "../CPU/PowerControl.h"
 
     class InterruptManager;
 
