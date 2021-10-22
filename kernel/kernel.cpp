@@ -7,14 +7,13 @@
 #include "../Drivers/Driver.h"
 #include "../Drivers/RTC.h"
 #include "../Hardcom/pci.h"
-#include "../Debug/Debug.h"
+#include "../Hardcom/SerialPort.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
 static bool useMouse = true;
 bool isused;
 bool isTxtMode;
-debugfunctions deb;
 static uint16_t* VideoMemory = (uint16_t*)0xb8000;
 
 // Can Support up to number 100
@@ -431,7 +430,7 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {               
-    deb.logToSerialPort("kernel started");
+
     ColourPrint(0);
     printTime();
 
@@ -459,8 +458,8 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
         printf("\nSYSMSG: Cannot initialize mouse driver. This driver is disabled by default.");
     }
 
-    PCI PCICONT;
-    PCICONT.SelectDrivers(&drvmgr);
+    //PCI PCICONT;
+    //PCICONT.SelectDrivers(&drvmgr);
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
     drvmgr.activateall();
@@ -473,6 +472,9 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
     printf("Run help to get the list of commands which is implemented \n \n");
+
+    SerialPort sp;
+    sp.logToSerialPort("kernel started");
 
     printf("$: ");
     while(1);

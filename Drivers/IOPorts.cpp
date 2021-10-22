@@ -1,6 +1,7 @@
 #include "IOPorts.h"
 
 void printf(char*);
+void printHex(uint8_t key);
 
 port::port(uint16_t portnumber)
 {
@@ -25,6 +26,15 @@ port8BIT::~port8BIT()
 void port8BIT::WriteToPort(uint8_t data)
 {
     __asm__ volatile("outb %0, %1" : : "a" (data), "Nd" (portnumber));
+
+    if(portnumber == 0x3F8)
+    {
+        //printHex(data);
+    }
+    else if (portnumber == 0x3F8 + 5)
+    {
+        //printHex(data);
+    }
 }
 
 // 8BIT inportb

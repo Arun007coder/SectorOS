@@ -7,7 +7,6 @@
 #include "Driver.h"
 #include "RTC.h"
 #include "../CPU/PowerControl.h"
-#include "../Debug/Debug.h"
 
 class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyboard
 {
