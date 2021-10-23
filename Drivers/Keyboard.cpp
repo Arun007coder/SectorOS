@@ -264,9 +264,12 @@ void KeyboardDriver::clear_key_buffer()
 
 void KeyboardDriver::CommandInterpreter()
 {
+    char* COMNAME;
+    serialport.logToSerialPort("Command Interpreter Initialised");
     printf("\n");
     if(key_buffer[0] == "e" & key_buffer[1] == "c" & key_buffer[2] == "h" & key_buffer[3] == "o")
     {
+        COMNAME = "echo";
         if (key_buffer[4] == "\0")
         {
             printf("cannot print null character");
@@ -281,6 +284,7 @@ void KeyboardDriver::CommandInterpreter()
     }
     else if (key_buffer[0] == "h" & key_buffer[1] == "e" & key_buffer[2] == "l" & key_buffer[3] == "p")
     {
+        COMNAME = "help";
         if(key_buffer[5] == "s" & key_buffer[6] == "d")
         {
             printf("sd <options> : \nh : to halt the computer\nr : To reboot he computer\nsv : If running in virtualbox. then shutdown");
@@ -294,11 +298,13 @@ void KeyboardDriver::CommandInterpreter()
     }
     else if (key_buffer[0] == "c" & key_buffer[1] == "l" & key_buffer[2] == "e" & key_buffer[3] == "a" & key_buffer[4] == "r")
     {
+        COMNAME = "clear";
         printf("\5");
         printf("SectorOS Monolithic kernel ");PrintDate();printf("                               Type: Shell\n");
     }
     else if (key_buffer[0] == "s" & key_buffer[1] == "d")
     {
+        COMNAME = "sd";
         if(key_buffer[3] == "h")
         {
             power.halt();
@@ -314,6 +320,7 @@ void KeyboardDriver::CommandInterpreter()
     }
     else if(key_buffer[0] == "a" & key_buffer[1] == "d" & key_buffer[2] == "d" & key_buffer[3] == "1" )
     {
+        COMNAME = "add1";
         char* arg1;
         char *arg2;
         arg1 = key_buffer[5];
@@ -327,6 +334,7 @@ void KeyboardDriver::CommandInterpreter()
     }
     else if(key_buffer[0] == "s" && key_buffer[1] == "u" & key_buffer[2] == "b" & key_buffer[3] == "1")
     {
+        COMNAME = "sub1";
         char* arg1;
         char *arg2;
         arg1 = key_buffer[5];
@@ -339,6 +347,7 @@ void KeyboardDriver::CommandInterpreter()
     }
     else if(key_buffer[0] == "m" & key_buffer[1] == "u" & key_buffer[2] == "l" & key_buffer[3] == "1" )
     {
+        COMNAME = "mul1";
         char* arg1;
         char* arg2;
         arg1 = key_buffer[5];
@@ -373,6 +382,8 @@ void KeyboardDriver::CommandInterpreter()
     }*/
     else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
     {
+        COMNAME = "txt";
+        serialport.logToSerialPort("\ntxt mode starting...");
         printf("Entering Text editing mode. Please wait....");
         for(int i = 999999999; i != 0; i--);
         printf("\5");
@@ -394,6 +405,7 @@ void KeyboardDriver::CommandInterpreter()
         rtclock.read_rtc();
         printf("welcome to SectorOS text mode ");PrintDate(); printf("                             Type: Text ");printf("This is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
         isTxtMode = true;
+        serialport.logToSerialPort("\ntxt mode initialised");
     }
     /*
     else if(key_buffer[0] == "o" & key_buffer[1] == "u" & key_buffer[2] == "t" & key_buffer[3] == "p" & key_buffer[4] == "o" & key_buffer[5] == "r" & key_buffer[6] == "t")
@@ -444,6 +456,7 @@ void KeyboardDriver::CommandInterpreter()
         printf("\n");
         printf("$: ");
     }
+    serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
     clear_key_buffer();
 }
 

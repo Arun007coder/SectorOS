@@ -165,6 +165,9 @@ void printf(char* str)
     uint8_t curx;
     uint8_t cury;
 
+    //SerialPort s;
+    //s.logToSerialPort(str);
+
     //static uint16_t* VideoMemory = (uint16_t*)0xb8000;
 
     for(int i = 0; str[i] != '\0'; ++i)
@@ -429,10 +432,17 @@ extern "C" void callConstructors()
 
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
-{               
+{
+    SerialPort sp;
+    sp.INITSerial();
+    sp.logToSerialPort("kernel started");
 
     ColourPrint(0);
     printTime();
+
+    printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
+
+    printf("Run help to get the list of commands which is implemented \n \n");
 
     GlobalDescriptorTable gdt;
 
@@ -442,6 +452,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 1]...");
     KeyboardDriver KeyboardDriver(&interrupts);
+    sp.logToSerialPort("\nHardware initialising stage 1 finished");
     
 
     drvmgr.AddDriver(&KeyboardDriver);
@@ -458,14 +469,18 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
         printf("\nSYSMSG: Cannot initialize mouse driver. This driver is disabled by default.");
     }
 
-    //PCI PCICONT;
-    //PCICONT.SelectDrivers(&drvmgr);
+    PCI PCICONT;
+    PCICONT.SelectDrivers(&drvmgr);
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
     drvmgr.activateall();
+    sp.logToSerialPort("\nHardware initialising stage 2 finished");
+    sp.logToSerialPort("\nDriverManager started");
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
     interrupts.Activate();
+    sp.logToSerialPort("\nHardware initialising stage 3 finished");
+    sp.logToSerialPort("\nInterrupt manager started");
 
     printf("\5");
 
@@ -473,8 +488,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("Run help to get the list of commands which is implemented \n \n");
 
-    SerialPort sp;
-    sp.logToSerialPort("kernel started");
+    sp.logToSerialPort("\nKernel initialisation surcessful.\nGiving execution access to the kernel.\nAwaiting user input");
 
     printf("$: ");
     while(1);

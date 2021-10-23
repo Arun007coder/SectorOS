@@ -7,6 +7,7 @@
 #include "Driver.h"
 #include "RTC.h"
 #include "../CPU/PowerControl.h"
+#include "../Hardcom/SerialPort.h"
 
 class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyboard
 {
@@ -17,6 +18,7 @@ class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyb
     //port8BIT UserCommandPort;
     // To interpret and execute the command
     void CommandInterpreter();
+    SerialPort serialport;
 
 public:
     KeyboardDriver(InterruptManager* manager);
