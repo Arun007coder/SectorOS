@@ -13,6 +13,8 @@ public:
     ~SerialPort();
     void logToSerialPort(char* msg);
     int isSerialEmpty();
+    int serial_received();
+    char read_serial();
 };
 
 #endif

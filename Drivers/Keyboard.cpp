@@ -448,6 +448,14 @@ void KeyboardDriver::CommandInterpreter()
         }
     }
     */
+   else if(key_buffer[0] == "s" && key_buffer[1] == "p")
+   {
+       for (int i = 3; key_buffer[i] != "\n"; i++)
+       {
+           serialport.logToSerialPort(key_buffer[i]);
+       }
+       
+   }
     else
     {
         printf("Unknown Command. Type help in console to get all the commands");

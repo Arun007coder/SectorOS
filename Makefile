@@ -36,7 +36,7 @@ move: mykernel.iso
 	mv *.iso mykernel.bin Build_files/
 
 runQEMU: mykernel.iso
-	qemu-system-i386 -boot d -cdrom mykernel.iso -serial file:serial.log
+	qemu-system-i386 -boot d -cdrom mykernel.iso -serial file:serial.log -soundhw pcspk
 
 runVBOX: mykernel.iso
 	(killall VirtualBoxVM && sleep 1) || true

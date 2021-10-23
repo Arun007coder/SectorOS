@@ -61,3 +61,15 @@ void SerialPort::logToSerialPort(char* msg)
         dataport.WriteToPort(msg[i]);
     }
 }
+
+int SerialPort::serial_received() 
+{
+   return sendport.ReadFromPort() & 1;
+}
+ 
+char SerialPort::read_serial() 
+{
+   while (serial_received() == 0);
+ 
+   return dataport.ReadFromPort();
+}

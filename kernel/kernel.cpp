@@ -14,7 +14,46 @@ static uint8_t cursorx;
 static bool useMouse = true;
 bool isused;
 bool isTxtMode;
+
+port8BIT port43(0x43);
+port8BIT port42(0x42);
+port8BIT port61(0x61);
 static uint16_t* VideoMemory = (uint16_t*)0xb8000;
+
+static void play_sound(uint32_t nFrequence) 
+{
+    uint32_t Div;
+    uint8_t tmp;
+    
+    //Set the PIT to the desired frequency
+    Div = 1193180 / nFrequence;
+    port43.WriteToPort(0xb6);
+    port42.WriteToPort((uint8_t) (Div) );
+    port42.WriteToPort((uint8_t) (Div >> 8));
+    
+    //And play the sound using the PC speaker
+    tmp = port61.ReadFromPort();
+    if (tmp != (tmp | 3)) {
+        port61.WriteToPort(tmp | 3);
+    }
+}
+
+static void nosound() 
+{
+    uint8_t tmp = port61.ReadFromPort() & 0xFC;
+    
+    port61.WriteToPort(tmp);
+}
+
+void beep() 
+{
+	play_sound(1000);
+	for (int i = 0; i != 10000; i++);
+	nosound();
+    SerialPort ss;
+    ss.INITSerial();
+    ss.logToSerialPort("beep\n");
+}
 
 // Can Support up to number 100
 char* INTTOCHARPOINT(int num)
@@ -433,8 +472,8 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
+    beep();
     SerialPort sp;
-    sp.INITSerial();
     sp.logToSerialPort("kernel started");
 
     ColourPrint(0);
