@@ -171,6 +171,33 @@ char* INTTOCHARPOINT(int num)
 
 }
 
+uint16_t GetAvailableMem()
+{
+    port8BIT port(0x70);
+    port8BIT inport(0x71);
+
+    unsigned short total;
+    unsigned char lowmem, highmem;
+
+    port.WriteToPort(0x30);
+    lowmem = inport.ReadFromPort();
+    port.WriteToPort(0x31);
+    highmem = inport.ReadFromPort();
+
+    total = lowmem | highmem << 8;
+
+    return total;
+}
+
+char* hertochar(uint16_t hex2)
+{
+    char* foo = "00";
+    char* hex = "0123456789ABCDEF";
+    foo[0] = hex[(hex2 >> 4) & 0xF];
+    foo[1] = hex[hex2 & 0xF];
+    return foo;
+}
+
 void ColourPrint(int type)
 {
     uint8_t x; //crx;
@@ -400,12 +427,12 @@ void printfchar(char st)
         }
 }
 
-void printHex(uint8_t key)
+void printHex(uint8_t Key)
 {
     char* foo = "00";
     char* hex = "0123456789ABCDEF";
-    foo[0] = hex[(key >> 4) & 0xF];
-    foo[1] = hex[key & 0xF];
+    foo[0] = hex[(Key >> 4) & 0xF];
+    foo[1] = hex[Key & 0xF];
     printf(foo);
 }
 
@@ -474,7 +501,14 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 {
     beep();
     SerialPort sp;
-    sp.logToSerialPort("kernel started");
+    uint16_t value = GetAvailableMem();
+    uint8_t partA = static_cast<uint8_t>((value & 0xFF00) >> 8);
+    uint8_t partB = static_cast<uint8_t>(value & 0x00FF);
+    sp.logToSerialPort("Avaliable Memory = ");
+    sp.logToSerialPort(hertochar(partA));
+    sp.logToSerialPort(" ");
+    sp.logToSerialPort(hertochar(partB));
+    sp.logToSerialPort("\nkernel started");
 
     ColourPrint(0);
     printTime();
@@ -490,11 +524,11 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     DriverManager drvmgr;
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 1]...");
-    KeyboardDriver KeyboardDriver(&interrupts);
+    KeyboardDriver hexboardDriver(&interrupts);
     sp.logToSerialPort("\nHardware initialising stage 1 finished");
     
 
-    drvmgr.AddDriver(&KeyboardDriver);
+    drvmgr.AddDriver(&hexboardDriver);
     
 
     MouseToConsole msmgr;
@@ -521,13 +555,17 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     sp.logToSerialPort("\nHardware initialising stage 3 finished");
     sp.logToSerialPort("\nInterrupt manager started");
 
+    printf("\nKernel initialization surcessful.");
+
     printf("\5");
 
     printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
-    printf("Run help to get the list of commands which is implemented \n \n");
+    printf("Initializing SOSH V1.0.2\n\n");
 
-    sp.logToSerialPort("\nKernel initialisation surcessful.\nGiving execution access to the kernel.\nAwaiting user input");
+    printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
+
+    sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 
     printf("$: ");
     while(1);

@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Build ISO [There will be unstable builds which are not tested]
 
 on:
   push:

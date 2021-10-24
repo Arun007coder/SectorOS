@@ -25,3 +25,5 @@ make clean
 ```
 
 You can get prebuilt iso and kernel from `Build_files` folder
+
+To get unstable builds. go to <https://github.com/Arun007coder/SectorOS/actions>

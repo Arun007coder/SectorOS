@@ -10,14 +10,14 @@ objects = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/
 %.o: %.s
 	as $(ASPARAMS) -o $@ $<
 
-mykernel.bin: LILO/linker.ld $(objects)
+SectorOS.bin: LILO/linker.ld $(objects)
 	ld $(LDPARAMS) -T $< -o $@ $(objects)
 
-install: mykernel.bin
-	sudo cp $< /boot/mykernel.bin
+install: SectorOS.bin
+	sudo cp $< /boot/SectorOS.bin
 
-mykernel.iso: mykernel.bin
-	cp mykernel.bin Build_files/
+SectorOS.iso: SectorOS.bin
+	cp SectorOS.bin Build_files/
 	mkdir iso
 	mkdir iso/boot
 	mkdir iso/boot/grub/
@@ -26,28 +26,28 @@ mykernel.iso: mykernel.bin
 	echo 'set default=0' >> iso/boot/grub/grub.cfg
 	echo '' >> iso/boot/grub/grub.cfg
 	echo 'menuentry "SectorOS" { '>> iso/boot/grub/grub.cfg
-	echo 'multiboot /boot/mykernel.bin' >> iso/boot/grub/grub.cfg
+	echo 'multiboot /boot/SectorOS.bin' >> iso/boot/grub/grub.cfg
 	echo 'boot' >> iso/boot/grub/grub.cfg
 	echo '}' >> iso/boot/grub/grub.cfg
 	grub-mkrescue --output=$@ iso
 	rm -rf iso
 
-move: mykernel.iso
-	mv *.iso mykernel.bin Build_files/
+move: SectorOS.iso
+	mv *.iso SectorOS.bin Build_files/
 
-runQEMU: mykernel.iso
-	qemu-system-i386 -boot d -cdrom mykernel.iso -serial file:serial.log -soundhw pcspk
+runQEMU: SectorOS.iso
+	sudo qemu-system-i386 -boot d -cdrom SectorOS.iso -chardev serial,path=/dev/ttyS0,id=hostusbserial -device pci-serial,chardev=hostusbserial -soundhw pcspk
 
-runVBOX: mykernel.iso
+runVBOX: SectorOS.iso
 	(killall VirtualBoxVM && sleep 1) || true
-	VBoxManage startvm 'SectorOS'
+	VirtualBoxVM --startvm 'SectorOS' --dbg
 
 stopVBOX:
 	killall VirtualBoxVM
 
 .PHONY: clean
 clean: move
-	rm -f $(objects) mykernel.bin mykernel.iso
+	rm -f $(objects) SectorOS.bin SectorOS.iso
 
 clear:
-	rm -f $(objects) mykernel.bin mykernel.iso
+	rm -f $(objects) SectorOS.bin SectorOS.iso

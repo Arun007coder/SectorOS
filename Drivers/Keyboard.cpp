@@ -262,7 +262,7 @@ void KeyboardDriver::clear_key_buffer()
     
 }
 
-void KeyboardDriver::CommandInterpreter()
+void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Commands 
 {
     char* COMNAME;
     serialport.logToSerialPort("Command Interpreter Initialised");
@@ -292,7 +292,9 @@ void KeyboardDriver::CommandInterpreter()
         else if(key_buffer[5] == "1")
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
         else if(key_buffer[5] == "2")
-            printf("Help page 2:\nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number\ntxt : To enter the text mode. You cannot save files\nmul1 <num1> <num2> : To multiply 2 numbers. ");
+            printf("Help page 2:\nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number\ntxt : To enter the text mode. You cannot save files\nmul1 <num1> <num2> : To multiply 2 numbers.");
+        else if (key_buffer[5] == "3")
+            printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8");
         else
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
     }
@@ -362,24 +364,6 @@ void KeyboardDriver::CommandInterpreter()
 
         printf(INTTOCHARPOINT(res));
     }
-    /*
-    else if(key_buffer[0] == "m" & key_buffer[1] == "e" & key_buffer[2] == "m")
-    {
-        port8BIT port(0x70);
-        port8BIT inport(0x71);
-
-        unsigned short total;
-        unsigned char lowmem, highmem;
-    
-        port.WriteToPort(0x30);
-        lowmem = inport.ReadFromPort();
-        port.WriteToPort(0x31);
-        highmem = inport.ReadFromPort();
-    
-        total = lowmem | highmem << 8;
-
-        printf(INTTOCHARPOINT(total));
-    }*/
     else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
     {
         COMNAME = "txt";
@@ -387,17 +371,6 @@ void KeyboardDriver::CommandInterpreter()
         printf("Entering Text editing mode. Please wait....");
         for(int i = 999999999; i != 0; i--);
         printf("\5");
-        /*
-        if(txtcolor){
-            ColourPrint(1);
-            txtcolor = false;
-        }
-        else
-        {
-            ColourPrint(0);
-            txtcolor = true;
-        }
-        */
 
 
         
@@ -407,55 +380,18 @@ void KeyboardDriver::CommandInterpreter()
         isTxtMode = true;
         serialport.logToSerialPort("\ntxt mode initialised");
     }
-    /*
-    else if(key_buffer[0] == "o" & key_buffer[1] == "u" & key_buffer[2] == "t" & key_buffer[3] == "p" & key_buffer[4] == "o" & key_buffer[5] == "r" & key_buffer[6] == "t")
+    else if(key_buffer[0] == "s" && key_buffer[1] == "p" && key_buffer[2] == "o")
     {
-        char* arg1 = key_buffer[10];
-        uint16_t portno = *arg1 - '0';
-        port8BIT dp(portno);
-        port8BIT cp(portno);
-        if(key_buffer[8] == "c")
+        for (int i = 4; key_buffer[i] != "\n"; i++)
         {
-            printHex(cp.ReadFromPort());
+            serialport.logToSerialPort(key_buffer[i]);
         }
-        else if (key_buffer[8] == "d")
-        {
-            printHex(dp.ReadFromPort());
-        }
-        else{
-            printf("debug");
-        }
+        
     }
-    */
-    /*
-    else if(key_buffer[0] == "i" & key_buffer[1] == "n" & key_buffer[2] == "p" & key_buffer[3] == "o" & key_buffer[4] == "r" & key_buffer[5] == "t")
+    else if(key_buffer[0] == "s" && key_buffer[1] == "p" && key_buffer[2] == "i")
     {
-        char* arg2 = key_buffer[11];
-        uint16_t portno = *arg2 - '0';
-        port8BIT dp(portno);
-        port8BIT cp(portno);
-        char* arg1 = key_buffer[9];
-        uint8_t data = *arg1 - '0';
-        if(key_buffer[7] == "c")
-        {
-            cp.WriteToPort(data);
-            printf("data writen to dataport");
-        }
-        else if(key_buffer[7] == "d")
-        {
-            dp.WriteToPort(data);
-            printf("data written to dataport");
-        }
+        printfchar(serialport.read_serial());
     }
-    */
-   else if(key_buffer[0] == "s" && key_buffer[1] == "p")
-   {
-       for (int i = 3; key_buffer[i] != "\n"; i++)
-       {
-           serialport.logToSerialPort(key_buffer[i]);
-       }
-       
-   }
     else
     {
         printf("Unknown Command. Type help in console to get all the commands");
