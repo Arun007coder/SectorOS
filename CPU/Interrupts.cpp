@@ -4,6 +4,7 @@
 void printf(char* str);
 void printHex(uint8_t key);
 void printTime();
+void ColourPrint(int);
 void reboot();
 PowerControl Power;
 
@@ -173,10 +174,11 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
     else if(interrupt == 0x0D)
     {
         printf("\5");
-        printf("SYSMSG:: EXCEPTION: GENERAL PROTECTION FAULT. REBOOTING...\n");
-        printf("An exception has occured in the system during execution which cannot fix itself.The computer will restart in a moment.");
-        for(int i = 999999999; i != 0; i--);
-        Power.reboot();
+        printf("A Kernel Panic Occured. HALTING...\nSYSMSG:: EXCEPTION: GENERAL PROTECTION FAULT\n");
+        printf("An exception has occured in the system during execution which cannot fix itself.The general protection fault is called when a function is improperly executed which leads to memory corruption.Restarting may solve thr problem.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        printf("Execption stack pointer = 0x"); printHex(esp);
+        printf("\nExecption interrupt number = 0x"); printHex(interrupt);
+        Power.halt();
     }
     else if(interrupt = 0x20)
     {

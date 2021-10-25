@@ -7,7 +7,7 @@ A Simple operating system
 To build the project, First Run:
 
 ```shell
-make mykernel.iso
+make SectorOS.iso
 ```
 
 to build the project. The output will be in the Build folder.  
