@@ -20,6 +20,7 @@
 
     public:
         virtual uint32_t HandleInterrupt(uint32_t esp);
+        void wait(int msec);
     };
 
     class InterruptManager

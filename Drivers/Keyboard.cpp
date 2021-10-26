@@ -265,7 +265,7 @@ void KeyboardDriver::clear_key_buffer()
 void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Commands 
 {
     char* COMNAME;
-    serialport.logToSerialPort("Command Interpreter Initialised");
+    //serialport.logToSerialPort("Command Interpreter Initialised");
     printf("\n");
     if(key_buffer[0] == "e" & key_buffer[1] == "c" & key_buffer[2] == "h" & key_buffer[3] == "o")
     {
@@ -367,7 +367,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
     else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
     {
         COMNAME = "txt";
-        serialport.logToSerialPort("\ntxt mode starting...");
+        //serialport.logToSerialPort("\ntxt mode starting...");
         printf("Entering Text editing mode. Please wait....");
         for(int i = 999999999; i != 0; i--);
         printf("\5");
@@ -378,8 +378,9 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
         rtclock.read_rtc();
         printf("welcome to SectorOS text mode ");PrintDate(); printf("                             Type: Text ");printf("This is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
         isTxtMode = true;
-        serialport.logToSerialPort("\ntxt mode initialised");
+        //serialport.logToSerialPort("\ntxt mode initialised");
     }
+    /*
     else if(key_buffer[0] == "s" && key_buffer[1] == "p" && key_buffer[2] == "o")
     {
         for (int i = 4; key_buffer[i] != "\n"; i++)
@@ -392,6 +393,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
     {
         printfchar(serialport.read_serial());
     }
+    */
     else
     {
         printf("Unknown Command. Type help in console to get all the commands");
@@ -400,7 +402,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
         printf("\n");
         printf("$: ");
     }
-    serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
+    //serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
     clear_key_buffer();
 }
 

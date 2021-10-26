@@ -1,22 +1,29 @@
 GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings
+DEBUG = -DDEBUG=true
 ASPARAMS = --32
 LDPARAMS = -melf_i386
+DR= true
 
 objects = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Driver.o CPU/PowerControl.o Drivers/Keyboard.o Drivers/Mouse.o Drivers/RTC.o Hardcom/SerialPort.o CPU/interruptstab.o Hardcom/pci.o kernel/kernel.o
+DEBUGOBJ = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Driver.o CPU/PowerControl.o Drivers/Keyboard.o Drivers/Mouse.o Drivers/RTC.o CPU/interruptstab.o Hardcom/pci.o kernel/kernel.o
 
 %.o: %.cpp
-	gcc $(GCCPARAMS) -c -o $@ $<
+	@echo "[1/3] Compiling $<"
+	gcc $(DEBUG) $(GCCPARAMS) -c -o $@ $<
 
 %.o: %.s
+	@echo "[1/3] Compiling $<"
 	as $(ASPARAMS) -o $@ $<
 
 SectorOS.bin: LILO/linker.ld $(objects)
+	@echo "[2/3] Linking object files"
 	ld $(LDPARAMS) -T $< -o $@ $(objects)
 
 install: SectorOS.bin
 	sudo cp $< /boot/SectorOS.bin
 
 SectorOS.iso: SectorOS.bin
+	@echo "[3/3] Building ISO file"
 	cp SectorOS.bin Build_files/
 	mkdir iso
 	mkdir iso/boot
@@ -50,4 +57,7 @@ clean: move
 	rm -f $(objects) SectorOS.bin SectorOS.iso
 
 clear:
+	@echo "Cleaning the build files" 
 	rm -f $(objects) SectorOS.bin SectorOS.iso
+
+SectOS_DBG.iso:

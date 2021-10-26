@@ -18,7 +18,7 @@ jobs:
     - name: make clean
       run: make clean
       
-    - name: Step 3 - Use the Upload Artifact GitHub Action
+    - name: Upload Build files
       uses: actions/upload-artifact@v2
       with: 
         name: SectorOS_Artifact-Build

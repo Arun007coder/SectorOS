@@ -7,7 +7,7 @@
 #include "../Drivers/Driver.h"
 #include "../Drivers/RTC.h"
 #include "../Hardcom/pci.h"
-#include "../Hardcom/SerialPort.h"
+//#include "../Hardcom/SerialPort.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
@@ -18,6 +18,8 @@ bool isTxtMode;
 port8BIT port43(0x43);
 port8BIT port42(0x42);
 port8BIT port61(0x61);
+int delay;
+volatile int done;
 static uint16_t* VideoMemory = (uint16_t*)0xb8000;
 
 static void play_sound(uint32_t nFrequence) 
@@ -50,9 +52,9 @@ void beep()
 	play_sound(1000);
 	for (int i = 0; i != 10000; i++);
 	nosound();
-    SerialPort ss;
-    ss.INITSerial();
-    ss.logToSerialPort("beep\n");
+    //SerialPort ss;
+    //ss.INITSerial();
+    //ss.logToSerialPort("beep\n");
 }
 
 // Can Support up to number 100
@@ -355,6 +357,8 @@ void PrintDate()
 
 void printTime()
 {
+    if (!done && delay) delay--;
+    if (delay==0) done=true;
     uint8_t x = 51;
     uint8_t y = 0;
     RTC rtclock;
@@ -389,6 +393,13 @@ void printTime()
         x++;
     }
 
+}
+
+void wait(int msec)
+{
+   done=false;
+   delay=msec;
+   while (!done);
 }
 
 void printfchar(char st)
@@ -434,6 +445,149 @@ void printHex(uint8_t Key)
     foo[0] = hex[(Key >> 4) & 0xF];
     foo[1] = hex[Key & 0xF];
     printf(foo);
+}
+
+#define cpuid(in, a, b, c, d) __asm__("cpuid": "=a" (a), "=b" (b), "=c" (c), "=d" (d) : "a" (in));
+
+int do_intel(void) 
+{
+	printf("Intel Specific Features:\n");
+	unsigned long eax, ebx, ecx, edx, max_eax, signature, unused;
+	int model, family, type, brand;
+	int extended_family = -1;
+	cpuid(1, eax, ebx, unused, unused);
+	model = (eax >> 4) & 0xf;
+	family = (eax >> 8) & 0xf;
+	type = (eax >> 12) & 0x3;
+	brand = ebx & 0xff;
+
+    printf("Type - ");
+	switch(type) {
+		case 0:
+		printf("Original OEM");
+		break;
+		case 1:
+		printf("Overdrive");
+		break;
+		case 2:
+		printf("Dual-capable");
+		break;
+		case 3:
+		printf("Reserved");
+		break;
+	}
+    printf("\n");
+
+    printf("Family - ");
+	switch(family) {
+		case 3:
+		printf("i386");
+		break;
+		case 4:
+		printf("i486");
+		break;
+		case 5:
+		printf("Pentium");
+		break;
+		case 6:
+		printf("Pentium Pro");
+		break;
+		case 15:
+		printf("Pentium 4");
+	}
+    printf("\n");
+
+    printf("Model - ");
+	switch(family) {
+		case 3:
+		break;
+		case 4:
+		switch(model) {
+			case 0:
+			case 1:
+			printf("DX");
+			break;
+			case 2:
+			printf("SX");
+			break;
+			case 3:
+			printf("487/DX2");
+			break;
+			case 4:
+			printf("SL");
+			break;
+			case 5:
+			printf("SX2");
+			break;
+			case 7:
+			printf("Write-back enhanced DX2");
+			break;
+			case 8:
+			printf("DX4");
+			break;
+		}
+		break;
+		case 5:
+		switch(model) {
+			case 1:
+			printf("60/66");
+			break;
+			case 2:
+			printf("75-200");
+			break;
+			case 3:
+			printf("for 486 system");
+			break;
+			case 4:
+			printf("MMX");
+			break;
+		}
+		break;
+		case 6:
+		switch(model) {
+			case 1:
+			printf("Pentium Pro");
+			break;
+			case 3:
+			printf("Pentium II Model 3");
+			break;
+			case 5:
+			printf("Pentium II Model 5/Xeon/Celeron");
+			break;
+			case 6:
+			printf("Celeron");
+			break;
+			case 7:
+			printf("Pentium III/Pentium III Xeon - external L2 cache");
+			break;
+			case 8:
+			printf("Pentium III/Pentium III Xeon - internal L2 cache");
+			break;
+		}
+		break;
+		case 15:
+		break;
+        printf("\n");
+    }
+
+}
+
+int detect_cpu(void) 
+{
+	unsigned long ebx, unused;
+	cpuid(0, unused, ebx, unused, unused);
+	switch(ebx) {
+		case 0x756e6547:
+		do_intel();
+		break;
+		case 0x68747541:
+		//do_amd();
+		break;
+		default:
+		printf("Unknown x86 CPU Detected\n");
+		break;
+	}
+	return 0;
 }
 
 class MouseToConsole : public MouseEventHandler
@@ -499,23 +653,20 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
-    beep();
-    SerialPort sp;
+    printf("Initializing SectorOS Kernel....\n");
+    //SerialPort sp;
+    //sp.INITSerial();
     uint16_t value = GetAvailableMem();
     uint8_t partA = static_cast<uint8_t>((value & 0xFF00) >> 8);
     uint8_t partB = static_cast<uint8_t>(value & 0x00FF);
+
+/*
     sp.logToSerialPort("Avaliable Memory = ");
     sp.logToSerialPort(hertochar(partA));
     sp.logToSerialPort(" ");
     sp.logToSerialPort(hertochar(partB));
     sp.logToSerialPort("\nkernel started");
-
-    ColourPrint(0);
-    printTime();
-
-    printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
-
-    printf("Run help to get the list of commands which is implemented \n \n");
+    */
 
     GlobalDescriptorTable gdt;
 
@@ -523,9 +674,9 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     DriverManager drvmgr;
 
-    printf("\nSYSMSG: Initializing Hardwares [Stage 1]...");
+    printf("\nSYSMSG: Initializing Hardwares [Stage 1]...\n");
     KeyboardDriver hexboardDriver(&interrupts);
-    sp.logToSerialPort("\nHardware initialising stage 1 finished");
+    //sp.logToSerialPort("\nHardware initialising stage 1 finished");
     
 
     drvmgr.AddDriver(&hexboardDriver);
@@ -543,21 +694,31 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     }
 
     PCI PCICONT;
-    PCICONT.SelectDrivers(&drvmgr);
+    PCICONT.SelectDrivers(&drvmgr, &interrupts);
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
     drvmgr.activateall();
-    sp.logToSerialPort("\nHardware initialising stage 2 finished");
-    sp.logToSerialPort("\nDriverManager started");
+
+    //sp.logToSerialPort("\nHardware initialising stage 2 finished");
+    //sp.logToSerialPort("\nDriverManager started");
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
-    interrupts.Activate();
-    sp.logToSerialPort("\nHardware initialising stage 3 finished");
-    sp.logToSerialPort("\nInterrupt manager started");
 
-    printf("\nKernel initialization surcessful.");
+    //sp.logToSerialPort("\nHardware initialising stage 3 finished");
+
+    //detect_cpu();
+
+    printf("\nKernel initialization surcessful");
+
+    for (int i = 0; i < 999999999; i++);
+    
+    ColourPrint(0);
 
     printf("\5");
+
+    interrupts.Activate();
+
+    //sp.logToSerialPort("\nInterrupt manager started");
 
     printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
@@ -565,7 +726,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
 
-    sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
+    //sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 
     printf("$: ");
     while(1);

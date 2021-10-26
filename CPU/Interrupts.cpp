@@ -133,12 +133,10 @@ uint16_t InterruptManager::HardwareInterruptOffset()
 
 void InterruptManager::Activate()
 {
-    printf("SYSMSG: Activating interrupt descriptor table...\n");
     if(ActiveInterruptManager != 0)
         ActiveInterruptManager -> Deactivate();
     ActiveInterruptManager = this;
     asm("sti");
-    printf("SYSMSG: Interrupt descriptor table activated\n \n");
 }
 
 void InterruptManager::Deactivate()
