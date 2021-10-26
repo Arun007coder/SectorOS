@@ -24,13 +24,13 @@ jobs:
         name: SectorOS_Artifact-Build
         path: Build_files
 
-      - name: Create release
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ github.ref }}
-          prerelease: true
-          title: "Automatic Release ${{ github.ref }}"
-          files: |
-            *.iso
-            *.bin
+    - name: Create release
+       uses: "marvinpinto/action-automatic-releases@latest"
+       with:
+         repo_token: "${{ secrets.GITHUB_TOKEN }}"
+         automatic_release_tag: ${{ github.ref }}
+         prerelease: false
+         title: "Automatic Release ${{ github.ref }}"
+         files: |
+           *.iso
+           *.bin
