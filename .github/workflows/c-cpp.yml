@@ -15,8 +15,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: install tools
       run: make prep
-    - name: make clean
-      run: make clean grubbin=pt
+    - name: make move
+      run: make move grubbin=pt
       
     - name: Upload Build files
       uses: actions/upload-artifact@v2
