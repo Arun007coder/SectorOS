@@ -92,7 +92,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
         case 0x26:if (!isShift) printf("l"); else printf("L"); break;
         case 0x27:if (!isShift) printf(";"); else printf(":"); break;
         case 0x28:if (!isShift) printf("E"); else printf("e"); break;
-        //case 0x2B:if (!isShift) printf("\ "); else printf("|"); break; 
+        case 0x2B:if (!isShift) printf("\\"); else printf("|"); break;
         case 0x2A: isShift = true; break;
         case 0x2C:if (!isShift) printf("z"); else printf("Z"); break;
         case 0x2D:if (!isShift) printf("x"); else printf("X"); break;
@@ -246,6 +246,7 @@ char* KeyboardDriver::KeycodeToASCII(uint8_t Keycode)
             case 0x34:if (!isShift) result = "."; else result = ">"; break;
             case 0x35:if (!isShift) result = "/"; else result = "?"; break;
             case 0x39:if (!isShift) result = " "; else result = " "; break;
+            case 0x2B:if (!isShift) result = "\\"; else result = "|"; break;
         }
     }
     return result;
@@ -265,7 +266,7 @@ void KeyboardDriver::clear_key_buffer()
 void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Commands 
 {
     char* COMNAME;
-    //serialport.logToSerialPort("Command Interpreter Initialised");
+    serialport.logToSerialPort("Command Interpreter Initialised");
     printf("\n");
     if(key_buffer[0] == "e" & key_buffer[1] == "c" & key_buffer[2] == "h" & key_buffer[3] == "o")
     {
@@ -367,7 +368,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
     else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
     {
         COMNAME = "txt";
-        //serialport.logToSerialPort("\ntxt mode starting...");
+        serialport.logToSerialPort("\ntxt mode starting...");
         printf("Entering Text editing mode. Please wait....");
         for(int i = 999999999; i != 0; i--);
         printf("\5");
@@ -378,9 +379,8 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
         rtclock.read_rtc();
         printf("welcome to SectorOS text mode ");PrintDate(); printf("                             Type: Text ");printf("This is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
         isTxtMode = true;
-        //serialport.logToSerialPort("\ntxt mode initialised");
+        serialport.logToSerialPort("\ntxt mode initialised");
     }
-    /*
     else if(key_buffer[0] == "s" && key_buffer[1] == "p" && key_buffer[2] == "o")
     {
         for (int i = 4; key_buffer[i] != "\n"; i++)
@@ -393,7 +393,6 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
     {
         printfchar(serialport.read_serial());
     }
-    */
     else
     {
         printf("Unknown Command. Type help in console to get all the commands");
@@ -402,7 +401,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
         printf("\n");
         printf("$: ");
     }
-    //serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
+    serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
     clear_key_buffer();
 }
 

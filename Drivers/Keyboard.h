@@ -7,7 +7,7 @@
 #include "Driver.h"
 #include "RTC.h"
 #include "../CPU/PowerControl.h"
-//#include "../Hardcom/SerialPort.h"
+#include "../Hardcom/SerialPort.h"
 
 class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyboard
 {
@@ -17,7 +17,7 @@ class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyb
     // SOSH v1.0.2 [SectorOS SHell]
     // To interpret and execute the command
     void CommandInterpreter();
-    //SerialPort serialport;
+    SerialPort serialport;
 
 public:
     KeyboardDriver(InterruptManager* manager);

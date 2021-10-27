@@ -7,7 +7,7 @@
 #include "../Drivers/Driver.h"
 #include "../Drivers/RTC.h"
 #include "../Hardcom/pci.h"
-//#include "../Hardcom/SerialPort.h"
+#include "../Hardcom/SerialPort.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
@@ -52,9 +52,9 @@ void beep()
 	play_sound(1000);
 	for (int i = 0; i != 10000; i++);
 	nosound();
-    //SerialPort ss;
-    //ss.INITSerial();
-    //ss.logToSerialPort("beep\n");
+    SerialPort ss;
+    ss.INITSerial();
+    ss.logToSerialPort("beep\n");
 }
 
 // Can Support up to number 100
@@ -654,19 +654,17 @@ extern "C" void callConstructors()
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
     printf("Initializing SectorOS Kernel....\n");
-    //SerialPort sp;
-    //sp.INITSerial();
+    SerialPort sp;
+    sp.INITSerial();
     uint16_t value = GetAvailableMem();
     uint8_t partA = static_cast<uint8_t>((value & 0xFF00) >> 8);
     uint8_t partB = static_cast<uint8_t>(value & 0x00FF);
 
-/*
     sp.logToSerialPort("Avaliable Memory = ");
     sp.logToSerialPort(hertochar(partA));
     sp.logToSerialPort(" ");
     sp.logToSerialPort(hertochar(partB));
     sp.logToSerialPort("\nkernel started");
-    */
 
     GlobalDescriptorTable gdt;
 
@@ -676,7 +674,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 1]...\n");
     KeyboardDriver hexboardDriver(&interrupts);
-    //sp.logToSerialPort("\nHardware initialising stage 1 finished");
+    sp.logToSerialPort("\nHardware initialising stage 1 finished");
     
 
     drvmgr.AddDriver(&hexboardDriver);
@@ -699,14 +697,14 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
     drvmgr.activateall();
 
-    //sp.logToSerialPort("\nHardware initialising stage 2 finished");
-    //sp.logToSerialPort("\nDriverManager started");
+    sp.logToSerialPort("\nHardware initialising stage 2 finished");
+    sp.logToSerialPort("\nDriverManager started");
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
 
-    //sp.logToSerialPort("\nHardware initialising stage 3 finished");
+    sp.logToSerialPort("\nHardware initialising stage 3 finished");
 
-    //detect_cpu();
+    detect_cpu();
 
     printf("\nKernel initialization surcessful");
 
@@ -718,7 +716,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     interrupts.Activate();
 
-    //sp.logToSerialPort("\nInterrupt manager started");
+    sp.logToSerialPort("\nInterrupt manager started");
 
     printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
@@ -726,7 +724,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
 
-    //sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
+    sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 
     printf("$: ");
     while(1);
