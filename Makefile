@@ -19,14 +19,14 @@ prep:
 	@echo "[1/3] Compiling $<"
 	as $(ASPARAMS) -o $@ $<
 
-SectorOS.bin: LILO/linker.ld $(objects)
+SectorOS_Kernel.bin: LILO/linker.ld $(objects)
 	@echo "[2/3] Linking object files"
 	ld $(LDPARAMS) -T $< -o $@ $(objects)
 
-install: SectorOS.bin
-	sudo cp $< /boot/SectorOS.bin
+install: SectorOS_Kernel.bin
+	sudo cp $< /boot/SectorOS_Kernel.bin
 
-SectorOS.iso: SectorOS.bin
+SectorOS.iso: SectorOS_Kernel.bin
 	@echo "[3/3] Building ISO file"
 	mkdir -pv iso
 	mkdir -pv iso/boot
@@ -36,7 +36,7 @@ SectorOS.iso: SectorOS.bin
 	echo 'set default=0' >> iso/boot/grub/grub.cfg
 	echo '' >> iso/boot/grub/grub.cfg
 	echo 'menuentry "SectorOS" { '>> iso/boot/grub/grub.cfg
-	echo 'multiboot /boot/SectorOS.bin' >> iso/boot/grub/grub.cfg
+	echo 'multiboot /boot/SectorOS_Kernel.bin' >> iso/boot/grub/grub.cfg
 	echo 'boot' >> iso/boot/grub/grub.cfg
 	echo '}' >> iso/boot/grub/grub.cfg
 	@if [ $(grubbin) == "pt" ];then\
@@ -48,7 +48,7 @@ SectorOS.iso: SectorOS.bin
 
 move: SectorOS.iso
 	mkdir Build_files
-	mv *.iso SectorOS.bin Build_files/
+	mv *.iso SectorOS_Kernel.bin Build_files/
 
 runQEMU: SectorOS.iso
 	sudo qemu-system-i386 -boot d -cdrom SectorOS.iso -chardev serial,path=/dev/ttyS0,id=hostusbserial -device pci-serial,chardev=hostusbserial -soundhw pcspk
@@ -63,4 +63,4 @@ stopVBOX:
 .PHONY: clean
 clean:
 	@echo "Cleaning the build files" 
-	rm -f $(objects) SectorOS.bin SectorOS.iso
+	rm -f $(objects) SectorOS_Kernel.bin SectorOS.iso

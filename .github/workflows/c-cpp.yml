@@ -1,4 +1,4 @@
-name: Build ISO [There will be unstable builds which are not tested]
+name: Build ISO
 
 on:
   push:
