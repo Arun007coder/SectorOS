@@ -24,13 +24,16 @@ jobs:
         name: SectorOS_Artifact-Build
         path: Build_files
 
+    - name: Calculate short sha
+      run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+
     - name: Create release
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
         prerelease: false
-        title: "Automatic Release Commit: ${{ GitHub.sha }}"
+        title: "Automatic Release Commit: ${GITHUB_SHA}"
         files: |
           Build_files/*.iso
           Build_files/*.bin
