@@ -9,6 +9,7 @@ DEBUGOBJ = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers
 
 prep:
 	sudo apt-get install xorriso mtools
+	mkdir ~/local
 	tar xf DEP/grub.tar.xz -C ~/local/
 
 %.o: %.cpp
