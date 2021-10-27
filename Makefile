@@ -8,7 +8,7 @@ objects = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/
 DEBUGOBJ = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Driver.o CPU/PowerControl.o Drivers/Keyboard.o Drivers/Mouse.o Drivers/RTC.o CPU/interruptstab.o Hardcom/pci.o kernel/kernel.o
 
 prep:
-	sudo apt-get install xorriso mtools
+	sudo apt-get install xorriso mtools libc6-dev
 	mkdir -pv ~/local/
 	tar xf DEP/grub.tar.xz -C ~/local/
 
