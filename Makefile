@@ -8,7 +8,9 @@ objects = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/
 DEBUGOBJ = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Driver.o CPU/PowerControl.o Drivers/Keyboard.o Drivers/Mouse.o Drivers/RTC.o CPU/interruptstab.o Hardcom/pci.o kernel/kernel.o
 
 prep:
-	sudo sed -i 's/azure\.//' /etc/apt/sources.list
+	sudo apt install ruby-rubygems
+	gem install apt-spy2
+	sudo apt-spy2 fix
 	sudo apt-get update
 	sudo apt-get install xorriso mtools libc6-dev
 	mkdir -pv ~/local/
