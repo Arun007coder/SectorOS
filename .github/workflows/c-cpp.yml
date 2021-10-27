@@ -16,7 +16,7 @@ jobs:
     - name: install tools
       run: make prep
     - name: make clean
-      run: make clean
+      run: make clean grubbin=pt
       
     - name: Upload Build files
       uses: actions/upload-artifact@v2
