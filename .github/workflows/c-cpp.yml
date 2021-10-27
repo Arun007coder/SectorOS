@@ -28,9 +28,9 @@ jobs:
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: ${{ github.ref }}
+        automatic_release_tag: "latest"
         prerelease: false
-        title: "Automatic Release ${{ github.ref }}"
+        title: "Automatic Release Commit: ${{ GITHUB_SHA }}"
         files: |
-          *.iso
-          *.bin
+          Build_files/*.iso
+          Build_files/*.bin
