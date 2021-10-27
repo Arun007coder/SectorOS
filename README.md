@@ -24,8 +24,6 @@ To clean all output files, Run:
 make clean
 ```
 
-~~You can get prebuilt iso and kernel from `Build_files` folder~~
-
-The iso image in the Build_files will not boot because the grub-mkrescue is making a uefi bootable disk.
+You can get prebuilt iso and kernel from `Build_files` folder
 
 To get unstable builds. go to <https://github.com/Arun007coder/SectorOS/actions>
