@@ -30,7 +30,7 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
         prerelease: false
-        title: "Automatic Release Commit: ${{ GITHUB_SHA }}"
+        title: "Automatic Release Commit: ${{ GitHub.sha }}"
         files: |
           Build_files/*.iso
           Build_files/*.bin
