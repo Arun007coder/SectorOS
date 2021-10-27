@@ -3,18 +3,13 @@ DEBUG = -DDEBUG=true
 ASPARAMS = --32
 LDPARAMS = -melf_i386
 SHELL = /bin/bash
+grubbin = ~/local/bin
 
 objects = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Driver.o CPU/PowerControl.o Drivers/Keyboard.o Drivers/Mouse.o Drivers/RTC.o Hardcom/SerialPort.o CPU/interruptstab.o Hardcom/pci.o kernel/kernel.o
 DEBUGOBJ = LILO/loader.o kernel/gdt.o Drivers/IOPorts.o CPU/Interrupts.o Drivers/Driver.o CPU/PowerControl.o Drivers/Keyboard.o Drivers/Mouse.o Drivers/RTC.o CPU/interruptstab.o Hardcom/pci.o kernel/kernel.o
 
 prep:
-	sudo apt install ruby-rubygems
-	gem install apt-spy2
-	sudo apt-spy2 fix
-	sudo apt-get update
-	sudo apt-get install xorriso mtools libc6-dev
-	mkdir -pv ~/local/
-	tar xf DEP/grub.tar.xz -C ~/local/
+	sudo apt-get install xorriso mtools grub-common
 
 %.o: %.cpp
 	@echo "[1/3] Compiling $<"
@@ -24,7 +19,7 @@ prep:
 	@echo "[1/3] Compiling $<"
 	as $(ASPARAMS) -o $@ $<
 
-SectorOS.bin: LILO/linker.ld prep $(objects)
+SectorOS.bin: LILO/linker.ld $(objects)
 	@echo "[2/3] Linking object files"
 	ld $(LDPARAMS) -T $< -o $@ $(objects)
 
@@ -33,7 +28,6 @@ install: SectorOS.bin
 
 SectorOS.iso: SectorOS.bin
 	@echo "[3/3] Building ISO file"
-	cp SectorOS.bin Build_files/
 	mkdir -pv iso
 	mkdir -pv iso/boot
 	mkdir -pv iso/boot/grub/
@@ -45,10 +39,15 @@ SectorOS.iso: SectorOS.bin
 	echo 'multiboot /boot/SectorOS.bin' >> iso/boot/grub/grub.cfg
 	echo 'boot' >> iso/boot/grub/grub.cfg
 	echo '}' >> iso/boot/grub/grub.cfg
-	~/local/bin/grub-mkrescue --output=$@ iso
+	@if [ $(grubbin) == "pt" ];then\
+		grub-mkrescue --output=$@ iso;\
+	else\
+		$(grubbin)/grub-mkrescue --output=$@ iso;\
+	fi
 	rm -rf iso
 
 move: SectorOS.iso
+	mkdir Build_files
 	mv *.iso SectorOS.bin Build_files/
 
 runQEMU: SectorOS.iso
@@ -62,11 +61,6 @@ stopVBOX:
 	killall VirtualBoxVM
 
 .PHONY: clean
-clean: move
-	rm -f $(objects) SectorOS.bin SectorOS.iso
-
-clear:
+clean:
 	@echo "Cleaning the build files" 
 	rm -f $(objects) SectorOS.bin SectorOS.iso
-
-SectOS_DBG.iso:
