@@ -19,7 +19,6 @@ class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyb
     // To interpret and execute the command
     void CommandInterpreter();
     SerialPort serialport;
-    VideoGraphicsArray VGA;
 
 public:
     KeyboardDriver(InterruptManager* manager);
