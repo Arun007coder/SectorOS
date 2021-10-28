@@ -263,6 +263,7 @@ void KeyboardDriver::clear_key_buffer()
     
 }
 
+// TODO: Move the Command Interpreter to a new class
 void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Commands 
 {
     char* COMNAME;
