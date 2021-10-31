@@ -1,9 +1,8 @@
 GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings
-DEBUG = -DDEBUG=true
 ASPARAMS = --32
 LDPARAMS = -melf_i386
 SHELL = /bin/bash
-grubbin = ~/local/bin
+GRUB = ~/local/bin
 
 objects = LILO/loader.o \
 kernel/gdt.o \
@@ -54,17 +53,18 @@ SectorOS.iso: SectorOS_Kernel.bin
 	@echo 'multiboot /boot/SectorOS_Kernel.bin' >> iso/boot/grub/grub.cfg
 	@echo 'boot' >> iso/boot/grub/grub.cfg
 	@echo '}' >> iso/boot/grub/grub.cfg
-	@if [ $(grubbin) == "pt" ];then\
+	@if [ $(GRUB) == "pt" ];then\
 		grub-mkrescue --output=$@ iso;\
 	else\
-		$(grubbin)/grub-mkrescue --output=$@ iso;\
+		$(GRUB)/grub-mkrescue --output=$@ iso;\
 	fi
 	@rm -rf iso
 	
 
 move: SectorOS.iso
-	mkdir Build_files
-	mv *.iso SectorOS_Kernel.bin Build_files/
+	@printf "\e[1;35mMoving $< to Build_files\n\e[0m"
+	@mkdir Build_files
+	@mv *.iso SectorOS_Kernel.bin Build_files/
 
 runQEMU: SectorOS.iso
 	sudo qemu-system-i386 -boot d -cdrom SectorOS.iso -chardev serial,path=/dev/ttyS0,id=hostusbserial -device pci-serial,chardev=hostusbserial -soundhw pcspk
