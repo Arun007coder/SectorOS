@@ -21,7 +21,7 @@ Hardcom/pci.o \
 kernel/kernel.o
 
 prep:
-	@echo "Preparing...\n"
+	@printf "Preparing...\n"
 	@sudo apt-get install xorriso mtools grub-common
 
 %.o: %.cpp
