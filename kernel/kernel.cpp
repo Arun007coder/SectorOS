@@ -8,6 +8,7 @@
 #include "../Drivers/RTC.h"
 #include "../Hardcom/pci.h"
 #include "../Hardcom/SerialPort.h"
+#include "MultiTask.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
@@ -640,6 +641,21 @@ public:
 
 };
 
+void taskA()
+{
+    while(1)
+    {
+        printf("A");
+    }
+}
+void taskB()
+{
+    while(1)
+    {
+        printf("B");
+    }
+}
+
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
 extern "C" constructor end_ctors;
@@ -668,7 +684,13 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     GlobalDescriptorTable gdt;
 
-    InterruptManager interrupts(0x20, &gdt);
+    TaskManager taskManager;
+    Task task1(&gdt, taskA);
+    Task task2(&gdt, taskB);
+    taskManager.AddTask(&task1);
+    taskManager.AddTask(&task2);
+
+    InterruptManager interrupts(0x20, &gdt, &taskManager);
 
     DriverManager drvmgr;
 

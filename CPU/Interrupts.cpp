@@ -45,12 +45,13 @@ void InterruptManager::SetInterruptDescriptorTableEntry(uint8_t interrupt,
 }
 
 
-InterruptManager::InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* globalDescriptorTable)
-    : programmableInterruptControllerMasterCommandPort(0x20),
-      programmableInterruptControllerMasterDataPort(0x21),
-      programmableInterruptControllerSlaveCommandPort(0xA0),
-      programmableInterruptControllerSlaveDataPort(0xA1)
+InterruptManager::InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* globalDescriptorTable, TaskManager* taskManager)
+: programmableInterruptControllerMasterCommandPort(0x20),
+  programmableInterruptControllerMasterDataPort(0x21),
+  programmableInterruptControllerSlaveCommandPort(0xA0),
+  programmableInterruptControllerSlaveDataPort(0xA1)
 {
+    this->taskManager = taskManager;
     this->hardwareInterruptOffset = hardwareInterruptOffset;
     uint32_t CodeSegment = globalDescriptorTable->CodeSegmentSelector();
 
@@ -164,11 +165,13 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
     {
         esp = handlers[interrupt] -> HandleInterrupt(esp);
 
-    } else if(interrupt != 0x20 && interrupt != 0x25 && interrupt != 0x27 & interrupt != 0x0D )
+    }
+    else if(interrupt != 0x20 && interrupt != 0x25 && interrupt != 0x27 & interrupt != 0x0D )
     {
         printf(foo);
         printHex(interrupt);
     }
+    /*
     else if(interrupt == 0x0D)
     {
         printf("\5");
@@ -178,9 +181,15 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
         printf("\nExecption interrupt number = 0x"); printHex(interrupt);
         Power.halt();
     }
+    */
     else if(interrupt = 0x20)
     {
         printTime();
+    }
+
+    if(interrupt == hardwareInterruptOffset)
+    {
+        esp = (uint32_t)taskManager->Schedule((CPUState*)esp);
     }
 
     if(0x20 <= interrupt && interrupt < 0x30)

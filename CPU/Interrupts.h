@@ -6,6 +6,7 @@
     #include "../Includes/types.h"
     #include "../Drivers/IOPorts.h"
     #include "../CPU/PowerControl.h"
+    #include "../kernel/MultiTask.h"
 
     class InterruptManager;
 
@@ -23,21 +24,22 @@
         void wait(int msec);
     };
 
-    class InterruptManager
-    {
-        friend class InterruptHandler;
-        protected:
-            static InterruptManager* ActiveInterruptManager;
-            InterruptHandler* handlers[256];
+class InterruptManager
+{
+    friend class InterruptHandler;
+protected:
+    static InterruptManager* ActiveInterruptManager;
+    InterruptHandler* handlers[256];
+    TaskManager *taskManager;
 
-            struct GateDescriptor
-            {
-                uint16_t handlerAddressLowBits;
-                uint16_t gdt_codeSegmentSelector;
-                uint8_t reserved;
-                uint8_t access;
-                uint16_t handlerAddressHighBits;
-            } __attribute__((packed));
+    struct GateDescriptor
+    {
+        uint16_t handlerAddressLowBits;
+        uint16_t gdt_codeSegmentSelector;
+        uint8_t reserved;
+        uint8_t access;
+        uint16_t handlerAddressHighBits;
+    } __attribute__((packed));
 
             static GateDescriptor interruptDescriptorTable[256];
 
@@ -103,7 +105,7 @@
             port8BITSlow programmableInterruptControllerSlaveDataPort;
 
         public:
-            InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* globalDescriptorTable);
+            InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* globalDescriptorTable, TaskManager* taskManager);
             ~InterruptManager();
             uint16_t HardwareInterruptOffset();
             uint32_t DoHandleInterrupt(uint8_t interrupt, uint32_t esp);
