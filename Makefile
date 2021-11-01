@@ -6,6 +6,7 @@ GRUB = ~/local/bin
 
 objects = LILO/loader.o \
 kernel/gdt.o \
+Memory/MemoryManagement.o \
 Drivers/IOPorts.o \
 CPU/Interrupts.o \
 kernel/MultiTask.o \

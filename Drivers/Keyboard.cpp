@@ -10,6 +10,9 @@ void PrintDate();
 char* INTTOCHARPOINT(int num);
 void ColourPrint(int type);
 bool txtcolor;
+const void* mb;
+void detect_cpu();
+void PrintMEM(const void* multiboot_structure);
 
 PowerControl power;
 
@@ -291,12 +294,16 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
         {
             printf("sd <options> : \nh : to halt the computer\nr : To reboot he computer\nsv : If running in virtualbox. then shutdown");
         }
+        else if (key_buffer[5] == "s" && key_buffer[6] == "y" && key_buffer[7] == "s" && key_buffer[8] == "i" && key_buffer[9] == "n" && key_buffer[10] == "f" && key_buffer[11] == "o")
+        {
+            printf("sysinfo [options] : \n-C : To get CPU information\n-M : To get Memory Info\n-A : To get the Kernel architecture\n-K : To get kernel information");
+        }
         else if(key_buffer[5] == "1")
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
         else if(key_buffer[5] == "2")
             printf("Help page 2:\nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number\ntxt : To enter the text mode. You cannot save files\nmul1 <num1> <num2> : To multiply 2 numbers.");
         else if (key_buffer[5] == "3")
-            printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8");
+            printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8.\nsysinfo [option] : To get info about system.");
         else
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
     }
@@ -393,6 +400,30 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
     else if(key_buffer[0] == "s" && key_buffer[1] == "p" && key_buffer[2] == "i")
     {
         printfchar(serialport.read_serial());
+    }
+    else if(key_buffer[0] == "s" && key_buffer[1] == "y" && key_buffer[2] == "s" && key_buffer[3] == "i" && key_buffer[4] == "n" && key_buffer[5] == "f" && key_buffer[6] == "o")
+    {
+        COMNAME = "sysinfo";
+        if(key_buffer[8] == "-" & key_buffer[9] == "C")
+        {
+            detect_cpu();
+        }
+        else if (key_buffer[8] == "-" & key_buffer[9] == "M")
+        {
+            PrintMEM(mb);
+        }
+        else if (key_buffer[8] == "-" & key_buffer[9] == "A")
+        {
+            printf("x86");
+        }
+        else if (key_buffer[8] == "-" && key_buffer[9] == "K")
+        {
+            printf("SectorOS Kernel V1.3.0 REV 0");
+        }
+        else
+        {
+            printf("SectorOS Kernel V1.3.0 REV 0");
+        }
     }
     else
     {

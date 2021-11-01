@@ -184,12 +184,10 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
     */
     else if(interrupt = 0x20)
     {
+        if(isTaskAllowed)
+            esp = (uint32_t)taskManager->Schedule((CPUState*)esp);
+            isTaskAllowed = false;
         printTime();
-    }
-
-    if(interrupt == hardwareInterruptOffset)
-    {
-        esp = (uint32_t)taskManager->Schedule((CPUState*)esp);
     }
 
     if(0x20 <= interrupt && interrupt < 0x30)
@@ -200,4 +198,12 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
     }
 
     return esp;
+}
+
+void InterruptManager::UseMultiTask(int OPT)
+{
+    if(OPT == 1)
+        isTaskAllowed = true;
+    else if(OPT == 0)
+        isTaskAllowed = false;
 }

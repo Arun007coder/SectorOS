@@ -9,12 +9,14 @@
 #include "../Hardcom/pci.h"
 #include "../Hardcom/SerialPort.h"
 #include "MultiTask.h"
+#include "../Memory/MemoryManagement.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
 static bool useMouse = true;
 bool isused;
 bool isTxtMode;
+extern const void* mb;
 
 port8BIT port43(0x43);
 port8BIT port42(0x42);
@@ -448,10 +450,33 @@ void printHex(uint8_t Key)
     printf(foo);
 }
 
+void PrintMEM(const void* multiboot_structure)
+{
+    mb = &multiboot_structure; 
+    uint32_t* memupper = (uint32_t*)(((size_t)multiboot_structure) + 8);
+    size_t heap = 10*1024*1024;
+    MemoryManager memoryManager(heap, (*memupper)*1024 - heap - 10*1024);
+
+    printf("heap: 0x");
+    printHex((heap >> 24) & 0xFF);
+    printHex((heap >> 16) & 0xFF);
+    printHex((heap >> 8 ) & 0xFF);
+    printHex((heap      ) & 0xFF);
+
+    void* allocated = memoryManager.MemAllocate(1024);
+    printf("\nallocated: 0x");
+    printHex(((size_t)allocated >> 24) & 0xFF);
+    printHex(((size_t)allocated >> 16) & 0xFF);
+    printHex(((size_t)allocated >> 8 ) & 0xFF);
+    printHex(((size_t)allocated      ) & 0xFF);
+    printf("\n");
+}
+
 #define cpuid(in, a, b, c, d) __asm__("cpuid": "=a" (a), "=b" (b), "=c" (c), "=d" (d) : "a" (in));
 
 int do_intel(void) 
 {
+    printf("CPU Manufacture - Genuineintel\n");
 	printf("Intel Specific Features:\n");
 	unsigned long eax, ebx, ecx, edx, max_eax, signature, unused;
 	int model, family, type, brand;
@@ -648,12 +673,20 @@ void taskA()
         printf("A");
     }
 }
-void taskB()
+void NewInstance()
 {
-    while(1)
-    {
-        printf("B");
-    }
+    printf("\5");
+
+    printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
+
+    printf("Instance 2\n");
+
+    printf("Initializing SOSH V1.0.2\n\n");
+
+    printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
+
+    printf("$: ");
+    while(1);
 }
 
 typedef void (*constructor)();
@@ -684,11 +717,14 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     GlobalDescriptorTable gdt;
 
+
     TaskManager taskManager;
+    /*
     Task task1(&gdt, taskA);
-    Task task2(&gdt, taskB);
+    Task task2(&gdt, NewInstance);
     taskManager.AddTask(&task1);
     taskManager.AddTask(&task2);
+    */
 
     InterruptManager interrupts(0x20, &gdt, &taskManager);
 
@@ -722,7 +758,11 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     sp.logToSerialPort("\nHardware initialising stage 2 finished");
     sp.logToSerialPort("\nDriverManager started");
 
-    printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
+    printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n 0x00A00000");
+
+    printf("\nAllocating Memory...\n");
+
+    PrintMEM(multiboot_structure);
 
     sp.logToSerialPort("\nHardware initialising stage 3 finished");
 

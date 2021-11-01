@@ -9,13 +9,15 @@
 #include "../CPU/PowerControl.h"
 #include "../Hardcom/SerialPort.h"
 #include "VGADriver.h"
+#include "../Hardcom/pci.h"
+#include "../Includes/multiboot.h"
 
 class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyboard
 {
     port8BIT DataPort;
     port8BIT CommandPort;
 
-    // SOSH v1.0.2 [SectorOS SHell]
+    // SOSH v1.0.3 [SectorOS SHell]
     // To interpret and execute the command
     void CommandInterpreter();
     SerialPort serialport;
