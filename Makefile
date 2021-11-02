@@ -24,7 +24,7 @@ prep:
 	@printf "Preparing...\n"
 	@sudo apt-get install xorriso mtools grub-common
 	@mkdir -p ~/local/bin
-	@tar -xf grub.tar.xz -C ~/local/bin
+	@tar -xf grub.tar.xz -C ~/local/
 	@ls $(GRUB)
 
 %.o: %.cpp
