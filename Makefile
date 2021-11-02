@@ -22,7 +22,7 @@ kernel/kernel.o
 
 prep:
 	@printf "Preparing...\n"
-	@sudo apt-get install xorriso mtools grub-pc-bin grub-pc-bin-extra
+	@sudo apt-get install xorriso mtools grub-pc-bin
 
 %.o: %.cpp
 	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"
