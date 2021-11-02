@@ -25,7 +25,7 @@ prep:
 	@sudo apt-get install xorriso mtools grub-common
 	@mkdir -p ~/local/bin
 	@tar -xf grub.tar.xz -C ~/local
-	@sudo apt install libc6-dev
+	@sudo dpkg -i Package/libc6-dev_2.34-0ubuntu3_amd64.deb
 	@ls $(GRUB)
 
 %.o: %.cpp
