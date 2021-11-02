@@ -23,8 +23,20 @@ kernel/kernel.o
 prep:
 	@printf "Preparing...\n"
 	@sudo apt-get install xorriso mtools grub-common
-	@mkdir -p ~/local/bin
-	@tar -xf grub.tar.xz -C ~/local
+	@mkdir -p ~/local
+	@pushd ~/local
+	@git clone https://git.savannah.gnu.org/git/grub.git
+	@sudo apt-get install \
+	make \
+	binutils \
+	bison \
+	gcc \
+	gettext \
+	flex
+	@./configure --with-platform=pc
+	@make
+	@sudo make install
+	@popd
 	@ls $(GRUB)
 
 %.o: %.cpp
