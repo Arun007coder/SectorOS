@@ -33,9 +33,11 @@ prep:
 	gcc \
 	gettext \
 	flex
+	@pushd grub
 	@./configure --with-platform=pc
 	@make
 	@sudo make install
+	@popd
 	@popd
 	@ls $(GRUB)
 
