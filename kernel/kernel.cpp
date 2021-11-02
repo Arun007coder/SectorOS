@@ -8,6 +8,7 @@
 #include "../Drivers/RTC.h"
 #include "../Hardcom/pci.h"
 #include "../Hardcom/SerialPort.h"
+#include "../Includes/Public_VAR.h"
 #include "MultiTask.h"
 #include "../Memory/MemoryManagement.h"
 
@@ -378,6 +379,7 @@ void printTime()
         x++;
     }
 
+    x--;
         VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | dd;
         x++;
 
@@ -387,6 +389,7 @@ void printTime()
         x++;
     }
 
+    x--;
         VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ',';
         x++;
 
@@ -396,13 +399,6 @@ void printTime()
         x++;
     }
 
-}
-
-void wait(int msec)
-{
-   done=false;
-   delay=msec;
-   while (!done);
 }
 
 void printfchar(char st)
@@ -452,7 +448,6 @@ void printHex(uint8_t Key)
 
 void PrintMEM(const void* multiboot_structure)
 {
-    mb = &multiboot_structure; 
     uint32_t* memupper = (uint32_t*)(((size_t)multiboot_structure) + 8);
     size_t heap = 10*1024*1024;
     MemoryManager memoryManager(heap, (*memupper)*1024 - heap - 10*1024);
@@ -702,7 +697,7 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
-    printf("Initializing SectorOS Kernel....\n");
+    printf("Initializing SectorOS Kernel ");printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD); printf("....\n");
     SerialPort sp;
     sp.INITSerial();
     uint16_t value = GetAvailableMem();
@@ -758,9 +753,9 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     sp.logToSerialPort("\nHardware initialising stage 2 finished");
     sp.logToSerialPort("\nDriverManager started");
 
-    printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n 0x00A00000");
+    printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
 
-    printf("\nAllocating Memory...\n");
+    printf("Allocating Memory....\n");
 
     PrintMEM(multiboot_structure);
 
@@ -768,13 +763,9 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     detect_cpu();
 
-    printf("\nKernel initialization surcessful");
-
-    for (int i = 0; i < 999999999; i++);
+    printf("\5");
     
     ColourPrint(0);
-
-    printf("\5");
 
     interrupts.Activate();
 
@@ -782,12 +773,14 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
-    printf("Initializing SOSH V1.0.2\n\n");
+    printf("Initializing "); printf(SHELL_NAME); printf(" "); printf(SHELL_VER);
+    printf("\n\n");
 
     printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
 
     sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 
     printf("$: ");
+
     while(1);
 }

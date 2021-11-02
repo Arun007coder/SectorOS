@@ -267,7 +267,7 @@ void KeyboardDriver::clear_key_buffer()
 }
 
 // TODO: Move the Command Interpreter to a new class
-void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Commands 
+void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Commands 
 {
     char* COMNAME;
     serialport.logToSerialPort("Command Interpreter Initialised");
@@ -296,7 +296,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
         }
         else if (key_buffer[5] == "s" && key_buffer[6] == "y" && key_buffer[7] == "s" && key_buffer[8] == "i" && key_buffer[9] == "n" && key_buffer[10] == "f" && key_buffer[11] == "o")
         {
-            printf("sysinfo [options] : \n-C : To get CPU information\n-M : To get Memory Info\n-A : To get the Kernel architecture\n-K : To get kernel information");
+            printf("sysinfo [options] : \n-C : To get CPU information\n-M : To get Memory Info\n-A : To get the Kernel architecture\n-K : To get kernel information\n-O : To get OS name\n-D : To get kernel build date\n-V : To get Kernel Version");
         }
         else if(key_buffer[5] == "1")
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
@@ -414,15 +414,31 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.2 [SectorOS SHell]. 10 Co
         }
         else if (key_buffer[8] == "-" & key_buffer[9] == "A")
         {
-            printf("x86");
+            printf(KERNEL_ARCH);
+        }
+        else if (key_buffer[8] == "-" && key_buffer[9] == "V")
+        {
+            printf(KERNEL_VERSION);
+        }
+        else if (key_buffer[8] == "-" && key_buffer[9] == "D")
+        {
+            printf(KERNEL_BUILD);
+        }
+        else if (key_buffer[8] == "-" && key_buffer[9] == "H")
+        {
+            printf("sysinfo [options] : \n-C : To get CPU information\n-M : To get Memory Info\n-A : To get the Kernel architecture\n-K : To get kernel information\n-O : To get OS name\n-D : To get kernel build date\n-V : To get Kernel Version\n-H : To print this message");
+        }
+        else if (key_buffer[8] == "-" && key_buffer[9] == "O")
+        {
+            printf(OS_NAME);
         }
         else if (key_buffer[8] == "-" && key_buffer[9] == "K")
         {
-            printf("SectorOS Kernel V1.3.0 REV 0");
+            printf("SectorOS Kernel "); printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD);
         }
         else
         {
-            printf("SectorOS Kernel V1.3.0 REV 0");
+            printf("SectorOS Kernel "); printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD);
         }
     }
     else

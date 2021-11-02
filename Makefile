@@ -23,6 +23,8 @@ kernel/kernel.o
 prep:
 	@printf "Preparing...\n"
 	@sudo apt-get install xorriso mtools grub-common
+	@mkdir -p ~/local/bin
+	@tar -xvf grub.tar.xz -C ~/local/bin
 
 %.o: %.cpp
 	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"

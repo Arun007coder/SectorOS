@@ -16,7 +16,7 @@ jobs:
     - name: install tools
       run: make prep
     - name: make move
-      run: make move GRUB=pt
+      run: make move
       
     - name: Upload Build files
       uses: actions/upload-artifact@v2

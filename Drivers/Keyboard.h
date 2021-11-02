@@ -9,6 +9,7 @@
 #include "../CPU/PowerControl.h"
 #include "../Hardcom/SerialPort.h"
 #include "VGADriver.h"
+#include "../Includes/Public_VAR.h"
 #include "../Hardcom/pci.h"
 #include "../Includes/multiboot.h"
 
