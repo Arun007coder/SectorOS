@@ -15,8 +15,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: install tools
       run: make prep
+    - name: Install grub
+      run: make Install-Grub-BIOS
     - name: make move
-      run: make move GRUB=pt
+      run: make move
       
     - name: Upload Build files
       uses: actions/upload-artifact@v2

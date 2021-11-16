@@ -81,4 +81,17 @@ stopVBOX:
 .PHONY: clean
 clean:
 	@printf "\e[1;31mCleaning the object files...\n\e[0m"
-	@rm -f $(objects) SectorOS_Kernel.bin SectorOS.iso
+	@rm -f $(objects) SectorOS_Kernel.bin SectorOS.
+	
+.PHONY: Install-Grub-BIOS
+Install-Grub-BIOS:
+	pushd /tmp/
+	git clone https://git.savannah.gnu.org/git/grub.git
+	cd grub
+	sudo apt-get install build-essential autoconf automake
+	./bootstrap
+	./autogen.sh
+	./configure --prefix=$HOME/local --platform=pc-i386
+	make
+	sudo make install
+	popd
