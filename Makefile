@@ -87,11 +87,11 @@ clean:
 Install-Grub-BIOS:
 	git clone https://git.savannah.gnu.org/git/grub.git
 	sudo apt-get install build-essential autoconf automake
-	cd grub
 	ls
-	pushd grub
-	./bootstrap
-	./autogen.sh
-	./configure --prefix=$HOME/local --platform=pc-i386
-	make
-	sudo make install
+	cd grub && \
+	./bootstrap && \
+	./autogen.sh && \
+	./configure --prefix=$HOME/local --platform=pc-i386 && \
+	make && \
+	sudo make install && \
+	@echo Installed Grub-BIOS
