@@ -81,7 +81,7 @@ stopVBOX:
 .PHONY: clean
 clean:
 	@printf "\e[1;31mCleaning the object files...\n\e[0m"
-	@rm -f $(objects) SectorOS_Kernel.bin SectorOS.
+	@rm -f $(objects) SectorOS_Kernel.bin SectorOS.iso
 	
 .PHONY: Install-Grub-BIOS
 Install-Grub-BIOS:
@@ -94,7 +94,7 @@ Install-Grub-BIOS:
 	cd grub && \
 	./bootstrap && \
 	./autogen.sh && \
-	./configure --prefix=$HOME/local --platform=pc && \
+	./configure --prefix=$HOME/local platform=pc && \
 	make && \
 	sudo make install && \
 	@echo Installed Grub-BIOS
