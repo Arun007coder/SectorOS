@@ -86,7 +86,10 @@ clean:
 .PHONY: Install-Grub-BIOS
 Install-Grub-BIOS:
 	git clone https://git.savannah.gnu.org/git/grub.git
-	sudo apt-get install build-essential autoconf automake
+	sudo sed -i 's/# deb-src/deb-src/' /etc/apt/sources.list
+	sudo apt update
+	sudo apt-get install build-essential autoconf automake autopoint
+	sudo apt-get build-dep grub-pc
 	ls
 	cd grub && \
 	./bootstrap && \
