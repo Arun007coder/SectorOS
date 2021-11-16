@@ -94,7 +94,7 @@ Install-Grub-BIOS:
 	cd grub && \
 	./bootstrap && \
 	./autogen.sh && \
-	./configure --prefix=$HOME/local platform=pc && \
+	./configure --prefix=~/local platform=pc && \
 	make && \
 	sudo make install && \
 	@echo Installed Grub-BIOS
