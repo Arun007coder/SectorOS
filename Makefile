@@ -89,9 +89,9 @@ Install-Grub-BIOS:
 	sudo apt-get install build-essential autoconf automake
 	cd grub
 	ls
-	./grub/bootstrap
-	./grub/autogen.sh
-	./grub/configure --prefix=$HOME/local --platform=pc-i386
 	pushd grub
+	./bootstrap
+	./autogen.sh
+	./configure --prefix=$HOME/local --platform=pc-i386
 	make
 	sudo make install
