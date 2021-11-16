@@ -85,7 +85,6 @@ clean:
 	
 .PHONY: Install-Grub-BIOS
 Install-Grub-BIOS:
-	pushd /tmp/
 	git clone https://git.savannah.gnu.org/git/grub.git
 	cd grub
 	sudo apt-get install build-essential autoconf automake
@@ -93,4 +92,3 @@ Install-Grub-BIOS:
 	./configure --prefix=$HOME/local --platform=pc-i386
 	make
 	sudo make install
-	popd
