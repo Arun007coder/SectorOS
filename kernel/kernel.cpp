@@ -11,6 +11,7 @@
 #include "../Includes/Public_VAR.h"
 #include "MultiTask.h"
 #include "../Memory/MemoryManagement.h"
+#include "../Drivers/HDD-ATA.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
@@ -18,6 +19,8 @@ static bool useMouse = true;
 bool isused;
 bool isTxtMode;
 extern const void* mb;
+AdvancedTechnologyAttachment ata0m(0x1F0, true);
+AdvancedTechnologyAttachment ata0s(0x1F0, false);
 
 port8BIT port43(0x43);
 port8BIT port42(0x42);
@@ -401,6 +404,11 @@ void printTime()
 
 }
 
+void PrintHDD()
+{
+    ata0s.identify();
+}
+
 void printfchar(char st)
 {
     static uint8_t x=0, y=0;
@@ -760,6 +768,11 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     PrintMEM(multiboot_structure);
 
     sp.logToSerialPort("\nHardware initialising stage 3 finished");
+
+    ata0s.identify();
+
+    AdvancedTechnologyAttachment ata1m(0x170, true);
+    AdvancedTechnologyAttachment ata1s(0x170, false);
 
     detect_cpu();
 

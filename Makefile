@@ -13,6 +13,7 @@ kernel/MultiTask.o \
 Drivers/Driver.o \
 CPU/PowerControl.o \
 Drivers/Keyboard.o \
+Drivers/HDD-ATA.o \
 Drivers/Mouse.o \
 Drivers/RTC.o \
 Hardcom/SerialPort.o \
