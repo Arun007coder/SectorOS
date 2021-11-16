@@ -89,7 +89,6 @@ Install-Grub-BIOS:
 	git clone https://git.savannah.gnu.org/git/grub.git
 	cd grub
 	sudo apt-get install build-essential autoconf automake
-	./bootstrap
 	./autogen.sh
 	./configure --prefix=$HOME/local --platform=pc-i386
 	make
