@@ -15,6 +15,7 @@ void PrintHDD();
 void detect_cpu();
 void PrintMEM(const void* multiboot_structure);
 void PrintSATA();
+void PVGA();
 
 PowerControl power;
 
@@ -305,7 +306,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         else if(key_buffer[5] == "2")
             printf("Help page 2:\nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number\ntxt : To enter the text mode. You cannot save files\nmul1 <num1> <num2> : To multiply 2 numbers.");
         else if (key_buffer[5] == "3")
-            printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8.\nsysinfo [option] : To get info about system.");
+            printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8.\nsysinfo [option] : To get info about system.\nvga : To use experimental vga graphics.");
         else
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
     }
@@ -446,6 +447,11 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         {
             printf("SectorOS Kernel "); printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD);
         }
+    }
+    else if (key_buffer[0] == "v" && key_buffer[1] == "g" && key_buffer[2] == "a")
+    {
+        COMNAME = "vga";
+        PVGA();
     }
     else
     {

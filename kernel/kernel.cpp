@@ -13,6 +13,7 @@
 #include "../Memory/MemoryManagement.h"
 #include "../Includes/Debug.h"
 #include "../Drivers/HDD-ATA.h"
+#include "../Drivers/VGADriver.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
@@ -403,6 +404,15 @@ void printTime()
         x++;
     }
 
+}
+
+void PVGA()
+{
+    VideoGraphicsArray vga;
+    vga.SetMode(320,200,8);
+    for(int32_t y = 0; y < 200; y++)
+        for(int32_t x = 0; x < 320; x++)
+            vga.PutPixel(x, y, 0x00, 0x00, 0xA8);
 }
 
 void printfchar(char st)

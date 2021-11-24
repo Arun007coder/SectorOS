@@ -5,37 +5,30 @@
 #include "IOPorts.h"
 #include "Driver.h"
 
-//! This driver is deprecated because it will cause damage to the monitor, I guess
 class VideoGraphicsArray
 {
 protected:
-    port8BIT MiscPort;
-    port8BIT CRTCIndexPort;
-    port8BIT CRTCDataPort;
-    port8BIT SequencerIndexPort;
-    port8BIT SequencerDataPort;
-    port8BIT GraphicsControllerIndexPort;
-    port8BIT GraphicsControllerDataPort;
-    port8BIT AttributeControllerIndexPort;
-    port8BIT AttributeControllerReadPort;
-    port8BIT AttributeControllerWritePort;
-    port8BIT AttributeControllerResetPort;
-
-
-protected:
-    void WriteToRegisters(uint8_t* registers);
-    uint8_t* GetVGAFrameBuffer();
-    virtual void PutPixel(uint32_t X, uint32_t Y, uint8_t ColorIndex);
-    virtual uint8_t GetColorIndex(uint8_t Red, uint8_t Green, uint8_t Blue);
-
+    port8BIT miscPort;
+    port8BIT crtcIndexPort;
+    port8BIT crtcDataPort;
+    port8BIT sequencerIndexPort;
+    port8BIT sequencerDataPort;
+    port8BIT graphicsControllerIndexPort;
+    port8BIT graphicsControllerDataPort;
+    port8BIT attributeControllerIndexPort;
+    port8BIT attributeControllerReadPort;
+    port8BIT attributeControllerWritePort;
+    port8BIT attributeControllerResetPort;
+    void WriteRegisters(uint8_t* registers);
+    uint8_t* GetFrameBufferSegment();
+    virtual uint8_t GetColorIndex(uint8_t r, uint8_t g, uint8_t b);
 public:
     VideoGraphicsArray();
     ~VideoGraphicsArray();
-
-public:
-    virtual bool SetMode(uint32_t ScreenWidth, uint32_t ScreenHeight, uint32_t ColorDepth);
-    virtual bool isModeSupported(uint32_t ScreenWidth, uint32_t ScreenHeight, uint32_t ColorDepth);
-    virtual void PutPixelOnScreen(uint32_t X, uint32_t Y, uint8_t Red, uint8_t Green, uint8_t Blue);
+    virtual bool SupportsMode(uint32_t width, uint32_t height, uint32_t colordepth);
+    virtual bool SetMode(uint32_t width, uint32_t height, uint32_t colordepth);
+    virtual void PutPixel(uint32_t x, uint32_t y,  uint8_t r, uint8_t g, uint8_t b);
+    virtual void PutPixel(uint32_t x, uint32_t y, uint8_t colorIndex);
 };
 
 
