@@ -14,6 +14,7 @@ const void* mb;
 void PrintHDD();
 void detect_cpu();
 void PrintMEM(const void* multiboot_structure);
+void PrintSATA();
 
 PowerControl power;
 
@@ -435,7 +436,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         }
         else if (key_buffer[8] == "-" && key_buffer[9] == "D")
         {
-            PrintHDD();
+            PrintSATA();
         }
         else if (key_buffer[8] == "-" && key_buffer[9] == "K")
         {

@@ -12,6 +12,7 @@
 #include "../Includes/Public_VAR.h"
 #include "../Hardcom/pci.h"
 #include "../Includes/multiboot.h"
+#include "HDD-ATA.h"
 
 class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyboard
 {

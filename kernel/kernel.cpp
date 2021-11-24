@@ -11,6 +11,7 @@
 #include "../Includes/Public_VAR.h"
 #include "MultiTask.h"
 #include "../Memory/MemoryManagement.h"
+#include "../Includes/Debug.h"
 #include "../Drivers/HDD-ATA.h"
 
 static uint8_t cursory;
@@ -404,11 +405,6 @@ void printTime()
 
 }
 
-void PrintHDD()
-{
-    ata0s.identify();
-}
-
 void printfchar(char st)
 {
     static uint8_t x=0, y=0;
@@ -601,6 +597,27 @@ int do_intel(void)
 
 }
 
+void PrintSATA()
+{
+    printf("\nS-ATA primary master: ");
+    AdvancedTechnologyAttachment ata0m(true, 0x1F0);
+    ata0m.Identify();
+
+    printf("\nS-ATA primary slave: ");
+    AdvancedTechnologyAttachment ata0s(false, 0x1F0);
+    ata0s.Identify();
+    printf("\n");
+
+    printf("\nS-ATA secondary master: ");
+    AdvancedTechnologyAttachment ata1m(true, 0x170);
+    ata1m.Identify();
+
+    printf("\nS-ATA secondary slave: ");
+    AdvancedTechnologyAttachment ata1s(false, 0x170);
+    ata1s.Identify();
+    printf("\n");
+}
+
 int detect_cpu(void) 
 {
 	unsigned long ebx, unused;
@@ -763,16 +780,13 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
 
+    PrintSATA();
+
     printf("Allocating Memory....\n");
 
     PrintMEM(multiboot_structure);
 
     sp.logToSerialPort("\nHardware initialising stage 3 finished");
-
-    ata0s.identify();
-
-    AdvancedTechnologyAttachment ata1m(0x170, true);
-    AdvancedTechnologyAttachment ata1s(0x170, false);
 
     detect_cpu();
 
@@ -787,6 +801,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
     printf("Initializing "); printf(SHELL_NAME); printf(" "); printf(SHELL_VER);
+
     printf("\n\n");
 
     printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
