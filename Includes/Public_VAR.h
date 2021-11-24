@@ -4,7 +4,7 @@
 inline char* OS_NAME = "SectorOS";
 
 inline char* KERNEL_NAME = "SectorOS";
-inline char* KERNEL_VERSION = "V1.4.5";
+inline char* KERNEL_VERSION = "V1.5.0";
 inline char* KERNEL_BUILD = "Build: 2021-11-24";
 inline char* KERNEL_ARCH = "x86";
 

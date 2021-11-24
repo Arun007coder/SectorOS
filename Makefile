@@ -15,6 +15,7 @@ CPU/PowerControl.o \
 Drivers/Keyboard.o \
 Drivers/HDD-ATA.o \
 Drivers/VGADriver.o \
+CPU/syscall.o \
 Drivers/Mouse.o \
 Drivers/RTC.o \
 Hardcom/SerialPort.o \
