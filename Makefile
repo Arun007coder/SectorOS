@@ -16,6 +16,8 @@ Drivers/Keyboard.o \
 Drivers/HDD-ATA.o \
 Drivers/VGADriver.o \
 CPU/syscall.o \
+Filesystem/MSDOSPT.o \
+Filesystem/FATFS.o \
 Drivers/Mouse.o \
 Drivers/RTC.o \
 Hardcom/SerialPort.o \

@@ -14,6 +14,7 @@
 #include "../Includes/Debug.h"
 #include "../Drivers/HDD-ATA.h"
 #include "../Drivers/VGADriver.h"
+#include "../Filesystem/MSDOSPT.h"
 
 static uint8_t cursory;
 static uint8_t cursorx;
@@ -460,6 +461,12 @@ void printHex(uint8_t Key)
     printf(foo);
 }
 
+void PrintPartitions()
+{
+    AdvancedTechnologyAttachment ata0s(false, 0x1F0);
+    MSDOSPartitionTable::ReadPartitions(&ata0s);
+}
+
 void PrintMEM(const void* multiboot_structure)
 {
     uint32_t* memupper = (uint32_t*)(((size_t)multiboot_structure) + 8);
@@ -792,6 +799,14 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
 
     PrintSATA();
 
+    PrintPartitions();
+    
+    /*
+    AdvancedTechnologyAttachment ata0s(false, 0x1F0);
+    ata0s.Write28(4, (uint8_t*)"Hello There", 12);
+    ata0s.Flush();
+    */
+
     printf("Allocating Memory....\n");
 
     PrintMEM(multiboot_structure);
@@ -815,6 +830,8 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     printf("\n\n");
 
     printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
+
+    //ata0s.Read28(4);
 
     sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 

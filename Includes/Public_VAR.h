@@ -4,11 +4,11 @@
 inline char* OS_NAME = "SectorOS";
 
 inline char* KERNEL_NAME = "SectorOS";
-inline char* KERNEL_VERSION = "V1.5.0";
-inline char* KERNEL_BUILD = "Build: 2021-11-24";
+inline char* KERNEL_VERSION = "V2.1.0";
+inline char* KERNEL_BUILD = "Build: 2021-11-25";
 inline char* KERNEL_ARCH = "x86";
 
 inline char* SHELL_NAME = "SOSH";
-inline char* SHELL_VER = "V1.0.6";
+inline char* SHELL_VER = "V1.0.7";
 
 #endif
