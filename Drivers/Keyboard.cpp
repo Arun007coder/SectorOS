@@ -10,6 +10,10 @@ void PrintDate();
 char* INTTOCHARPOINT(int num);
 void ColourPrint(int type);
 bool txtcolor;
+bool isESPChanged = false;
+GlobalDescriptorTable gdt;
+void taskA();
+void taskB();
 const void* mb;
 void PrintHDD();
 void detect_cpu();
@@ -26,6 +30,10 @@ DataPort(0x60),
 CommandPort(0x64)
 {
     isTxtMode = false;
+    Task task1(&gdt, taskA);
+    Task task2(&gdt, taskB);
+    taskManager.AddTask(&task1);
+    taskManager.AddTask(&task2);
 }
 
 KeyboardDriver::~KeyboardDriver()
@@ -47,6 +55,17 @@ void KeyboardDriver::activate()
 
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 {
+    esp2 = esp;
+    if(isESPChanged)
+    {
+        printf("\n");
+        printHex(esp);
+        printf(":");
+        printHex(esp1);
+        printf("task changed");
+        isESPChanged = false;
+        return esp1;
+    }
     uint8_t key = DataPort.ReadFromPort(); // The variable where a single keystroke is stored
     if(key < 0x80 & key != 0x3A & key != 0x2A & key != 0x2A & key != 0x36 & key != 0x3A & key != 0x0E & key != 0x38 & key != 0x1D ){
         key_buffer[keybufferpoint] = KeycodeToASCII(key);
@@ -309,7 +328,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         else if (key_buffer[5] == "3")
             printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8.\nsysinfo [option] : To get info about system.\nvga : To use experimental vga graphics.");
         else if (key_buffer[5] == "4")
-            printf("Help page 4:\nlspt: To list partitions in a drive.");
+            printf("Help page 4:\nlspt: To list partitions in a drive.\ntsk:to change instance.[EXPERIMENTAL]");
         else
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
     }
@@ -460,6 +479,13 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
     {
         COMNAME = "lspt";
         PrintPartitions();
+    }
+    else if(key_buffer[0] == "t" && key_buffer[1] == "s" && key_buffer[2] == "k")
+    {
+        esp1 = (uint32_t)taskManager.Schedule((CPUState*)esp1);
+        printf("esp1 is :"); printHex(esp1); printf("\n");
+        printf("esp2 is :"); printHex(esp2);
+        isESPChanged = true;
     }
     else
     {

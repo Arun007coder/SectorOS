@@ -173,17 +173,6 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
         printf(foo);
         printHex(interrupt);
     }
-    /*
-    else if(interrupt == 0x0D)
-    {
-        printf("\5");
-        printf("A Kernel Panic Occured. HALTING...\nSYSMSG:: EXCEPTION: GENERAL PROTECTION FAULT\n");
-        printf("An exception has occured in the system during execution which cannot fix itself.The general protection fault is called when a function is improperly executed which leads to memory corruption.Restarting may solve thr problem.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        printf("Execption stack pointer = 0x"); printHex(esp);
-        printf("\nExecption interrupt number = 0x"); printHex(interrupt);
-        Power.halt();
-    }
-    */
     else if(interrupt = 0x20)
     {
         if(isTaskAllowed)
@@ -209,3 +198,15 @@ void InterruptManager::UseMultiTask(int OPT)
     else if(OPT == 0)
         isTaskAllowed = false;
 }
+
+/*
+void InterruptManager::HandleException0x0D()
+{
+    printf("\5");
+    printf("A Kernel Panic Occured. HALTING...\nSYSMSG:: EXCEPTION: GENERAL PROTECTION FAULT\n");
+    printf("An exception has occured in the system during execution which cannot fix itself.The general protection fault is called when a function is improperly executed which leads to memory corruption.Restarting may solve thr problem.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+    //printf("Extended stack pointer = 0x"); printHex(esp);
+    //printf("\nExecption interrupt number = 0x"); printHex(interrupt);
+    Power.halt();
+}
+*/

@@ -3,6 +3,7 @@
 #include"../CPU/Interrupts.h"
 #include "../Drivers/IOPorts.h"
 #include "../Drivers/Keyboard.h"
+#include "../Includes/multiboot.h"
 #include "../Drivers/Mouse.h"
 #include "../Drivers/Driver.h"
 #include "../Drivers/RTC.h"
@@ -22,6 +23,9 @@ static bool useMouse = true;
 bool isused;
 bool isTxtMode;
 extern const void* mb;
+uint32_t mm;
+extern GlobalDescriptorTable gdt;
+extern TaskManager taskManager;
 AdvancedTechnologyAttachment ata0m(0x1F0, true);
 AdvancedTechnologyAttachment ata0s(0x1F0, false);
 
@@ -703,28 +707,39 @@ public:
 
 };
 
+void taskB()
+{
+    printf("Welcome to SectorOS Shell instance 2\nRun help to get the list of commands which is implemented \n \n");
+    TaskManager taskManager;
+    GlobalDescriptorTable gdt;
+    InterruptManager interrupts(0x20, &gdt, &taskManager);
+    KeyboardDriver boardDriver(&interrupts);
+    DriverManager drvmgr;
+    drvmgr.AddDriver(&boardDriver);
+    PCI PCICONT;
+    PCICONT.SelectDrivers(&drvmgr, &interrupts);
+    drvmgr.activateall();
+    printf("#:");
+    while (1);
+}
+
 void taskA()
 {
-    while(1)
-    {
-        printf("A");
-    }
+    printf("Welcome to SectorOS Shell instance 2\nRun help to get the list of commands which is implemented \n \n");
+    TaskManager taskManager;
+    GlobalDescriptorTable gdt;
+    InterruptManager interrupts(0x20, &gdt, &taskManager);
+    KeyboardDriver boardDriver(&interrupts);
+    DriverManager drvmgr;
+    drvmgr.AddDriver(&boardDriver);
+    PCI PCICONT;
+    PCICONT.SelectDrivers(&drvmgr, &interrupts);
+    drvmgr.activateall();
+    printf("$:");
+    while (1);
+    
 }
-void NewInstance()
-{
-    printf("\5");
 
-    printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
-
-    printf("Instance 2\n");
-
-    printf("Initializing SOSH V1.0.2\n\n");
-
-    printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
-
-    printf("$: ");
-    while(1);
-}
 
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
@@ -737,8 +752,10 @@ extern "C" void callConstructors()
 
 
 
-extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
+extern "C" void kernelMain(const void* multiboot_structure, uint32_t multiboot_m)
 {
+    TaskManager taskManager;
+    uint32_t mm = multiboot_m;
     printf("Initializing SectorOS Kernel ");printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD); printf("....\n");
     SerialPort sp;
     sp.INITSerial();
@@ -753,15 +770,6 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     sp.logToSerialPort("\nkernel started");
 
     GlobalDescriptorTable gdt;
-
-
-    TaskManager taskManager;
-    /*
-    Task task1(&gdt, taskA);
-    Task task2(&gdt, NewInstance);
-    taskManager.AddTask(&task1);
-    taskManager.AddTask(&task2);
-    */
 
     InterruptManager interrupts(0x20, &gdt, &taskManager);
 
@@ -828,6 +836,8 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot
     printf("Initializing "); printf(SHELL_NAME); printf(" "); printf(SHELL_VER);
 
     printf("\n\n");
+
+    
 
     printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
 
