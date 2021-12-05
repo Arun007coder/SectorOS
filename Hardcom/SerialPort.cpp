@@ -5,7 +5,7 @@ void printfchar(char);
 
 #define PORT  0x3f8
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 port8BIT dataport(PORT);

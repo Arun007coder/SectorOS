@@ -4,6 +4,7 @@
 #include "../Drivers/IOPorts.h"
 #include "../Drivers/Keyboard.h"
 #include "../Includes/multiboot.h"
+#include "../CPU/syscall.h"
 #include "../Drivers/Mouse.h"
 #include "../Drivers/Driver.h"
 #include "../Drivers/RTC.h"
@@ -275,7 +276,7 @@ void printf(char* str)
             case '\3':
                 for(int i = 0; i != 2; i++)
                     x = cursorx;
-                    if (x != 3){
+                    if (x != SPIndex){
                         x--;
                     }
                     VideoMemory[80*y+x] = (VideoMemory[80*y+x] & 0xFF00) | ' ';
@@ -343,7 +344,9 @@ void printf(char* str)
             x = 0;
             y = 0;
             //ColourPrint(0);
-            printf("SectorOS Monolithic kernel       ");
+            printf("SectorOS ");
+            printf(KERNEL_VERSION);
+            printf("                   ");
             RTC rtclock;
             rtclock.read_rtc();
             printf(INTTOCHARPOINT(rtclock.day));
@@ -351,7 +354,7 @@ void printf(char* str)
             printf(INTTOCHARPOINT(rtclock.month));
             printf("/");
             printf(INTTOCHARPOINT(rtclock.year));
-            printf("                         Type: Shell ");
+            printf("                        Type: Shell ");
         }
         
     }
@@ -616,6 +619,8 @@ int do_intel(void)
         printf("\n");
     }
 
+    return 0;
+
 }
 
 void PrintSATA()
@@ -740,6 +745,17 @@ void taskA()
     
 }
 
+void SPOMEMLOC(SerialPort sp)
+{
+    uint16_t value = GetAvailableMem();
+    uint8_t partA = static_cast<uint8_t>((value & 0xFF00) >> 8);
+    uint8_t partB = static_cast<uint8_t>(value & 0x00FF);
+    sp.logToSerialPort("Current memory location: ");
+    sp.logToSerialPort(hertochar(partA));
+    sp.logToSerialPort(" ");
+    sp.logToSerialPort(hertochar(partB));
+}
+
 
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
@@ -759,19 +775,17 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t multiboot_m
     printf("Initializing SectorOS Kernel ");printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD); printf("....\n");
     SerialPort sp;
     sp.INITSerial();
-    uint16_t value = GetAvailableMem();
-    uint8_t partA = static_cast<uint8_t>((value & 0xFF00) >> 8);
-    uint8_t partB = static_cast<uint8_t>(value & 0x00FF);
 
-    sp.logToSerialPort("Avaliable Memory = ");
-    sp.logToSerialPort(hertochar(partA));
-    sp.logToSerialPort(" ");
-    sp.logToSerialPort(hertochar(partB));
+    SPOMEMLOC(sp);
     sp.logToSerialPort("\nkernel started");
+
+
 
     GlobalDescriptorTable gdt;
 
     InterruptManager interrupts(0x20, &gdt, &taskManager);
+
+    SyscallHandler syscalls(&interrupts, 0x80);
 
     DriverManager drvmgr;
 
@@ -831,7 +845,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t multiboot_m
 
     sp.logToSerialPort("\nInterrupt manager started");
 
-    printf("Welcome to SectorOS Monolithic kernel ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
+    printf("Welcome to SectorOS ");printf(KERNEL_VERSION);printf("          ");PrintDate();printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
     printf("Initializing "); printf(SHELL_NAME); printf(" "); printf(SHELL_VER);
 
@@ -845,7 +859,10 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t multiboot_m
 
     sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 
-    printf("$: ");
+    SPIndex = 15;
+
+    asm("int $0x80" : : "a" (4), "b" ("root@secos:~#> ")); // Used syscall to print this prompt
+    SPOMEMLOC(sp);
 
     while(1);
 }

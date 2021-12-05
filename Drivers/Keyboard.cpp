@@ -3,6 +3,10 @@
 static int keybufferpoint = 0;
 static bool isShift = false;
 static bool isCTRLed = false;
+
+
+
+bool isUSRChanged = false;
 void printf(char*);
 void printfchar(char st);
 void printHex(uint8_t key);
@@ -34,6 +38,18 @@ CommandPort(0x64)
     Task task2(&gdt, taskB);
     taskManager.AddTask(&task1);
     taskManager.AddTask(&task2);
+
+    for(int i = 0; i < 30; i++)
+    {
+        SP[i] = "\0";
+    }
+
+    char* Shell_Prompt[15] = {"r","o","o","t","@","s","e","c","o","s",":","~","#",">", " "};
+    for (int i = 0; i < 15; i++)
+    {
+        SP[SPIndex] = Shell_Prompt[i];
+        SPIndex++;
+    }
 }
 
 KeyboardDriver::~KeyboardDriver()
@@ -302,6 +318,13 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         {
             printf("cannot print null character");
         }
+        else if (key_buffer[5] == "$" && key_buffer[6] == "S" && key_buffer[7] == "P")
+        {
+            for (int i = 0; i < SPIndex; i++)
+            {
+                printf(SP[i]);
+            }
+        }
         else
         {
             for (int i = 5; key_buffer[i] != "\n"; i++)
@@ -328,7 +351,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         else if (key_buffer[5] == "3")
             printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8.\nsysinfo [option] : To get info about system.\nvga : To use experimental vga graphics.");
         else if (key_buffer[5] == "4")
-            printf("Help page 4:\nlspt: To list partitions in a drive.\ntsk:to change instance.[EXPERIMENTAL]");
+            printf("Help page 4:\nlspt: To list partitions in a drive.\ntsk:to change instance.[EXPERIMENTAL]\nexport [var]=[value] : To change value of a ENV var in shell.");
         else
             printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
     }
@@ -336,7 +359,12 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
     {
         COMNAME = "clear";
         printf("\5");
-        printf("SectorOS Monolithic kernel ");PrintDate();printf("                               Type: Shell\n");
+            
+        printf("SectorOS ");
+        printf(KERNEL_VERSION);
+        printf("                   ");
+        PrintDate();
+        printf("                        Type: Shell ");
     }
     else if (key_buffer[0] == "s" & key_buffer[1] == "d")
     {
@@ -487,13 +515,37 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         printf("esp2 is :"); printHex(esp2);
         isESPChanged = true;
     }
+    else if (key_buffer[0] == "e" && key_buffer[1] == "x" && key_buffer[2] == "p" && key_buffer[3] == "o" && key_buffer[4] == "r" && key_buffer[5] == "t")
+    {
+        COMNAME = "export";
+
+        if (key_buffer[7] == "S" && key_buffer[8] == "P" && key_buffer[9] == "=" )
+        {
+            SPIndex = 0;
+
+            for (int i = 10; key_buffer[i] != "\n"; i++)
+            {
+                SP[SPIndex] = key_buffer[i];
+                SPIndex++;
+            }
+            printf("SP is set to : ");
+            for (int i = 0; i < SPIndex; i++)
+            {
+                printf(SP[i]);
+            }
+        }
+    }
     else
     {
         printf("Unknown Command. Type help in console to get all the commands");
     }
     if(!isTxtMode){
         printf("\n");
-        printf("$: ");
+        for (int i = 0; SPIndex > i; i++)
+        {
+            printf(SP[i]);
+        }
+        
     }
     serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
     clear_key_buffer();
@@ -507,12 +559,17 @@ void KeyboardDriver::returnHScreen()
     //ColourPrint(0);
     //printf("Welcome to SectorOS Monolithic kernel                               Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
-    printf("SectorOS Monolithic kernel ");
+    printf("SectorOS ");
+    printf(KERNEL_VERSION);
+    printf("                   ");
     PrintDate();
-    printf("                               Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
+    printf("                        Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
     printf("Run help to get the list of commands which is implemented \n \n");
 
-    printf("$: ");
+    for (int i = 0; SPIndex > i; i++)
+    {
+        printf(SP[i]);
+    }
     isTxtMode = false;
 }
 

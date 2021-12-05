@@ -1,6 +1,7 @@
-GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings
-ASPARAMS = --32
-LDPARAMS = -melf_i386
+CPP=gcc
+CPPFLAGS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings
+ASFLAGS = --32
+LDFLAGS = -melf_i386
 SHELL = /bin/bash
 GRUB = ~/local/bin
 
@@ -31,15 +32,15 @@ prep:
 
 %.o: %.cpp
 	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"
-	gcc $(DEBUG) $(GCCPARAMS) -c -o $@ $<
+	$(CPP) $(DEBUG) $(CPPFLAGS) -c -o $@ $<
 
 %.o: %.s
 	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"
-	as $(ASPARAMS) -o $@ $<
+	as $(ASFLAGS) -o $@ $<
 
 SectorOS_Kernel.bin: LILO/linker.ld $(objects)
 	@printf "\e[1;33m[2/3]Linking object files\n\e[0m"
-	@ld $(LDPARAMS) -T $< -o $@ $(objects)
+	@ld $(LDFLAGS) -T $< -o $@ $(objects)
 	@printf "Linking $(objects) to make $@\n"
 	@printf "Linking finished\n"
 
@@ -79,6 +80,11 @@ runVBOX: SectorOS.iso
 	@printf "Starting VirtualBox\n";
 	@(killall VirtualBoxVM && sleep 1) || true
 	VirtualBoxVM --startvm 'SectorOS' --dbg
+
+runBOCHS: SectorOS.iso
+	@printf "Starting Bochs\n";
+	@(killall bochs && sleep 1) || true
+	bochs -q -f bochsrc.txt 
 
 stopVBOX:
 	killall VirtualBoxVM
