@@ -1,7 +1,7 @@
 #ifndef __POWERCONTROL_H
 #define __POWERCONTROL_H
 
-#include "../Includes/types.h"
+#include "../Include/types.h"
 #include "../Drivers/IOPorts.h"
 
 class PowerControl
@@ -13,6 +13,9 @@ public:
     void halt();
     //If running in virtualBox. This function will Stop virtualBox
     void StopVirtualBox();
+
+    //To get the current power state
+    bool getPowerState();
 };
 
 #endif

@@ -2,7 +2,7 @@
 #define __MSDOSPT_H
 
 #include "../Drivers/HDD-ATA.h"
-#include "../Includes/types.h"
+#include "../Include/types.h"
 #include "FATFS.h"
 
 struct PartitionTableEntry

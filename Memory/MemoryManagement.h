@@ -1,7 +1,7 @@
 #ifndef __MEMORYMANAGEMENT_H
 #define __MEMORYMANAGEMENT_H
 
-#include "../Includes/types.h"
+#include "../Include/types.h"
 
 struct MemoryChunk
 {

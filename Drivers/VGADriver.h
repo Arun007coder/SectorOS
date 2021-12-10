@@ -1,7 +1,7 @@
 #ifndef __VGADRIVER_H
 #define __VGADRIVER_H
 
-#include "../Includes/types.h"
+#include "../Include/types.h"
 #include "IOPorts.h"
 #include "Driver.h"
 

@@ -3,7 +3,7 @@
 #define __INTERRUPTMANAGER_H
 
     #include "../kernel/gdt.h"
-    #include "../Includes/types.h"
+    #include "../Include/types.h"
     #include "../Drivers/IOPorts.h"
     #include "../CPU/PowerControl.h"
     #include "../kernel/MultiTask.h"

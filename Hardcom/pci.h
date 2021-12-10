@@ -2,7 +2,7 @@
 #define __PCI_H
 
 #include "../Drivers/IOPorts.h"
-#include "../Includes/types.h"
+#include "../Include/types.h"
 #include "../CPU/Interrupts.h"
 #include "../Drivers/Driver.h"
 

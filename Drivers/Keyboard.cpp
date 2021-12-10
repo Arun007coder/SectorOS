@@ -1,6 +1,5 @@
 #include "Keyboard.h"
 
-static int keybufferpoint = 0;
 static bool isShift = false;
 static bool isCTRLed = false;
 
@@ -28,12 +27,30 @@ void PrintPartitions();
 
 PowerControl power;
 
-KeyboardDriver::KeyboardDriver(InterruptManager* manager)
+CustomShell::CustomShell()
+{
+}
+
+CustomShell::~CustomShell()
+{
+}
+
+void CustomShell::Shell()
+{
+    
+}
+
+void CustomShell::clearBuffer()
+{
+}
+
+KeyboardDriver::KeyboardDriver(InterruptManager* manager, CustomShell* shell)
 :InterruptHandler(0x21, manager),
 DataPort(0x60),
 CommandPort(0x64)
 {
     isTxtMode = false;
+    this->shell = shell;
     Task task1(&gdt, taskA);
     Task task2(&gdt, taskB);
     taskManager.AddTask(&task1);
@@ -84,8 +101,16 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
     }
     uint8_t key = DataPort.ReadFromPort(); // The variable where a single keystroke is stored
     if(key < 0x80 & key != 0x3A & key != 0x2A & key != 0x2A & key != 0x36 & key != 0x3A & key != 0x0E & key != 0x38 & key != 0x1D ){
-        key_buffer[keybufferpoint] = KeycodeToASCII(key);
-        keybufferpoint++;
+        if(!IsShellDisabled)
+        {
+            key_buffer[key_buffer_index] = KeycodeToASCII(key);
+            key_buffer_index++;
+        }
+        else
+        {
+            shell->CharBuffer[shell->CharBufferIndex] = KeycodeToASCII(key);
+            shell->CharBufferIndex++;
+        }
     }
     switch (key)
     {
@@ -118,10 +143,18 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
         case 0x19:if (!isShift) printf("p"); else printf("P"); break;
         case 0x1A:if (!isShift) printf("["); else printf("{"); break;
         case 0x1B:if (!isShift) printf("]"); else printf("}"); break;
-        case 0x1C: if(!isTxtMode)
-                        CommandInterpreter();
-                   else
-                        printf("\n");
+        case 0x1C: 
+                    if(!IsShellDisabled)
+                    {
+                        if(!isTxtMode)
+                            CommandInterpreter();
+                        else
+                            printf("\n");
+                    }
+                    else
+                    {
+                        shell->Shell();
+                    }
         break; //Enter
         case 0x1E:if (!isShift) printf("a"); else printf("A"); break;
         case 0x1F:if (!isShift) printf("s"); else printf("S"); break;
@@ -182,8 +215,8 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
                 printf("\3");
             else
                 printf("\f"); 
-            if(keybufferpoint != 0)
-                keybufferpoint--; 
+            if(key_buffer_index != 0)
+                key_buffer_index--; 
             break;
 
         case 0x39: printf(" "); break;
@@ -204,8 +237,8 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
                 printf("\4");
             else
                 printf("\4"); 
-                if(keybufferpoint != 0)
-                    keybufferpoint--;
+                if(key_buffer_index != 0)
+                    key_buffer_index--;
         break;
 
         case 0x4D : 
@@ -213,8 +246,8 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
                 printf("\6");
             else
                 printf("\6"); 
-                if(keybufferpoint != 0)
-                    keybufferpoint++;
+                if(key_buffer_index != 0)
+                    key_buffer_index++;
          break;
             
         default: // To tell that a unmapped key is pressed on the keyboard
@@ -296,259 +329,268 @@ char* KeyboardDriver::KeycodeToASCII(uint8_t Keycode)
 
 void KeyboardDriver::clear_key_buffer()
 {
-    char* zeros = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\a";
-    for (int i = 0; zeros[i] != '\a'; i++)
+    if(!IsShellDisabled)
     {
-        key_buffer[i] = "\0";
+        char* zeros = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\a";
+        for (int i = 0; zeros[i] != '\a'; i++)
+        {
+            key_buffer[i] = "\0";
+        }
+        key_buffer_index = 0;
     }
-    keybufferpoint = 0;
-    
+    else
+    {
+        shell->clearBuffer();
+    }
 }
 
 // TODO: Move the Command Interpreter to a new class
 void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Commands 
 {
-    char* COMNAME;
-    serialport.logToSerialPort("Command Interpreter Initialised");
-    printf("\n");
-    if(key_buffer[0] == "e" & key_buffer[1] == "c" & key_buffer[2] == "h" & key_buffer[3] == "o")
+    if (!IsShellDisabled)
     {
-        COMNAME = "echo";
-        if (key_buffer[4] == "\0")
-        {
-            printf("cannot print null character");
-        }
-        else if (key_buffer[5] == "$" && key_buffer[6] == "S" && key_buffer[7] == "P")
-        {
-            for (int i = 0; i < SPIndex; i++)
-            {
-                printf(SP[i]);
-            }
-        }
-        else
-        {
-            for (int i = 5; key_buffer[i] != "\n"; i++)
-            {
-                printf(key_buffer[i]);
-            }
-        }
-    }
-    else if (key_buffer[0] == "h" & key_buffer[1] == "e" & key_buffer[2] == "l" & key_buffer[3] == "p")
-    {
-        COMNAME = "help";
-        if(key_buffer[5] == "s" & key_buffer[6] == "d")
-        {
-            printf("sd <options> : \nh : to halt the computer\nr : To reboot he computer\nsv : If running in virtualbox. then shutdown");
-        }
-        else if (key_buffer[5] == "s" && key_buffer[6] == "y" && key_buffer[7] == "s" && key_buffer[8] == "i" && key_buffer[9] == "n" && key_buffer[10] == "f" && key_buffer[11] == "o")
-        {
-            printf("sysinfo [options] : \n-C : To get CPU information\n-M : To get Memory Info\n-A : To get the Kernel architecture\n-K : To get kernel information\n-O : To get OS name\n-B : To get kernel build date\n-D : To identify a ATA drive\n-V : To get Kernel Version");
-        }
-        else if(key_buffer[5] == "1")
-            printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
-        else if(key_buffer[5] == "2")
-            printf("Help page 2:\nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number\ntxt : To enter the text mode. You cannot save files\nmul1 <num1> <num2> : To multiply 2 numbers.");
-        else if (key_buffer[5] == "3")
-            printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8.\nsysinfo [option] : To get info about system.\nvga : To use experimental vga graphics.");
-        else if (key_buffer[5] == "4")
-            printf("Help page 4:\nlspt: To list partitions in a drive.\ntsk:to change instance.[EXPERIMENTAL]\nexport [var]=[value] : To change value of a ENV var in shell.");
-        else
-            printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
-    }
-    else if (key_buffer[0] == "c" & key_buffer[1] == "l" & key_buffer[2] == "e" & key_buffer[3] == "a" & key_buffer[4] == "r")
-    {
-        COMNAME = "clear";
-        printf("\5");
-            
-        printf("SectorOS ");
-        printf(KERNEL_VERSION);
-        printf("                   ");
-        PrintDate();
-        printf("                        Type: Shell ");
-    }
-    else if (key_buffer[0] == "s" & key_buffer[1] == "d")
-    {
-        COMNAME = "sd";
-        if(key_buffer[3] == "h")
-        {
-            power.halt();
-        }
-        else if(key_buffer[3] == "s" & key_buffer[4] == "v")
-        {
-            power.StopVirtualBox();
-        }
-        else if(key_buffer[3] == "r")
-        {
-            power.reboot();
-        }
-    }
-    else if(key_buffer[0] == "a" & key_buffer[1] == "d" & key_buffer[2] == "d" & key_buffer[3] == "1" )
-    {
-        COMNAME = "add1";
-        char* arg1;
-        char *arg2;
-        arg1 = key_buffer[5];
-        arg2 = key_buffer[7];
-        int resint;
-        int x = arg1[0] - '0';
-        int y = arg2[0] - '0';
-        resint = x + y;
-        printf(INTTOCHARPOINT(resint));
-        
-    }
-    else if(key_buffer[0] == "s" && key_buffer[1] == "u" & key_buffer[2] == "b" & key_buffer[3] == "1")
-    {
-        COMNAME = "sub1";
-        char* arg1;
-        char *arg2;
-        arg1 = key_buffer[5];
-        arg2 = key_buffer[7];
-        int resint;
-        int x = arg1[0] - '0';
-        int y = arg2[0] - '0';
-        resint = x - y;
-        printf(INTTOCHARPOINT(resint));
-    }
-    else if(key_buffer[0] == "m" & key_buffer[1] == "u" & key_buffer[2] == "l" & key_buffer[3] == "1" )
-    {
-        COMNAME = "mul1";
-        char* arg1;
-        char* arg2;
-        arg1 = key_buffer[5];
-        arg2 = key_buffer[7];
-
-        int res;
-
-        int x = arg1[0] - '0';
-        int y = arg2[0] - '0';
-
-        res = x * y;
-
-        printf(INTTOCHARPOINT(res));
-    }
-    else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
-    {
-        COMNAME = "txt";
-        serialport.logToSerialPort("\ntxt mode starting...");
-        printf("Entering Text editing mode. Please wait....");
-        for(int i = 999999999; i != 0; i--);
-        printf("\5");
-
-
-        
-        RTC rtclock;
-        rtclock.read_rtc();
-        printf("welcome to SectorOS text mode ");PrintDate(); printf("                             Type: Text ");printf("This is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
-        isTxtMode = true;
-        serialport.logToSerialPort("\ntxt mode initialised");
-    }
-    else if(key_buffer[0] == "s" && key_buffer[1] == "p" && key_buffer[2] == "o")
-    {
-        for (int i = 4; key_buffer[i] != "\n"; i++)
-        {
-            serialport.logToSerialPort(key_buffer[i]);
-        }
-        
-    }
-    else if(key_buffer[0] == "s" && key_buffer[1] == "p" && key_buffer[2] == "i")
-    {
-        printfchar(serialport.read_serial());
-    }
-    else if(key_buffer[0] == "s" && key_buffer[1] == "y" && key_buffer[2] == "s" && key_buffer[3] == "i" && key_buffer[4] == "n" && key_buffer[5] == "f" && key_buffer[6] == "o")
-    {
-        COMNAME = "sysinfo";
-        if(key_buffer[8] == "-" & key_buffer[9] == "C")
-        {
-            detect_cpu();
-        }
-        else if (key_buffer[8] == "-" & key_buffer[9] == "M")
-        {
-            PrintMEM(mb);
-        }
-        else if (key_buffer[8] == "-" & key_buffer[9] == "A")
-        {
-            printf(KERNEL_ARCH);
-        }
-        else if (key_buffer[8] == "-" && key_buffer[9] == "V")
-        {
-            printf(KERNEL_VERSION);
-        }
-        else if (key_buffer[8] == "-" && key_buffer[9] == "B")
-        {
-            printf(KERNEL_BUILD);
-        }
-        else if (key_buffer[8] == "-" && key_buffer[9] == "H")
-        {
-            printf("sysinfo [options] : \n-C : To get CPU information\n-M : To get Memory Info\n-A : To get the Kernel architecture\n-K : To get kernel information\n-O : To get OS name\n-B : To get kernel build date\n-V : To get Kernel Version\n-D : To identify a ATA drive\n-H : To print this message");
-        }
-        else if (key_buffer[8] == "-" && key_buffer[9] == "O")
-        {
-            printf(OS_NAME);
-        }
-        else if (key_buffer[8] == "-" && key_buffer[9] == "D")
-        {
-            PrintSATA();
-        }
-        else if (key_buffer[8] == "-" && key_buffer[9] == "K")
-        {
-            printf("SectorOS Kernel "); printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD);
-        }
-        else
-        {
-            printf("SectorOS Kernel "); printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD);
-        }
-    }
-    else if (key_buffer[0] == "v" && key_buffer[1] == "g" && key_buffer[2] == "a")
-    {
-        COMNAME = "vga";
-        PVGA();
-    }
-    else if (key_buffer[0] == "l" && key_buffer[1] == "s" && key_buffer[2] == "p" && key_buffer[3] == "t")
-    {
-        COMNAME = "lspt";
-        PrintPartitions();
-    }
-    else if(key_buffer[0] == "t" && key_buffer[1] == "s" && key_buffer[2] == "k")
-    {
-        esp1 = (uint32_t)taskManager.Schedule((CPUState*)esp1);
-        printf("esp1 is :"); printHex(esp1); printf("\n");
-        printf("esp2 is :"); printHex(esp2);
-        isESPChanged = true;
-    }
-    else if (key_buffer[0] == "e" && key_buffer[1] == "x" && key_buffer[2] == "p" && key_buffer[3] == "o" && key_buffer[4] == "r" && key_buffer[5] == "t")
-    {
-        COMNAME = "export";
-
-        if (key_buffer[7] == "S" && key_buffer[8] == "P" && key_buffer[9] == "=" )
-        {
-            SPIndex = 0;
-
-            for (int i = 10; key_buffer[i] != "\n"; i++)
-            {
-                SP[SPIndex] = key_buffer[i];
-                SPIndex++;
-            }
-            printf("SP is set to : ");
-            for (int i = 0; i < SPIndex; i++)
-            {
-                printf(SP[i]);
-            }
-        }
-    }
-    else
-    {
-        printf("Unknown Command. Type help in console to get all the commands");
-    }
-    if(!isTxtMode){
+        char* COMNAME;
+        serialport.logToSerialPort("Command Interpreter Initialised");
         printf("\n");
-        for (int i = 0; SPIndex > i; i++)
+        if(key_buffer[0] == "e" & key_buffer[1] == "c" & key_buffer[2] == "h" & key_buffer[3] == "o")
         {
-            printf(SP[i]);
+            COMNAME = "echo";
+            if (key_buffer[4] == "\0")
+            {
+                printf("cannot print null character");
+            }
+            else if (key_buffer[5] == "$" && key_buffer[6] == "S" && key_buffer[7] == "P")
+            {
+                for (int i = 0; i < SPIndex; i++)
+                {
+                    printf(SP[i]);
+                }
+            }
+            else
+            {
+                for (int i = 5; key_buffer[i] != "\n"; i++)
+                {
+                    printf(key_buffer[i]);
+                }
+            }
         }
-        
+        else if (key_buffer[0] == "h" & key_buffer[1] == "e" & key_buffer[2] == "l" & key_buffer[3] == "p")
+        {
+            COMNAME = "help";
+            if(key_buffer[5] == "s" & key_buffer[6] == "d")
+            {
+                printf("sd <options> : \nh : to halt the computer\nr : To reboot he computer\nsv : If running in virtualbox. then shutdown");
+            }
+            else if (key_buffer[5] == "s" && key_buffer[6] == "y" && key_buffer[7] == "s" && key_buffer[8] == "i" && key_buffer[9] == "n" && key_buffer[10] == "f" && key_buffer[11] == "o")
+            {
+                printf("sysinfo [options] : \n-C : To get CPU information\n-M : To get Memory Info\n-A : To get the Kernel architecture\n-K : To get kernel information\n-O : To get OS name\n-B : To get kernel build date\n-D : To identify a ATA drive\n-V : To get Kernel Version");
+            }
+            else if(key_buffer[5] == "1")
+                printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
+            else if(key_buffer[5] == "2")
+                printf("Help page 2:\nadd1 <num1> <num2> :To add 2 numbers.This command only supports 1 digit number\nsub1 <num1> <num2> :to subtract 2 numbers.This command only supports 1 digit number\ntxt : To enter the text mode. You cannot save files\nmul1 <num1> <num2> : To multiply 2 numbers.");
+            else if (key_buffer[5] == "3")
+                printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8.\nsysinfo [option] : To get info about system.\nvga : To use experimental vga graphics.");
+            else if (key_buffer[5] == "4")
+                printf("Help page 4:\nlspt: To list partitions in a drive.\ntsk:to change instance.[EXPERIMENTAL]\nexport [var]=[value] : To change value of a ENV var in shell.");
+            else
+                printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
+        }
+        else if (key_buffer[0] == "c" & key_buffer[1] == "l" & key_buffer[2] == "e" & key_buffer[3] == "a" & key_buffer[4] == "r")
+        {
+            COMNAME = "clear";
+            printf("\5");
+                
+            printf("SectorOS ");
+            printf(KERNEL_VERSION);
+            printf("                   ");
+            PrintDate();
+            printf("                        Type: Shell ");
+        }
+        else if (key_buffer[0] == "s" & key_buffer[1] == "d")
+        {
+            COMNAME = "sd";
+            if(key_buffer[3] == "h")
+            {
+                power.halt();
+            }
+            else if(key_buffer[3] == "s" & key_buffer[4] == "v")
+            {
+                power.StopVirtualBox();
+            }
+            else if(key_buffer[3] == "r")
+            {
+                power.reboot();
+            }
+        }
+        else if(key_buffer[0] == "a" & key_buffer[1] == "d" & key_buffer[2] == "d" & key_buffer[3] == "1" )
+        {
+            COMNAME = "add1";
+            char* arg1;
+            char *arg2;
+            arg1 = key_buffer[5];
+            arg2 = key_buffer[7];
+            int resint;
+            int x = arg1[0] - '0';
+            int y = arg2[0] - '0';
+            resint = x + y;
+            printf(INTTOCHARPOINT(resint));
+            
+        }
+        else if(key_buffer[0] == "s" && key_buffer[1] == "u" & key_buffer[2] == "b" & key_buffer[3] == "1")
+        {
+            COMNAME = "sub1";
+            char* arg1;
+            char *arg2;
+            arg1 = key_buffer[5];
+            arg2 = key_buffer[7];
+            int resint;
+            int x = arg1[0] - '0';
+            int y = arg2[0] - '0';
+            resint = x - y;
+            printf(INTTOCHARPOINT(resint));
+        }
+        else if(key_buffer[0] == "m" & key_buffer[1] == "u" & key_buffer[2] == "l" & key_buffer[3] == "1" )
+        {
+            COMNAME = "mul1";
+            char* arg1;
+            char* arg2;
+            arg1 = key_buffer[5];
+            arg2 = key_buffer[7];
+
+            int res;
+
+            int x = arg1[0] - '0';
+            int y = arg2[0] - '0';
+
+            res = x * y;
+
+            printf(INTTOCHARPOINT(res));
+        }
+        else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
+        {
+            COMNAME = "txt";
+            serialport.logToSerialPort("\ntxt mode starting...");
+            printf("Entering Text editing mode. Please wait....");
+            for(int i = 999999999; i != 0; i--);
+            printf("\5");
+
+
+            
+            RTC rtclock;
+            rtclock.read_rtc();
+            printf("welcome to SectorOS text mode ");PrintDate(); printf("                             Type: Text ");printf("This is experimental. you cannot save the documents . To return to CLI press LCTRL+C");
+            isTxtMode = true;
+            serialport.logToSerialPort("\ntxt mode initialised");
+        }
+        else if(key_buffer[0] == "s" && key_buffer[1] == "p" && key_buffer[2] == "o")
+        {
+            for (int i = 4; key_buffer[i] != "\n"; i++)
+            {
+                serialport.logToSerialPort(key_buffer[i]);
+            }
+            
+        }
+        else if(key_buffer[0] == "s" && key_buffer[1] == "p" && key_buffer[2] == "i")
+        {
+            printfchar(serialport.read_serial());
+        }
+        else if(key_buffer[0] == "s" && key_buffer[1] == "y" && key_buffer[2] == "s" && key_buffer[3] == "i" && key_buffer[4] == "n" && key_buffer[5] == "f" && key_buffer[6] == "o")
+        {
+            COMNAME = "sysinfo";
+            if(key_buffer[8] == "-" & key_buffer[9] == "C")
+            {
+                detect_cpu();
+            }
+            else if (key_buffer[8] == "-" & key_buffer[9] == "M")
+            {
+                PrintMEM(mb);
+            }
+            else if (key_buffer[8] == "-" & key_buffer[9] == "A")
+            {
+                printf(KERNEL_ARCH);
+            }
+            else if (key_buffer[8] == "-" && key_buffer[9] == "V")
+            {
+                printf(KERNEL_VERSION);
+            }
+            else if (key_buffer[8] == "-" && key_buffer[9] == "B")
+            {
+                printf(KERNEL_BUILD);
+            }
+            else if (key_buffer[8] == "-" && key_buffer[9] == "H")
+            {
+                printf("sysinfo [options] : \n-C : To get CPU information\n-M : To get Memory Info\n-A : To get the Kernel architecture\n-K : To get kernel information\n-O : To get OS name\n-B : To get kernel build date\n-V : To get Kernel Version\n-D : To identify a ATA drive\n-H : To print this message");
+            }
+            else if (key_buffer[8] == "-" && key_buffer[9] == "O")
+            {
+                printf(OS_NAME);
+            }
+            else if (key_buffer[8] == "-" && key_buffer[9] == "D")
+            {
+                PrintSATA();
+            }
+            else if (key_buffer[8] == "-" && key_buffer[9] == "K")
+            {
+                printf("SectorOS Kernel "); printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD);
+            }
+            else
+            {
+                printf("SectorOS Kernel "); printf(KERNEL_VERSION); printf(" "); printf(KERNEL_BUILD);
+            }
+        }
+        else if (key_buffer[0] == "v" && key_buffer[1] == "g" && key_buffer[2] == "a")
+        {
+            COMNAME = "vga";
+            PVGA();
+        }
+        else if (key_buffer[0] == "l" && key_buffer[1] == "s" && key_buffer[2] == "p" && key_buffer[3] == "t")
+        {
+            COMNAME = "lspt";
+            PrintPartitions();
+        }
+        else if(key_buffer[0] == "t" && key_buffer[1] == "s" && key_buffer[2] == "k")
+        {
+            esp1 = (uint32_t)taskManager.Schedule((CPUState*)esp1);
+            printf("esp1 is :"); printHex(esp1); printf("\n");
+            printf("esp2 is :"); printHex(esp2);
+            isESPChanged = true;
+        }
+        else if (key_buffer[0] == "e" && key_buffer[1] == "x" && key_buffer[2] == "p" && key_buffer[3] == "o" && key_buffer[4] == "r" && key_buffer[5] == "t")
+        {
+            COMNAME = "export";
+
+            if (key_buffer[7] == "S" && key_buffer[8] == "P" && key_buffer[9] == "=" )
+            {
+                SPIndex = 0;
+
+                for (int i = 10; key_buffer[i] != "\n"; i++)
+                {
+                    SP[SPIndex] = key_buffer[i];
+                    SPIndex++;
+                }
+                printf("SP is set to : ");
+                for (int i = 0; i < SPIndex; i++)
+                {
+                    printf(SP[i]);
+                }
+            }
+        }
+        else
+        {
+            printf("Unknown Command. Type help in console to get all the commands");
+        }
+        if(!isTxtMode){
+            printf("\n");
+            for (int i = 0; SPIndex > i; i++)
+            {
+                printf(SP[i]);
+            }
+            
+        }
+        serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
+        clear_key_buffer();
     }
-    serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
-    clear_key_buffer();
 }
 
 void KeyboardDriver::returnHScreen()
@@ -572,4 +614,3 @@ void KeyboardDriver::returnHScreen()
     }
     isTxtMode = false;
 }
-

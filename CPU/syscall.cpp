@@ -1,6 +1,7 @@
 #include "syscall.h"
 
 void printf(char*);
+PowerControl syscontrol;
 
 SyscallHandler::SyscallHandler(InterruptManager* interruptManager, uint8_t InterruptNumber)
 :InterruptHandler(InterruptNumber  + interruptManager->HardwareInterruptOffset(), interruptManager)
@@ -18,8 +19,12 @@ uint32_t SyscallHandler::HandleInterrupt(uint32_t esp)
 
     switch(cpu->eax)
     {
-        case 4:
+        case 1: // sys_print
             printf((char*)cpu->ebx);
+            break;
+
+        case 2: // sys_reboot
+            syscontrol.reboot();
             break;
 
         default:

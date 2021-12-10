@@ -1,7 +1,7 @@
 #ifndef __MOUSE_H
 #define __MOUSE_H
 
-#include "../Includes/types.h"
+#include "../Include/types.h"
 #include "IOPorts.h"
 #include "../CPU/Interrupts.h"
 #include "Driver.h"

@@ -2,7 +2,7 @@
 #define __HDD_ATA_H
 
 #include "IOPorts.h"
-#include "../Includes/types.h"
+#include "../Include/types.h"
 
 
 class AdvancedTechnologyAttachment

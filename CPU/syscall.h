@@ -1,8 +1,9 @@
 #ifndef __SYSCALL_H
 #define __SYSCALL_H
 
-#include "../Includes/types.h"
+#include "../Include/types.h"
 #include "Interrupts.h"
+#include "PowerControl.h"
 
 class SyscallHandler : public InterruptHandler
 {

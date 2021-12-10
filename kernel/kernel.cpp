@@ -1,19 +1,19 @@
-#include "../Includes/types.h"
+#include "../Include/types.h"
 #include "gdt.h"
 #include"../CPU/Interrupts.h"
 #include "../Drivers/IOPorts.h"
 #include "../Drivers/Keyboard.h"
-#include "../Includes/multiboot.h"
+#include "../Include/multiboot.h"
 #include "../CPU/syscall.h"
 #include "../Drivers/Mouse.h"
 #include "../Drivers/Driver.h"
 #include "../Drivers/RTC.h"
 #include "../Hardcom/pci.h"
 #include "../Hardcom/SerialPort.h"
-#include "../Includes/Public_VAR.h"
+#include "../Include/Public_VAR.h"
 #include "MultiTask.h"
 #include "../Memory/MemoryManagement.h"
-#include "../Includes/Debug.h"
+#include "../Include/Debug.h"
 #include "../Drivers/HDD-ATA.h"
 #include "../Drivers/VGADriver.h"
 #include "../Filesystem/MSDOSPT.h"
@@ -662,6 +662,54 @@ int detect_cpu(void)
 	return 0;
 }
 
+class cshell : public CustomShell
+{
+public:
+    cshell()
+    {
+        printf("lol");
+    }
+    char *CharBuffer[256];
+
+    virtual void clearBuffer()
+    {
+        for(int i = 0; i < 256; i++)
+        {
+            CharBuffer[i] = 0x00;
+        }
+        CharBufferIndex = 0;
+    }
+
+    virtual void Shell()
+    {
+        printf("\n");
+        for (int i = 0; i < 256; i++)
+        {
+            printf(CharBuffer[i]);
+        }
+        if (CharBuffer[1] == "e" && CharBuffer[2] == "c" && CharBuffer[3] == "h" && CharBuffer[4] == "o")
+        {
+            for (int i = 7; CharBuffer[i] != "\n"; i++)
+            {
+                printf(CharBuffer[i]);
+            }
+        }
+        if(CharBuffer[2] == "e")
+        {
+            printf("elol");
+        }
+        else
+        {
+            printf(INTTOCHARPOINT(CharBufferIndex));
+        }
+        printf("\n");
+        clearBuffer();
+        asm("int $0x80"
+            :
+            : "a"(1), "b"("root@secos:~#> "));
+    }
+};
+
 class MouseToConsole : public MouseEventHandler
 {
     int8_t x, y;
@@ -718,7 +766,8 @@ void taskB()
     TaskManager taskManager;
     GlobalDescriptorTable gdt;
     InterruptManager interrupts(0x20, &gdt, &taskManager);
-    KeyboardDriver boardDriver(&interrupts);
+    cshell she;
+    KeyboardDriver boardDriver(&interrupts, &she);
     DriverManager drvmgr;
     drvmgr.AddDriver(&boardDriver);
     PCI PCICONT;
@@ -734,7 +783,8 @@ void taskA()
     TaskManager taskManager;
     GlobalDescriptorTable gdt;
     InterruptManager interrupts(0x20, &gdt, &taskManager);
-    KeyboardDriver boardDriver(&interrupts);
+    cshell s;
+    KeyboardDriver boardDriver(&interrupts, &s);
     DriverManager drvmgr;
     drvmgr.AddDriver(&boardDriver);
     PCI PCICONT;
@@ -790,7 +840,10 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t multiboot_m
     DriverManager drvmgr;
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 1]...\n");
-    KeyboardDriver hexboardDriver(&interrupts);
+
+    cshell sh;
+
+    KeyboardDriver hexboardDriver(&interrupts, &sh);
     sp.logToSerialPort("\nHardware initialising stage 1 finished");
     
 
@@ -861,7 +914,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t multiboot_m
 
     SPIndex = 15;
 
-    asm("int $0x80" : : "a" (4), "b" ("root@secos:~#> ")); // Used syscall to print this prompt
+    asm("int $0x80" : : "a" (1), "b" ("root@secos:~#> ")); // Used syscall to print this prompt
     SPOMEMLOC(sp);
 
     while(1);

@@ -1,7 +1,7 @@
 #ifndef __GDT_H
 #define __GDT_H
 
-    #include "../Includes/types.h"
+    #include "../Include/types.h"
 
     class GlobalDescriptorTable
     {
