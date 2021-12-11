@@ -21,9 +21,7 @@ public:
     ~CustomShell();
     virtual void Shell();
     virtual void clearBuffer();
-    char* CharBuffer[256];
-    int CharBufferIndex;
-
+    virtual void OnKeyDown(uint8_t key);
 };
 
 class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyboard
@@ -40,12 +38,13 @@ public:
     KeyboardDriver(InterruptManager* manager, CustomShell* cshell);
     ~KeyboardDriver();
     virtual uint32_t HandleInterrupt(uint32_t esp);
-    // To change the keycode to ascii to write it into string
     TaskManager taskManager;
     uint32_t esp1;
     CustomShell* shell;
     uint32_t esp2;
-    char* KeycodeToASCII(uint8_t Keycode);
+    char *key_buffer[256];    // To Save the keystrokes in memory to use them later. Max number keystroke to save in the buffer is 256 Chars
+    int key_buffer_index = 0; // The index of the key_buffer
+
     // To clear the keystrokes in the keyboard buffer
     void clear_key_buffer(); 
     // To activate the keyboard driver

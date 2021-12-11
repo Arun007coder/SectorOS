@@ -3,6 +3,7 @@
 #include"../CPU/Interrupts.h"
 #include "../Drivers/IOPorts.h"
 #include "../Drivers/Keyboard.h"
+#include "../Shell/Shell.h"
 #include "../Include/multiboot.h"
 #include "../CPU/syscall.h"
 #include "../Drivers/Mouse.h"
@@ -22,6 +23,9 @@ static uint8_t cursory;
 static uint8_t cursorx;
 static bool useMouse = true;
 bool isused;
+
+static uint8_t x=0, y=0;
+
 bool isTxtMode;
 extern const void* mb;
 uint32_t mm;
@@ -244,7 +248,6 @@ void ColourPrint(int type)
 
 void printf(char* str)
 {
-    static uint8_t x=0, y=0;
     uint8_t curx;
     uint8_t cury;
 
@@ -425,7 +428,6 @@ void PVGA()
 
 void printfchar(char st)
 {
-    static uint8_t x=0, y=0;
 
     //static uint16_t* VideoMemory = (uint16_t*)0xb8000;
 
@@ -662,45 +664,83 @@ int detect_cpu(void)
 	return 0;
 }
 
+#define IndexOffset 0
+
+/*
 class cshell : public CustomShell
 {
+
 public:
     cshell()
     {
         printf("lol");
+        CharBufferIndex = 0;
+        for(int i = 0; i < 256; i++)
+        {
+            CharBuffer[i] = "\0";
+        }
     }
-    char *CharBuffer[256];
 
     virtual void clearBuffer()
     {
         for(int i = 0; i < 256; i++)
         {
-            CharBuffer[i] = 0x00;
+            CharBuffer[i] = "\0";
         }
         CharBufferIndex = 0;
+    }
+
+    virtual void OnKeyDown(uint8_t key)
+    {
+        if(key < 0x80 & key != 0x3A & key != 0x2A & key != 0x2A & key != 0x36 & key != 0x3A & key != 0x0E & key != 0x38 & key != 0x1D )
+        {
+            CharBuffer[CharBufferIndex] = KeycodeToASCII(key);
+            CharBufferIndex += 1;
+        }
+        else if (key == 0x3E)
+        {
+            clearBuffer();
+            CharBufferIndex = 0;
+        }
     }
 
     virtual void Shell()
     {
         printf("\n");
-        for (int i = 0; i < 256; i++)
+        if(CharBuffer[0] == 0x61 & CharBuffer[1] == "c" & CharBuffer[2] == "h" & CharBuffer[3] == "o")
         {
-            printf(CharBuffer[i]);
-        }
-        if (CharBuffer[1] == "e" && CharBuffer[2] == "c" && CharBuffer[3] == "h" && CharBuffer[4] == "o")
-        {
-            for (int i = 7; CharBuffer[i] != "\n"; i++)
+            if (CharBuffer[4] == "\0")
             {
-                printf(CharBuffer[i]);
+                printf("cannot print null character");
+            }
+            else if (CharBuffer[5] == "$" && CharBuffer[6] == "S" && CharBuffer[7] == "P")
+            {
+                for (int i = 0; i < SPIndex; i++)
+                {
+                    printf(SP[i]);
+                }
+            }
+            else
+            {
+                for (int i = 5; CharBuffer[i] != "\n"; i++)
+                {
+                    printf(CharBuffer[i]);
+                }
             }
         }
-        if(CharBuffer[2] == "e")
+        if(CharBuffer[0] == "e")
         {
             printf("elol");
         }
         else
         {
-            printf(INTTOCHARPOINT(CharBufferIndex));
+            for (int i = 0x00; i < CharBufferIndex; i++)
+            {
+                printHex(i);
+                printf(" : ");
+                printf(CharBuffer[i]);
+                printf("\n");
+            }
         }
         printf("\n");
         clearBuffer();
@@ -709,6 +749,7 @@ public:
             : "a"(1), "b"("root@secos:~#> "));
     }
 };
+*/
 
 class MouseToConsole : public MouseEventHandler
 {
@@ -766,7 +807,7 @@ void taskB()
     TaskManager taskManager;
     GlobalDescriptorTable gdt;
     InterruptManager interrupts(0x20, &gdt, &taskManager);
-    cshell she;
+    CShell she;
     KeyboardDriver boardDriver(&interrupts, &she);
     DriverManager drvmgr;
     drvmgr.AddDriver(&boardDriver);
@@ -783,7 +824,7 @@ void taskA()
     TaskManager taskManager;
     GlobalDescriptorTable gdt;
     InterruptManager interrupts(0x20, &gdt, &taskManager);
-    cshell s;
+    CShell s;
     KeyboardDriver boardDriver(&interrupts, &s);
     DriverManager drvmgr;
     drvmgr.AddDriver(&boardDriver);
@@ -841,7 +882,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t multiboot_m
 
     printf("\nSYSMSG: Initializing Hardwares [Stage 1]...\n");
 
-    cshell sh;
+    CShell sh;
 
     KeyboardDriver hexboardDriver(&interrupts, &sh);
     sp.logToSerialPort("\nHardware initialising stage 1 finished");
@@ -916,6 +957,8 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t multiboot_m
 
     asm("int $0x80" : : "a" (1), "b" ("root@secos:~#> ")); // Used syscall to print this prompt
     SPOMEMLOC(sp);
+
+    IsShellDisabled = true;
 
     while(1);
 }

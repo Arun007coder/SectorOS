@@ -16,6 +16,7 @@ CPU/PowerControl.o \
 Drivers/Keyboard.o \
 Drivers/HDD-ATA.o \
 Drivers/VGADriver.o \
+Shell/Shell.o \
 CPU/syscall.o \
 Filesystem/MSDOSPT.o \
 Filesystem/FATFS.o \
