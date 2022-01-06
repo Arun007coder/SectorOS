@@ -4,9 +4,11 @@
 #include "../Include/types.h"
 #include "Interrupts.h"
 #include "PowerControl.h"
+#include "../kernel/MultiTask.h"
 
 class SyscallHandler : public InterruptHandler
 {
+    TaskManager taskManager;
 public:
     SyscallHandler(InterruptManager* interruptManager, uint8_t InterruptNumber);
     ~SyscallHandler();

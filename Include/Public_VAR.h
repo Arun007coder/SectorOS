@@ -4,12 +4,12 @@
 inline char* OS_NAME = "SectorOS";
 
 inline char* KERNEL_NAME = "SectorOS";
-inline char* KERNEL_VERSION = "V2.1.6";
-inline char* KERNEL_BUILD = "Build: 2021-12-11";
+inline char* KERNEL_VERSION = "V2.2.1";
+inline char* KERNEL_BUILD = "Build: 2022-01-06";
 inline char* KERNEL_ARCH = "x86";
 
 inline char* SHELL_NAME = "SOSH";
-inline char* SHELL_VER = "V1.1.2";
+inline char* SHELL_VER = "V1.1.3";
 
 // START Environment variables
 inline char* SP[30]; // Shell Prompt

@@ -65,3 +65,10 @@ CPUState* TaskManager::Schedule(CPUState* cpustate)
         currentTask %= numTasks;
     return tasks[currentTask]->cpustate;
 }
+
+CPUState* TaskManager::SwitchTask(int tasknum, CPUState* CSTATE)
+{
+    if(tasknum >= numTasks)
+        return tasks[tasknum]->cpustate;
+    return tasks[tasknum]->cpustate;
+}

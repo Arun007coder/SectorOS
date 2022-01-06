@@ -12,7 +12,7 @@ char* INTTOCHARPOINT(int num);
 void ColourPrint(int type);
 bool txtcolor;
 bool isESPChanged = false;
-GlobalDescriptorTable gdt;
+inline GlobalDescriptorTable gdt;
 void taskA();
 void taskB();
 const void* mb;
@@ -54,10 +54,6 @@ CommandPort(0x64)
     clear_key_buffer();
     isTxtMode = false;
     this->shell = shell;
-    Task task1(&gdt, taskA);
-    Task task2(&gdt, taskB);
-    taskManager.AddTask(&task1);
-    taskManager.AddTask(&task2);
 
     for(int i = 0; i < 30; i++)
     {
@@ -497,10 +493,10 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         }
         else if(key_buffer[0] == "t" && key_buffer[1] == "s" && key_buffer[2] == "k")
         {
-            esp1 = (uint32_t)taskManager.Schedule((CPUState*)esp1);
-            printf("esp1 is :"); printHex(esp1); printf("\n");
-            printf("esp2 is :"); printHex(esp2);
-            isESPChanged = true;
+            char* arg1 = key_buffer[4]; 
+            int tsknum = arg1[0] - '0';
+            asm("int $0x80" : : "a" (0x04), "b" (tsknum));
+            //asm("int $0x80" : : "a" (0x05));
         }
         else if (key_buffer[0] == "e" && key_buffer[1] == "x" && key_buffer[2] == "p" && key_buffer[3] == "o" && key_buffer[4] == "r" && key_buffer[5] == "t")
         {

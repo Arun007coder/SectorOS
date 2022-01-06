@@ -48,6 +48,7 @@ public:
     TaskManager();
     ~TaskManager();
     bool AddTask(Task* task);
+    CPUState* SwitchTask(int tasknum, CPUState* CSTATE);
     CPUState* Schedule(CPUState* cpustate);
 };
 
