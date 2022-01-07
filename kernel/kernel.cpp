@@ -1125,7 +1125,7 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
 
     printf("Allocating Memory....\n");
     PrintMEM(multiboot_structure);
-    PrintPartitions();
+    //PrintPartitions();
     sp.logToSerialPort("\nHardware initialising stage 3 finished");
     detect_cpu();
 

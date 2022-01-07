@@ -3,6 +3,11 @@
 void printf(char*);
 void printHex(uint8_t Key);
 
+char *PATH;
+char *lst_dir;
+char *lst_dir2;
+int PATHIndex = 0;
+
 void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset)
 {
     BiosParameterBlock32 bpb;
@@ -36,7 +41,37 @@ void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset)
         printf(foo);
 
         if ((dirent[i].attributes & 0x10) == 0x10) // directory
+        {
+            int ZERO = 0;
+
+            if (lst_dir2 == (char*)dirent[i].name)
+            {
+                continue;
+            }
+            else
+            {
+                if (lst_dir == (char *)dirent[i].name)
+                {
+                    continue;
+                }
+                else
+                {
+                    for (int x = 0; dirent[i].name[x] != ' ' && x < 8; x++)
+                    {
+                        PATH[PATHIndex] = dirent[i].name[x];
+                        PATHIndex++;
+                    }
+                    PATH[PATHIndex] = '/';
+                    PATHIndex++;
+                    printf("\nPATH: ");
+                    printf(PATH);
+                    printf("\n");
+                }
+            }
+            lst_dir2 = lst_dir;
+            lst_dir = (char *)dirent[i].name;
             continue;
+        }   
 
         uint32_t firstFileCluster = ((uint32_t)dirent[i].firstClusterHi) << 16 | ((uint32_t)dirent[i].firstClusterLow);
 

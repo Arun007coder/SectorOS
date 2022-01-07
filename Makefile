@@ -43,7 +43,7 @@ prep:
 
 SectorOS_Kernel.bin: LILO/linker.ld $(objects)
 	@printf "\e[1;33m[2/3]Linking object files\n\e[0m"
-	@$(ld) $(LDFLAGS) -T $< -o $@ $(objects)
+	@$(LD) $(LDFLAGS) -T $< -o $@ $(objects)
 	@printf "Linking $(objects) to make $@\n"
 	@printf "Linking finished\n"
 
