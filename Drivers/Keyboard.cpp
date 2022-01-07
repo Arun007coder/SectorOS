@@ -520,13 +520,6 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         }
         else
         {
-            for (int i = 0x00; i < key_buffer_index; i++)
-            {
-                printHex(i);
-                printf(" : ");
-                printf(key_buffer[i]);
-                printf("\n");
-            }
             printf("Unknown Command. Type help in console to get all the commands");
         }
         if(!isTxtMode){

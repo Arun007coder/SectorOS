@@ -3,17 +3,18 @@
 void printf(char* );
 void printHex(uint8_t );
 
-AdvancedTechnologyAttachment::AdvancedTechnologyAttachment(bool master, uint16_t portBase)
-:   dataPort(portBase),
-    errorPort(portBase + 0x1),
-    sectorCountPort(portBase + 0x2),
-    lbaLowPort(portBase + 0x3),
-    lbaMidPort(portBase + 0x4),
-    lbaHiPort(portBase + 0x5),
-    devicePort(portBase + 0x6),
-    commandPort(portBase + 0x7),
-    controlPort(portBase + 0x206)
+AdvancedTechnologyAttachment::AdvancedTechnologyAttachment(uint16_t portBase, bool master)
+    : dataPort(portBase),
+      errorPort(portBase + 1),
+      sectorCountPort(portBase + 2),
+      lbaLowPort(portBase + 3),
+      lbaMidPort(portBase + 4),
+      lbaHiPort(portBase + 5),
+      devicePort(portBase + 6),
+      commandPort(portBase + 7),
+      controlPort(portBase + 0x206)
 {
+    bytesPerSector = 512;
     this->master = master;
 }
 
@@ -28,135 +29,133 @@ void AdvancedTechnologyAttachment::Identify()
 
     devicePort.WriteToPort(0xA0);
     uint8_t status = commandPort.ReadFromPort();
-    if(status == 0xFF)
+    if (status == 0xFF)
         return;
-
 
     devicePort.WriteToPort(master ? 0xA0 : 0xB0);
     sectorCountPort.WriteToPort(0);
     lbaLowPort.WriteToPort(0);
     lbaMidPort.WriteToPort(0);
     lbaHiPort.WriteToPort(0);
-    commandPort.WriteToPort(0xEC); // identify command
-
+    commandPort.WriteToPort(0xEC);
 
     status = commandPort.ReadFromPort();
-    if(status == 0x00)
-        return;
+    if (status == 0x00)
+        return; // no device
 
-    while(((status & 0x80) == 0x80)
-       && ((status & 0x01) != 0x01))
+    while (((status & 0x80) == 0x80) && ((status & 0x01) != 0x01))
         status = commandPort.ReadFromPort();
 
-    if(status & 0x01)
+    if (status & 0x01)
     {
         printf("ERROR");
         return;
     }
 
-    for(int i = 0; i < 35; i++)
+    for (uint16_t i = 0; i < 256; i++)
     {
-        
         uint16_t data = dataPort.ReadFromPort();
-        char *text = "\0\0";
-        text[0] = (data >> 8) & 0xFF;
-        text[1] = data & 0xFF;
-        printf(text);
+        char *foo = "  \0";
+        foo[1] = (data >> 8) & 0x00FF;
+        foo[0] = data & 0x00FF;
+        printf(foo);
     }
-    printf("\n");
 }
 
-void AdvancedTechnologyAttachment::Read28(uint32_t sectorNum, uint8_t* data, int count)
+void AdvancedTechnologyAttachment::Read28(uint32_t sector, uint8_t *data, int count)
 {
-    if(sectorNum > 0x0FFFFFFF)
+    if (sector & 0xF0000000)
+        return;
+    if (count > bytesPerSector)
         return;
 
-    devicePort.WriteToPort( (master ? 0xE0 : 0xF0) | ((sectorNum & 0x0F000000) >> 24) );
+    devicePort.WriteToPort((master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
     errorPort.WriteToPort(0);
     sectorCountPort.WriteToPort(1);
-    lbaLowPort.WriteToPort(  sectorNum & 0x000000FF );
-    lbaMidPort.WriteToPort( (sectorNum & 0x0000FF00) >> 8);
-    lbaLowPort.WriteToPort( (sectorNum & 0x00FF0000) >> 16 );
+
+    lbaLowPort.WriteToPort(sector & 0x000000FF);
+    lbaMidPort.WriteToPort((sector & 0x0000FF00) >> 8);
+    lbaHiPort.WriteToPort((sector & 0x00FF0000) >> 16);
     commandPort.WriteToPort(0x20);
 
     uint8_t status = commandPort.ReadFromPort();
-    while(((status & 0x80) == 0x80)
-       && ((status & 0x01) != 0x01))
+    while (((status & 0x80) == 0x80) && ((status & 0x01) != 0x01))
         status = commandPort.ReadFromPort();
 
-    if(status & 0x01)
+    if (status & 0x01)
     {
         printf("ERROR");
         return;
     }
 
+    printf("Reading from ATA: ");
 
-    printf("Reading ATA Drive: ");
-
-    for(uint16_t i = 0; i < count; i += 2)
+    for (uint16_t i = 0; i < count; i += 2)
     {
         uint16_t wdata = dataPort.ReadFromPort();
 
-        data[i] = wdata & 0x00FF;
-        if(i+1 < count)
-            data[i+1] = (wdata >> 8) & 0x00FF;
-    }    
+        /*
+        char* foo = "  \0";
+        foo[1] = (wdata >> 8) & 0x00FF;
+        foo[0] = wdata & 0x00FF;
+        printf(foo);
+        */
 
-    for(int i = count + (count%2); i < 512; i += 2)
+        data[i] = wdata & 0x00FF;
+        if (i + 1 < count)
+            data[i + 1] = (wdata >> 8) & 0x00FF;
+    }
+
+    for (uint16_t i = count + (count % 2); i < bytesPerSector; i += 2)
         dataPort.ReadFromPort();
 }
 
-void AdvancedTechnologyAttachment::Write28(uint32_t sectorNum, uint8_t* data, uint32_t count)
+void AdvancedTechnologyAttachment::Write28(uint32_t sector, uint8_t *data, int count)
 {
-    if(sectorNum > 0x0FFFFFFF)
+    if (sector & 0xF0000000)
         return;
-    if(count > 512)
+    if (count > bytesPerSector)
         return;
 
-
-    devicePort.WriteToPort( (master ? 0xE0 : 0xF0) | ((sectorNum & 0x0F000000) >> 24) );
+    devicePort.WriteToPort((master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
     errorPort.WriteToPort(0);
     sectorCountPort.WriteToPort(1);
-    lbaLowPort.WriteToPort(  sectorNum & 0x000000FF );
-    lbaMidPort.WriteToPort( (sectorNum & 0x0000FF00) >> 8);
-    lbaLowPort.WriteToPort( (sectorNum & 0x00FF0000) >> 16 );
+
+    lbaLowPort.WriteToPort(sector & 0x000000FF);
+    lbaMidPort.WriteToPort((sector & 0x0000FF00) >> 8);
+    lbaHiPort.WriteToPort((sector & 0x00FF0000) >> 16);
     commandPort.WriteToPort(0x30);
 
+    printf("Writing to ATA: ");
 
-    printf("Writing to ATA Drive: ");
-
-    for(int i = 0; i < count; i += 2)
+    for (uint16_t i = 0; i < count; i += 2)
     {
         uint16_t wdata = data[i];
-        if(i+1 < count)
-            wdata |= ((uint16_t)data[i+1]) << 8;
-        dataPort.WriteToPort(wdata);
+        if (i + 1 < count)
+            wdata |= ((uint16_t)data[i + 1]) << 8;
 
-        char *text = "  \0";
-        text[0] = (wdata >> 8) & 0xFF;
-        text[1] = wdata & 0xFF;
-        printf(text);
+        char *foo = "  \0";
+        foo[1] = (wdata >> 8) & 0x00FF;
+        foo[0] = wdata & 0x00FF;
+        printf(foo);
+
+        dataPort.WriteToPort(wdata);
     }
 
-    for(int i = count + (count%2); i < 512; i += 2)
+    for (uint16_t i = count + (count % 2); i < bytesPerSector; i += 2)
         dataPort.WriteToPort(0x0000);
-
 }
 
 void AdvancedTechnologyAttachment::Flush()
 {
-    devicePort.WriteToPort( master ? 0xE0 : 0xF0 );
+    devicePort.WriteToPort(master ? 0xE0 : 0xF0);
     commandPort.WriteToPort(0xE7);
 
     uint8_t status = commandPort.ReadFromPort();
-    if(status == 0x00)
-        return;
-
-    while(((status & 0x80) == 0x80)
-       && ((status & 0x01) != 0x01))
+    while (((status & 0x80) == 0x80) && ((status & 0x01) != 0x01))
         status = commandPort.ReadFromPort();
 
-    if(status & 0x01)
+    if (status & 0x01)
     {
         printf("ERROR");
         return;

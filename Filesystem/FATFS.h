@@ -20,7 +20,7 @@ struct BiosParameterBlock32
     uint16_t headCount;
     uint32_t hiddenSectors;
     uint32_t totalSectorCount;
-    
+
     uint32_t tableSize;
     uint16_t extFlags;
     uint16_t fatVersion;
@@ -35,8 +35,7 @@ struct BiosParameterBlock32
     uint8_t volumeLabel[11];
     uint8_t fatTypeLabel[8];
 } __attribute__((packed));
-        
-        
+
 struct DirectoryEntryFat32
 {
     uint8_t name[8];
@@ -53,8 +52,7 @@ struct DirectoryEntryFat32
     uint16_t firstClusterLow;
     uint32_t size;
 } __attribute__((packed));
-    
-    
-    void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset);
+
+void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset);
 
 #endif

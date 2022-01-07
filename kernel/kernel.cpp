@@ -803,7 +803,7 @@ void printHex(uint8_t Key)
 
 void PrintPartitions()
 {
-    AdvancedTechnologyAttachment ata0s(false, 0x1F0);
+    AdvancedTechnologyAttachment ata0s(0x1F0, false);
     MSDOSPartitionTable::ReadPartitions(&ata0s);
 }
 
@@ -966,20 +966,20 @@ int do_intel(void)
 void PrintSATA()
 {
     printf("\nS-ATA primary master: ");
-    AdvancedTechnologyAttachment ata0m(true, 0x1F0);
+    AdvancedTechnologyAttachment ata0m(0x1F0, true);
     ata0m.Identify();
 
     printf("\nS-ATA primary slave: ");
-    AdvancedTechnologyAttachment ata0s(false, 0x1F0);
+    AdvancedTechnologyAttachment ata0s(0x1F0, false);
     ata0s.Identify();
     printf("\n");
 
     printf("\nS-ATA secondary master: ");
-    AdvancedTechnologyAttachment ata1m(true, 0x170);
+    AdvancedTechnologyAttachment ata1m(0x170, true);
     ata1m.Identify();
 
     printf("\nS-ATA secondary slave: ");
-    AdvancedTechnologyAttachment ata1s(false, 0x170);
+    AdvancedTechnologyAttachment ata1s(0x170, false);
     ata1s.Identify();
     printf("\n");
 }
@@ -1003,93 +1003,6 @@ int detect_cpu(void)
     return 0;
 }
 
-#define IndexOffset 0
-
-/*
-class cshell : public CustomShell
-{
-
-public:
-    cshell()
-    {
-        printf("lol");
-        CharBufferIndex = 0;
-        for(int i = 0; i < 256; i++)
-        {
-            CharBuffer[i] = "\0";
-        }
-    }
-
-    virtual void clearBuffer()
-    {
-        for(int i = 0; i < 256; i++)
-        {
-            CharBuffer[i] = "\0";
-        }
-        CharBufferIndex = 0;
-    }
-
-    virtual void OnKeyDown(uint8_t key)
-    {
-        if(key < 0x80 & key != 0x3A & key != 0x2A & key != 0x2A & key != 0x36 & key != 0x3A & key != 0x0E & key != 0x38 & key != 0x1D )
-        {
-            CharBuffer[CharBufferIndex] = KeycodeToASCII(key);
-            CharBufferIndex += 1;
-        }
-        else if (key == 0x3E)
-        {
-            clearBuffer();
-            CharBufferIndex = 0;
-        }
-    }
-
-    virtual void Shell()
-    {
-        printf("\n");
-        if(CharBuffer[0] == 0x61 & CharBuffer[1] == "c" & CharBuffer[2] == "h" & CharBuffer[3] == "o")
-        {
-            if (CharBuffer[4] == "\0")
-            {
-                printf("cannot print null character");
-            }
-            else if (CharBuffer[5] == "$" && CharBuffer[6] == "S" && CharBuffer[7] == "P")
-            {
-                for (int i = 0; i < SPIndex; i++)
-                {
-                    printf(SP[i]);
-                }
-            }
-            else
-            {
-                for (int i = 5; CharBuffer[i] != "\n"; i++)
-                {
-                    printf(CharBuffer[i]);
-                }
-            }
-        }
-        if(CharBuffer[0] == "e")
-        {
-            printf("elol");
-        }
-        else
-        {
-            for (int i = 0x00; i < CharBufferIndex; i++)
-            {
-                printHex(i);
-                printf(" : ");
-                printf(CharBuffer[i]);
-                printf("\n");
-            }
-        }
-        printf("\n");
-        clearBuffer();
-        asm("int $0x80"
-            :
-            : "a"(1), "b"("root@secos:~#> "));
-    }
-};
-*/
-
 class MouseToConsole : public MouseEventHandler
 {
     int8_t x, y;
@@ -1098,16 +1011,6 @@ public:
     MouseToConsole()
     {
     }
-
-    /*
-    virtual void OnMouseUp(uint8_t button)
-    {
-        if (button == 0x01)
-            printf("you clicked");
-        else if (button == 0x03)
-            printf("hhh");
-    }
-    */
 
     virtual void OnActivate()
     {
@@ -1188,22 +1091,16 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
 
     InterruptManager interrupts(0x20, &gdt, &taskManager);
     intMngr = &interrupts;
-
     SyscallHandler syscalls(&interrupts, 0x80);
     shand = &syscalls;
-
     DriverManager drvmgr;
-
     drvMngr = &drvmgr;
-
     printf("\nSYSMSG: Initializing Hardwares [Stage 1]...\n");
-
     CShell sh;
 
     KeyboardDriver hexboardDriver(&interrupts, &sh);
     kbrd = &hexboardDriver;
     sp.logToSerialPort("\nHardware initialising stage 1 finished");
-
     drvmgr.AddDriver(&hexboardDriver);
 
     MouseToConsole msmgr;
@@ -1219,39 +1116,22 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
 
     PCI PCICONT;
     PCICONT.SelectDrivers(&drvmgr, &interrupts);
-
     printf("\nSYSMSG: Initializing Hardwares [Stage 2]...");
     drvmgr.activateall();
 
     sp.logToSerialPort("\nHardware initialising stage 2 finished");
     sp.logToSerialPort("\nDriverManager started");
-
     printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
 
-    PrintSATA();
-
-    PrintPartitions();
-
-    /*
-    AdvancedTechnologyAttachment ata0s(false, 0x1F0);
-    ata0s.Write28(4, (uint8_t*)"Hello There", 12);
-    ata0s.Flush();
-    */
-
     printf("Allocating Memory....\n");
-
     PrintMEM(multiboot_structure);
-
+    PrintPartitions();
     sp.logToSerialPort("\nHardware initialising stage 3 finished");
-
     detect_cpu();
 
     printf("\5");
-
     ColourPrint(0);
-
     interrupts.Activate();
-
     sp.logToSerialPort("\nInterrupt manager started");
 
     printf("Welcome to SectorOS ");
@@ -1264,20 +1144,14 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
     printf(SHELL_NAME);
     printf(" ");
     printf(SHELL_VER);
-
     printf("\n\n");
 
     printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
-
-    // ata0s.Read28(4);
-
     sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 
     SPIndex = 15;
 
-    asm("int $0x80"
-        :
-        : "a"(1), "b"("root@secos:~#> ")); // Used syscall to print this prompt
+    asm("int $0x80" :: "a"(1), "b"("root@secos:~#> ")); // Used syscall to print this prompt
     SPOMEMLOC(sp);
 
     while (1);

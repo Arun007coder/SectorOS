@@ -18,12 +18,15 @@ protected:
     port8BIT devicePort;
     port8BIT commandPort;
     port8BIT controlPort;
+
+    uint16_t bytesPerSector;
+
 public:
-    AdvancedTechnologyAttachment(bool master, uint16_t portBase);
+    AdvancedTechnologyAttachment(uint16_t portBase, bool master);
     ~AdvancedTechnologyAttachment();
     void Identify();
     void Read28(uint32_t sectorNum, uint8_t* data, int count = 512);
-    void Write28(uint32_t sectorNum, uint8_t* data, uint32_t count);
+    void Write28(uint32_t sectorNum, uint8_t* data, int count);
     void Flush();
 };
 
