@@ -1,4 +1,6 @@
 CPP=gcc
+AS=as
+LD=ld
 CPPFLAGS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings
 ASFLAGS = --32
 LDFLAGS = -melf_i386
@@ -37,11 +39,11 @@ prep:
 
 %.o: %.s
 	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"
-	as $(ASFLAGS) -o $@ $<
+	$(AS) $(ASFLAGS) -o $@ $<
 
 SectorOS_Kernel.bin: LILO/linker.ld $(objects)
 	@printf "\e[1;33m[2/3]Linking object files\n\e[0m"
-	@ld $(LDFLAGS) -T $< -o $@ $(objects)
+	@$(ld) $(LDFLAGS) -T $< -o $@ $(objects)
 	@printf "Linking $(objects) to make $@\n"
 	@printf "Linking finished\n"
 
@@ -94,19 +96,3 @@ stopVBOX:
 clean:
 	@printf "\e[1;31mCleaning the object files...\n\e[0m"
 	@rm -f $(objects) SectorOS_Kernel.bin SectorOS.iso
-	
-.PHONY: Install-Grub-BIOS
-Install-Grub-BIOS:
-	git clone https://git.savannah.gnu.org/git/grub.git
-	sudo sed -i 's/# deb-src/deb-src/' /etc/apt/sources.list
-	sudo apt update
-	sudo apt-get install build-essential autoconf automake autopoint
-	sudo apt-get build-dep grub-pc
-	ls
-	cd grub && \
-	./bootstrap && \
-	./autogen.sh && \
-	./configure --prefix=$HOME/local --platform=pc && \
-	make && \
-	sudo make install && \
-	@echo Installed Grub-BIOS
