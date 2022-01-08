@@ -5,7 +5,7 @@ inline char* OS_NAME = "SectorOS";
 
 inline char* KERNEL_NAME = "SectorOS";
 inline char* KERNEL_VERSION = "V2.2.2";
-inline char* KERNEL_BUILD = "Build: 2022-01-07";
+inline char* KERNEL_BUILD = "Build: 2022-01-08";
 inline char* KERNEL_ARCH = "x86";
 
 inline char* SHELL_NAME = "SOSH";

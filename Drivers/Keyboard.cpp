@@ -1,7 +1,7 @@
 #include "Keyboard.h"
 
 static bool isCTRLed = false;
-
+bool canNewLine = true;
 
 bool isUSRChanged = false;
 void printf(char *);
@@ -88,7 +88,7 @@ void KeyboardDriver::activate()
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 {
     esp2 = esp;
-    
+
     if(isESPChanged)
     {
         printf("\n");
@@ -348,6 +348,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
             printf("                   ");
             PrintDate();
             printf("                        Type: Shell ");
+            canNewLine = false;
         }
         else if (key_buffer[0] == "s" & key_buffer[1] == "d")
         {
@@ -518,17 +519,27 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
                 }
             }
         }
+        else if (key_buffer[0] == "e" && key_buffer[1] == "x" && key_buffer[2] == "i" && key_buffer[3] == "t")
+        {
+            //power.shutdown();
+        }
         else
         {
-            printf("Unknown Command. Type help in console to get all the commands");
+            printf("Unknown Command \"");
+            for (int i = 0; key_buffer[i] != "\n"; i++)
+            {
+                printf(key_buffer[i]);
+            }
+            printf("\". Type help in console to get all the commands");
         }
         if(!isTxtMode){
-            printf("\n");
+            if (canNewLine)
+                printf("\n");
             for (int i = 0; SPIndex > i; i++)
             {
                 printf(SP[i]);
             }
-            
+            canNewLine = true;
         }
         serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
         clear_key_buffer();

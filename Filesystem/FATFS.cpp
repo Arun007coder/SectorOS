@@ -46,13 +46,13 @@ void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset)
 
             if (lst_dir2 == (char*)dirent[i].name)
             {
-                continue;
+                printf("X");
             }
             else
             {
                 if (lst_dir == (char *)dirent[i].name)
                 {
-                    continue;
+                    printf("Y");
                 }
                 else
                 {

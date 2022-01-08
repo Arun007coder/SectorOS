@@ -1,5 +1,6 @@
 #include "PowerControl.h"
 
+extern uint32_t shutdown();
 
 void PowerControl::reboot()
 {
@@ -25,4 +26,9 @@ bool PowerControl::getPowerState()
 {
     port8BIT pt(0xB0);
     return pt.ReadFromPort() & 0x01;
+}
+
+void PowerControl::shutdown()
+{
+    shutdown();
 }

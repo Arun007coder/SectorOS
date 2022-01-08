@@ -1,6 +1,8 @@
 CPP=gcc
 AS=as
 LD=ld
+ASM=nasm
+ASMFLAGS= -f elf
 CPPFLAGS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings
 ASFLAGS = --32
 LDFLAGS = -melf_i386
@@ -33,6 +35,9 @@ prep:
 	@printf "Preparing...\n"
 	@sudo apt-get install xorriso mtools grub-pc-bin
 
+CPU/PowerControl.o: CPU/PowerControl.cpp CPU/shutdown.o
+	$(CPP) $(CPPFLAGS) -c -o $@ CPU/PowerControl.cpp CPU/shutdown.o
+
 %.o: %.cpp
 	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"
 	$(CPP) $(DEBUG) $(CPPFLAGS) -c -o $@ $<
@@ -40,6 +45,10 @@ prep:
 %.o: %.s
 	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"
 	$(AS) $(ASFLAGS) -o $@ $<
+
+%.o: %.asm
+	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"
+	$(ASM) $(ASMFLAGS) -o $@ $<
 
 SectorOS_Kernel.bin: LILO/linker.ld $(objects)
 	@printf "\e[1;33m[2/3]Linking object files\n\e[0m"

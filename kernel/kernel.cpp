@@ -5,6 +5,7 @@
 #include "../Drivers/Keyboard.h"
 #include "../Shell/Shell.h"
 #include "../Include/multiboot.h"
+#include "../Hardcom/SerialPort.h"
 #include "../CPU/syscall.h"
 #include "../Drivers/Mouse.h"
 #include "../Drivers/Driver.h"
@@ -525,6 +526,32 @@ char *INTTOCHARPOINT(int num)
     return res;
 }
 
+void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
+{
+    port8BIT P1(0x3D4);
+    port8BIT P2(0x3D5);
+
+    P1.WriteToPort(0x0A);
+    P2.WriteToPort((P2.ReadFromPort() & 0xC0) | cursor_start);
+
+    P1.WriteToPort(0x0B);
+    P2.WriteToPort((P2.ReadFromPort() & 0xE0) | cursor_end);
+}
+
+void update_cursor(int x, int y)
+{
+    int VGA_WIDTH = 80;
+    port8BIT P1(0x3D4);
+    port8BIT P2(0x3D5);
+
+    uint16_t pos = y * VGA_WIDTH + x;
+
+    P1.WriteToPort(0x0F);
+    P2.WriteToPort((uint8_t)(pos & 0xFF));
+    P1.WriteToPort(0x0E);
+    P2.WriteToPort((uint8_t)((pos >> 8) & 0xFF));
+}
+
 uint16_t GetAvailableMem()
 {
     port8BIT port(0x70);
@@ -693,6 +720,8 @@ void printf(char *str)
             printf("                        Type: Shell ");
         }
     }
+
+    update_cursor(x, y + 1);
 }
 
 // Uses 10 Character Space
@@ -790,6 +819,8 @@ void printfchar(char st)
         x = 0;
         y = 0;
     }
+
+    update_cursor(x, y + 1);
 }
 
 void printHex(uint8_t Key)
@@ -828,9 +859,7 @@ void PrintMEM(const void *multiboot_structure)
     printf("\n");
 }
 
-#define cpuid(in, a, b, c, d) __asm__("cpuid"                              \
-                                      : "=a"(a), "=b"(b), "=c"(c), "=d"(d) \
-                                      : "a"(in));
+#define cpuid(in, a, b, c, d) __asm__("cpuid"        : "=a"(a), "=b"(b), "=c"(c), "=d"(d): "a"(in));
 
 int do_intel(void)
 {
@@ -1074,6 +1103,7 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m)
 {
+    enable_cursor(0, 0);
     TaskManager taskManager;
     uint32_t mm = multiboot_m;
     printf("Initializing SectorOS Kernel ");
@@ -1138,7 +1168,7 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
     printf(KERNEL_VERSION);
     printf("          ");
     PrintDate();
-    printf("                    Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
+    printf("                      Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
     printf("Initializing ");
     printf(SHELL_NAME);

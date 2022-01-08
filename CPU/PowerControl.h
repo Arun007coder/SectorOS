@@ -13,6 +13,7 @@ public:
     void halt();
     //If running in virtualBox. This function will Stop virtualBox
     void StopVirtualBox();
+    void shutdown(); //!: This function is not implemented yet
 
     //To get the current power state
     bool getPowerState();
