@@ -33,7 +33,7 @@ kernel/kernel.o
 
 prep:
 	@printf "Preparing...\n"
-	@sudo apt-get install xorriso mtools grub-pc-bin
+	@sudo apt-get install xorriso mtools grub-pc-bin nasm build-essential
 
 CPU/PowerControl.o: CPU/PowerControl.cpp CPU/shutdown.o
 	$(CPP) $(CPPFLAGS) -c -o $@ CPU/PowerControl.cpp CPU/shutdown.o
