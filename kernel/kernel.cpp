@@ -700,9 +700,12 @@ void printf(char *str)
         if (y >= 25)
         {
             // ColourPrint(1);
+            char *foo = "                                                                               ";
             isused = true;
+            for (int i = 0; i != 80; i++)
+                foo[i] = VideoMemory[80 * 24 + i];
             for (y = 0; y < 25; y++)
-                for (x = 0; x < 80; x++)
+                for (x = 0; x < 79; x++)
                     VideoMemory[80 * y + x] = (VideoMemory[80 * y + x] & 0xFF00) | ' ';
             x = 0;
             y = 0;
@@ -717,7 +720,11 @@ void printf(char *str)
             printf(INTTOCHARPOINT(rtclock.month));
             printf("/");
             printf(INTTOCHARPOINT(rtclock.year));
-            printf("                        Type: Shell ");
+            printf("                        Type: Shell\n");
+            for (int i = 0; i != 80; i++)
+                VideoMemory[80 * 1 + i] = (VideoMemory[80 * 1 + i] & 0xFF00) | foo[i];
+            printf("\n");
+            play_sound(440);
         }
     }
 

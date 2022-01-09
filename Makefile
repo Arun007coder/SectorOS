@@ -104,4 +104,4 @@ stopVBOX:
 .PHONY: clean
 clean:
 	@printf "\e[1;31mCleaning the object files...\n\e[0m"
-	@rm -f $(objects) SectorOS_Kernel.bin SectorOS.iso
+	@rm -f $(objects) CPU/shutdown.o SectorOS_Kernel.bin SectorOS.iso
