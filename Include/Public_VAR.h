@@ -5,7 +5,7 @@ inline char* OS_NAME = "SectorOS";
 
 inline char* KERNEL_NAME = "SectorOS";
 inline char* KERNEL_VERSION = "V2.3.1";
-inline char* KERNEL_BUILD = "Build: 2022-01-09";
+inline char* KERNEL_BUILD = "Build: 2022-01-25";
 inline char* KERNEL_ARCH = "x86";
 
 inline char* SHELL_NAME = "SOSH";
@@ -141,7 +141,7 @@ inline char* KeycodeToASCII(uint8_t Keycode)
             case 0x2D:if (!isShift) result = "x"; else result = "X"; break;
             case 0x2E:if (!isShift) result = "c"; else result = "C"; break;
             case 0x2F:if (!isShift) result = "v"; else result = "V"; break;
-            case 0x30:if (!isShift) result = "v"; else result = "B"; break;
+            case 0x30:if (!isShift) result = "b"; else result = "B"; break;
             case 0x31:if (!isShift) result = "n"; else result = "N"; break;
             case 0x32:if (!isShift) result = "m"; else result = "M"; break;
             case 0x33:if (!isShift) result = ","; else result = "<"; break;

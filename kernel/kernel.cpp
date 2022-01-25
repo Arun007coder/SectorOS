@@ -5,6 +5,8 @@
 #include "../Drivers/Keyboard.h"
 #include "../Shell/Shell.h"
 #include "../Include/multiboot.h"
+#include "../Include/func.h"
+#include "Settings.h"
 #include "../Hardcom/SerialPort.h"
 #include "../CPU/syscall.h"
 #include "../Drivers/Mouse.h"
@@ -25,11 +27,16 @@ static uint8_t cursorx;
 static bool useMouse = true;
 bool isused;
 
+bool isPrefix;
+bool lkl;
+int index = 0;
+int spind = 0;
+
 static uint8_t x = 0, y = 0;
 
 bool isTxtMode;
-KeyboardDriver* kbrd;
-DriverManager* drvMngr;
+KeyboardDriver *kbrd;
+DriverManager *drvMngr;
 InterruptManager* intMngr;
 SyscallHandler* shand;
 extern const void *mb;
@@ -45,6 +52,7 @@ port8BIT port61(0x61);
 int delay;
 volatile int done;
 static uint16_t *VideoMemory = (uint16_t *)0xb8000;
+Settings set;
 
 static void play_sound(uint32_t nFrequence)
 {
@@ -724,7 +732,6 @@ void printf(char *str)
             for (int i = 0; i != 80; i++)
                 VideoMemory[80 * 1 + i] = (VideoMemory[80 * 1 + i] & 0xFF00) | foo[i];
             printf("\n");
-            play_sound(440);
         }
     }
 
@@ -741,6 +748,42 @@ void PrintDate()
     printf(INTTOCHARPOINT(rtclock.month));
     printf("/");
     printf(INTTOCHARPOINT(rtclock.year));
+}
+
+void PrintPrompt()
+{
+    for (int i = 0; SPIndex > i; i++)
+    {
+        if (SP[i][0] == '%')
+        {
+            switch (SP[i + 1][0])
+            {
+            case 'd':
+            {
+                PrintDate();
+                index = 2;
+                break;
+            }
+            case 'u':
+            {
+                printf(set.UserName);
+                index = 2;
+                break;
+            }
+            case 'h':
+            {
+                printf(set.Hostname);
+                index = 2;
+                break;
+            }
+            }
+        }
+        else if (index <= 0)
+        {
+            printf(SP[i]);
+        }
+        index--;
+    }
 }
 
 void printTime()
@@ -1162,7 +1205,8 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
 
     printf("Allocating Memory....\n");
     PrintMEM(multiboot_structure);
-    //PrintPartitions();
+
+    // PrintPartitions();
     sp.logToSerialPort("\nHardware initialising stage 3 finished");
     detect_cpu();
 
@@ -1186,9 +1230,10 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
     printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
     sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 
-    SPIndex = 15;
+    SPIndex = set.UserNameLength + set.HostnameLength + 5 + 11;
 
-    asm("int $0x80" :: "a"(1), "b"("root@secos:~#> ")); // Used syscall to print this prompt
+    //asm("int $0x80" :: "a"(1), "b"("root@secos:~#> ")); // Used syscall to print this prompt
+    PrintPrompt();
     SPOMEMLOC(sp);
 
     while (1);

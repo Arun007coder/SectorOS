@@ -3,12 +3,15 @@
 static bool isCTRLed = false;
 bool canNewLine = true;
 
+void PrintPrompt();
+
 bool isUSRChanged = false;
 void printf(char *);
 void printfchar(char st);
 void printHex(uint8_t key);
 void PrintDate();
 char* INTTOCHARPOINT(int num);
+void beep();
 void ColourPrint(int type);
 bool txtcolor;
 bool isESPChanged = false;
@@ -60,8 +63,8 @@ CommandPort(0x64)
         SP[i] = "\0";
     }
 
-    char* Shell_Prompt[15] = {"r","o","o","t","@","s","e","c","o","s",":","~","#",">", " "};
-    for (int i = 0; i < 15; i++)
+    char *Shell_Prompt[14] = {"%", "u", "@", "%", "h", "[", "%", "d" , "}" , ";", "~", "#", ">", " "};
+    for (int i = 0; i < 14; i++)
     {
         SP[SPIndex] = Shell_Prompt[i];
         SPIndex++;
@@ -523,6 +526,10 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         {
             //power.shutdown();
         }
+        else if (key_buffer[0] == "b" && key_buffer[1] == "e" && key_buffer[2] == "e" && key_buffer[3] == "p")
+        {
+            beep();
+        }
         else
         {
             printf("Unknown Command \"");
@@ -535,13 +542,12 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
         if(!isTxtMode){
             if (canNewLine)
                 printf("\n");
-            for (int i = 0; SPIndex > i; i++)
-            {
-                printf(SP[i]);
-            }
             canNewLine = true;
         }
-        serialport.logToSerialPort("Command interpreter got a command :- "); serialport.logToSerialPort(COMNAME); serialport.logToSerialPort("\n");
+        PrintPrompt();
+        serialport.logToSerialPort("Command interpreter got a command :- ");
+        serialport.logToSerialPort(COMNAME);
+        serialport.logToSerialPort("\n");
         clear_key_buffer();
     }
 }
