@@ -10,7 +10,6 @@
 #include "../Hardcom/SerialPort.h"
 #include "VGADriver.h"
 #include "../Include/Public_VAR.h"
-#include "../Hardcom/pci.h"
 #include "../Include/multiboot.h"
 #include "HDD-ATA.h"
 
@@ -35,7 +34,7 @@ class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyb
     SerialPort serialport;
 
 public:
-    KeyboardDriver(InterruptManager* manager, CustomShell* cshell);
+    KeyboardDriver(InterruptManager *manager, CustomShell *cshell);
     ~KeyboardDriver();
     virtual uint32_t HandleInterrupt(uint32_t esp);
     TaskManager taskManager;

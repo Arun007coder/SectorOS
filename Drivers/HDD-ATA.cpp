@@ -88,7 +88,7 @@ void AdvancedTechnologyAttachment::Read28(uint32_t sector, uint8_t *data, int co
         return;
     }
 
-    printf("Reading from ATA: ");
+    //printf("Reading from ATA: ");
 
     for (uint16_t i = 0; i < count; i += 2)
     {
@@ -126,7 +126,7 @@ void AdvancedTechnologyAttachment::Write28(uint32_t sector, uint8_t *data, int c
     lbaHiPort.WriteToPort((sector & 0x00FF0000) >> 16);
     commandPort.WriteToPort(0x30);
 
-    printf("Writing to ATA: ");
+    //printf("Writing to ATA: ");
 
     for (uint16_t i = 0; i < count; i += 2)
     {

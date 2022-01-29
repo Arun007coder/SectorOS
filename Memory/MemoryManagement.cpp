@@ -64,7 +64,7 @@ void MemoryManager::MemFree(void* ptr)
     }
 }
 
-void* MemoryManager::MemAllocate(size_t size)
+void* MemoryManager::MemAllocate(size_t size) // Malloc
 {
     MemoryChunk *result = 0;
 

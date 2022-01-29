@@ -4,6 +4,7 @@
 #include "../Include/types.h"
 #include "Interrupts.h"
 #include "PowerControl.h"
+#include "../Drivers/HDD-ATA.h"
 #include "../kernel/MultiTask.h"
 
 class SyscallHandler : public InterruptHandler

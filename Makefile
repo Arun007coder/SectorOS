@@ -14,6 +14,7 @@ kernel/gdt.o \
 Memory/MemoryManagement.o \
 Drivers/IOPorts.o \
 CPU/Interrupts.o \
+Drivers/AM79C973.o \
 kernel/MultiTask.o \
 Drivers/Driver.o \
 CPU/PowerControl.o \

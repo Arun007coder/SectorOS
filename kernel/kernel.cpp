@@ -5,6 +5,7 @@
 #include "../Drivers/Keyboard.h"
 #include "../Shell/Shell.h"
 #include "../Include/multiboot.h"
+#include "../Drivers/AM79C973.h"
 #include "../Include/func.h"
 #include "Settings.h"
 #include "../Hardcom/SerialPort.h"
@@ -619,11 +620,6 @@ void printf(char *str)
     uint8_t curx;
     uint8_t cury;
 
-    // SerialPort s;
-    // s.logToSerialPort(str);
-
-    // static uint16_t* VideoMemory = (uint16_t*)0xb8000;
-
     for (int i = 0; str[i] != '\0'; ++i)
     {
         cursorx = x;
@@ -752,26 +748,31 @@ void PrintDate()
 
 void PrintPrompt()
 {
+    int ind = SPIndex;
     for (int i = 0; SPIndex > i; i++)
     {
         if (SP[i][0] == '%')
         {
+            ind -= 2;
             switch (SP[i + 1][0])
             {
             case 'd':
             {
+                ind += 10;
                 PrintDate();
                 index = 2;
                 break;
             }
             case 'u':
             {
+                ind += set.UserNameLength;
                 printf(set.UserName);
                 index = 2;
                 break;
             }
             case 'h':
             {
+                ind += set.HostnameLength;
                 printf(set.Hostname);
                 index = 2;
                 break;
@@ -784,6 +785,7 @@ void PrintPrompt()
         }
         index--;
     }
+    SPIndex = ind;
 }
 
 void printTime()
@@ -886,27 +888,6 @@ void PrintPartitions()
 {
     AdvancedTechnologyAttachment ata0s(0x1F0, false);
     MSDOSPartitionTable::ReadPartitions(&ata0s);
-}
-
-void PrintMEM(const void *multiboot_structure)
-{
-    uint32_t *memupper = (uint32_t *)(((size_t)multiboot_structure) + 8);
-    size_t heap = 10 * 1024 * 1024;
-    MemoryManager memoryManager(heap, (*memupper) * 1024 - heap - 10 * 1024);
-
-    printf("heap: 0x");
-    printHex((heap >> 24) & 0xFF);
-    printHex((heap >> 16) & 0xFF);
-    printHex((heap >> 8) & 0xFF);
-    printHex((heap)&0xFF);
-
-    void *allocated = memoryManager.MemAllocate(1024);
-    printf("\nallocated: 0x");
-    printHex(((size_t)allocated >> 24) & 0xFF);
-    printHex(((size_t)allocated >> 16) & 0xFF);
-    printHex(((size_t)allocated >> 8) & 0xFF);
-    printHex(((size_t)allocated) & 0xFF);
-    printf("\n");
 }
 
 #define cpuid(in, a, b, c, d) __asm__("cpuid"        : "=a"(a), "=b"(b), "=c"(c), "=d"(d): "a"(in));
@@ -1167,6 +1148,25 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
     SPOMEMLOC(sp);
     sp.logToSerialPort("\nkernel started");
 
+    printf("Allocating Memory....\n");
+    uint32_t *memupper = (uint32_t *)(((size_t)multiboot_structure) + 8);
+    size_t heap = 10 * 1024 * 1024;
+    MemoryManager memoryManager(heap, (*memupper) * 1024 - heap - 10 * 1024);
+
+    printf("heap: 0x");
+    printHex((heap >> 24) & 0xFF);
+    printHex((heap >> 16) & 0xFF);
+    printHex((heap >> 8) & 0xFF);
+    printHex((heap)&0xFF);
+
+    void *allocated = memoryManager.MemAllocate(1024);
+    printf("\nallocated: 0x");
+    printHex(((size_t)allocated >> 24) & 0xFF);
+    printHex(((size_t)allocated >> 16) & 0xFF);
+    printHex(((size_t)allocated >> 8) & 0xFF);
+    printHex(((size_t)allocated) & 0xFF);
+    printf("\n");
+
     GlobalDescriptorTable gdt;
 
     InterruptManager interrupts(0x20, &gdt, &taskManager);
@@ -1203,10 +1203,11 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
     sp.logToSerialPort("\nDriverManager started");
     printf("\nSYSMSG: Initializing Hardwares [Stage 3]...\n");
 
-    printf("Allocating Memory....\n");
-    PrintMEM(multiboot_structure);
-
     // PrintPartitions();
+
+    AM79C973* eth0 = (AM79C973 *)(drvmgr.drivers[2]);
+    eth0->send((uint8_t *)"Hello Network", 13);
+
     sp.logToSerialPort("\nHardware initialising stage 3 finished");
     detect_cpu();
 
@@ -1214,6 +1215,8 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
     ColourPrint(0);
     interrupts.Activate();
     sp.logToSerialPort("\nInterrupt manager started");
+
+    printf("\5");
 
     printf("Welcome to SectorOS ");
     printf(KERNEL_VERSION);
@@ -1232,7 +1235,6 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
 
     SPIndex = set.UserNameLength + set.HostnameLength + 5 + 11;
 
-    //asm("int $0x80" :: "a"(1), "b"("root@secos:~#> ")); // Used syscall to print this prompt
     PrintPrompt();
     SPOMEMLOC(sp);
 

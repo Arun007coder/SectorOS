@@ -1,0 +1,11 @@
+list of Syscalls [0x80]:
+
+SYS_PRINTF[TEXT]: eax=1, ebx=(char*)"Text to print"
+SYS_PRINTC[TEXT]: eax=2, ebx=(char)"character to print"
+
+SYS_REBOOT[POWER]: eax=3
+
+SYS_CNGTSK[TASK]: eax=4, ebx=(int)tasknumber
+
+SYS_WRITEHDD[ATA]: eax=5, ebx=(uint32_t)sectornumber, ecx=(uint8_t*)pointertovariable, edx=(int)count
+SYS_READHDD[ATA] : eax=6, ebx=(uint32_t)sectornumber, ecx=(uint8_t*)pointertovariable

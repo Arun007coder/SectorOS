@@ -1,4 +1,5 @@
 #include "pci.h"
+#include "../Drivers/AM79C973.h"
 
 void printf(char* str);
 void printHex(uint8_t num);
@@ -147,7 +148,13 @@ Driver* PCI::GetDriver(PCIDeviceDescriptor dev, InterruptManager* interrupts)
             {
                 case 0x2000:
                     printf("AMD AM79C973 \n");
-                    break;
+                    driver = (AM79C973*)MemoryManager::ActiveMemoryManager->MemAllocate(sizeof(AM79C973));
+                    if (driver != 0)
+                    {
+                        new (driver) AM79C973(&dev, interrupts);
+                    }
+                    return driver;
+                break;
             }
             break;
 

@@ -1,9 +1,11 @@
 #ifndef __PCI_H
 #define __PCI_H
 
+
 #include "../Drivers/IOPorts.h"
 #include "../Include/types.h"
 #include "../CPU/Interrupts.h"
+#include "../Memory/MemoryManagement.h"
 #include "../Drivers/Driver.h"
 
 class PCIDeviceDescriptor
