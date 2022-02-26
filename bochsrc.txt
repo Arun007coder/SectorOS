@@ -1,3 +1,4 @@
 ata0-slave: type=cdrom, path=SectorOS.iso, status=inserted
 boot:cdrom
 com1: enabled=1, mode=file, dev=serial.log
+speaker: enabled=1, mode=sound

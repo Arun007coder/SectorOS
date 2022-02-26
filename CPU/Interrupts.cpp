@@ -45,7 +45,7 @@ void InterruptManager::SetInterruptDescriptorTableEntry(uint8_t interrupt,
 }
 
 
-InterruptManager::InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* globalDescriptorTable, TaskManager* taskManager)
+InterruptManager::InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* globalDescriptorTable)
 : programmableInterruptControllerMasterCommandPort(0x20),
   programmableInterruptControllerMasterDataPort(0x21),
   programmableInterruptControllerSlaveCommandPort(0xA0),
@@ -168,16 +168,13 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
         esp = handlers[interrupt] -> HandleInterrupt(esp);
 
     }
-    else if(interrupt != 0x20 && interrupt != 0x25 && interrupt != 0x27 & interrupt != 0x0D )
+    else if(interrupt != 0x20 && interrupt != 0x25 && interrupt != 0x27 )
     {
         printf(foo);
         printHex(interrupt);
     }
     else if(interrupt = 0x20)
     {
-        if(isTaskAllowed)
-            esp = (uint32_t)taskManager->Schedule((CPUState*)esp);
-            isTaskAllowed = false;
         printTime();
     }
 
@@ -198,15 +195,3 @@ void InterruptManager::UseMultiTask(int OPT)
     else if(OPT == 0)
         isTaskAllowed = false;
 }
-
-/*
-void InterruptManager::HandleException0x0D()
-{
-    printf("\5");
-    printf("A Kernel Panic Occured. HALTING...\nSYSMSG:: EXCEPTION: GENERAL PROTECTION FAULT\n");
-    printf("An exception has occured in the system during execution which cannot fix itself.The general protection fault is called when a function is improperly executed which leads to memory corruption.Restarting may solve thr problem.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    //printf("Extended stack pointer = 0x"); printHex(esp);
-    //printf("\nExecption interrupt number = 0x"); printHex(interrupt);
-    Power.halt();
-}
-*/

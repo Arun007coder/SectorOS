@@ -151,8 +151,11 @@ Driver* PCI::GetDriver(PCIDeviceDescriptor dev, InterruptManager* interrupts)
                     driver = (AM79C973*)MemoryManager::ActiveMemoryManager->MemAllocate(sizeof(AM79C973));
                     if (driver != 0)
                     {
-                        new (driver) AM79C973(&dev, interrupts);
+                        driver = new AM79C973(&dev, interrupts);
+                        printf("INSTANTIALIZED AMD AM79C973 \n");
                     }
+                    else
+                        printf("instantiation failed");
                     return driver;
                 break;
             }

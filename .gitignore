@@ -1,6 +1,8 @@
 .vscode/targets.log
 .vscode/configurationCache.log
 out/
+Tools/
+Tools/*
 .vscode
 serial.log
 .UNCODE

@@ -2,6 +2,8 @@
 #define __KEYBOARD_H
 
 #include "../Include/types.h"
+#include "../Include/func.h"
+#include "AM79C973.h"
 #include "IOPorts.h"
 #include "../CPU/Interrupts.h"
 #include "Driver.h"
@@ -34,20 +36,23 @@ class KeyboardDriver : public InterruptHandler, public Driver // Driver for keyb
     SerialPort serialport;
 
 public:
-    KeyboardDriver(InterruptManager *manager, CustomShell *cshell);
+    KeyboardDriver(InterruptManager *manager);
     ~KeyboardDriver();
     virtual uint32_t HandleInterrupt(uint32_t esp);
+    CustomShell *shell;
     TaskManager taskManager;
     uint32_t esp1;
-    CustomShell* shell;
     uint32_t esp2;
     char *key_buffer[256];    // To Save the keystrokes in memory to use them later. Max number keystroke to save in the buffer is 256 Chars
     int key_buffer_index = 0; // The index of the key_buffer
+    void ChangeEventHandler(CustomShell* shell);
+    void ResetEventHandler();
 
     // To clear the keystrokes in the keyboard buffer
     void clear_key_buffer(); 
     // To activate the keyboard driver
     virtual void activate();
+    int UniquedriverID();
     // To print text like when booting up 
     void returnHScreen();
 

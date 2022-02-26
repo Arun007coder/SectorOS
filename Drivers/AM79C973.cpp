@@ -1,6 +1,28 @@
 #include "AM79C973.h"
 
-void printHex(uint8_t Key);
+RawDataHandler::RawDataHandler(AM79C973 *backend)
+{
+    this->Backend = backend;
+    backend->setHandler(this);
+}
+
+RawDataHandler::~RawDataHandler()
+{
+    Backend->setHandler(0);
+}
+
+bool RawDataHandler::OnRawDataReceived(uint8_t *buffer, uint32_t size)
+{
+    return false;
+}
+
+void RawDataHandler::Send(uint8_t *buffer, uint32_t size)
+{
+    Backend->send(buffer, size);
+}
+
+void printf(char *);
+void printHex(uint8_t);
 
 AM79C973::AM79C973(PCIDeviceDescriptor *dev, InterruptManager *interrupts)
     : Driver(),
@@ -13,6 +35,7 @@ AM79C973::AM79C973(PCIDeviceDescriptor *dev, InterruptManager *interrupts)
       resetPort(dev->portBase + 0x14),
       busControlRegisterDataPort(dev->portBase + 0x16)
 {
+    this->handler = 0;
     currentSendBuffer = 0;
     currentRecvBuffer = 0;
 
@@ -68,6 +91,11 @@ AM79C973::~AM79C973()
 {
 }
 
+int AM79C973::UniquedriverID()
+{
+    return 38576;
+}
+
 void AM79C973::activate()
 {
     registerAddressPort.WriteToPort(0);
@@ -80,6 +108,8 @@ void AM79C973::activate()
 
     registerAddressPort.WriteToPort(0);
     registerDataPort.WriteToPort(0x42);
+
+    printf("AM79C973: Activated\n");
 }
 
 int AM79C973::reset()
@@ -89,33 +119,29 @@ int AM79C973::reset()
     return 10;
 }
 
-void printf(char *);
-
 uint32_t AM79C973::HandleInterrupt(uint32_t esp)
 {
-    printf("AM79C973: Interrupt\n");
-
     registerAddressPort.WriteToPort(0);
     uint32_t temp = registerDataPort.ReadFromPort();
 
     if ((temp & 0x8000) == 0x8000)
-        printf("AM79c973 ERROR\n");
+        printf("AMD am79c973 ERROR\n");
     if ((temp & 0x2000) == 0x2000)
-        printf("AM79c973 COLLISION ERROR\n");
+        printf("AMD am79c973 COLLISION ERROR\n");
     if ((temp & 0x1000) == 0x1000)
-        printf("AM79c973 MISSED FRAME\n");
+        printf("AMD am79c973 MISSED FRAME\n");
     if ((temp & 0x0800) == 0x0800)
-        printf("AM79c973 MEMORY ERROR\n");
+        printf("AMD am79c973 MEMORY ERROR\n");
     if ((temp & 0x0400) == 0x0400)
         receive();
     if ((temp & 0x0200) == 0x0200)
-        printf("AM79c973 DATA SENT\n");
+        printf(" SENT");
 
     registerAddressPort.WriteToPort(0);
     registerDataPort.WriteToPort(temp);
 
-    if ((temp & 0x0200) == 0x0200)
-        printf("AM79c973 INIT DONE\n");
+    if ((temp & 0x0100) == 0x0100)
+        printf("AMD am79c973 INIT DONE\n");
 
     return esp;
 }
@@ -128,8 +154,17 @@ void AM79C973::send(uint8_t *buffer, int size)
     if (size > 1518)
         size = 1518;
 
-    for (uint8_t *src = buffer + size - 1,*dst = (uint8_t *)(sendBufferDescr[sendDescriptor].address + size - 1);src >= buffer; src--, dst--)
+    for (uint8_t *src = buffer + size - 1,
+                 *dst = (uint8_t *)(sendBufferDescr[sendDescriptor].address + size - 1);
+        src >= buffer; src--, dst--)
         *dst = *src;
+
+    printf("\nSEND: ");
+    for (int i = 14 + 20; i < (size > 64 ? 64 : size); i++)
+    {
+        printHex(buffer[i]);
+        printf(" ");
+    }
 
     sendBufferDescr[sendDescriptor].avail = 0;
     sendBufferDescr[sendDescriptor].flags2 = 0;
@@ -140,9 +175,10 @@ void AM79C973::send(uint8_t *buffer, int size)
 
 void AM79C973::receive()
 {
-    printf("AM79c973 DATA RECEIVED\n");
+    printf("\nRECV: ");
 
-    for (; (recvBufferDescr[currentRecvBuffer].flags & 0x80000000) == 0;currentRecvBuffer = (currentRecvBuffer + 1) % 8)
+    for (; (recvBufferDescr[currentRecvBuffer].flags & 0x80000000) == 0;
+        currentRecvBuffer = (currentRecvBuffer + 1) % 8)
     {
         if (!(recvBufferDescr[currentRecvBuffer].flags & 0x40000000) && (recvBufferDescr[currentRecvBuffer].flags & 0x03000000) == 0x03000000)
 
@@ -153,14 +189,38 @@ void AM79C973::receive()
 
             uint8_t *buffer = (uint8_t *)(recvBufferDescr[currentRecvBuffer].address);
 
-            for (int i = 0; i < size; i++)
+            for (int i = 14 + 20; i < (size > 64 ? 64 : size); i++)
             {
                 printHex(buffer[i]);
                 printf(" ");
             }
+
+            if (handler != 0)
+                if (handler->OnRawDataReceived(buffer, size))
+                    send(buffer, size);
         }
 
         recvBufferDescr[currentRecvBuffer].flags2 = 0;
         recvBufferDescr[currentRecvBuffer].flags = 0x8000F7FF;
     }
+}
+
+void AM79C973::setHandler(RawDataHandler *handler)
+{
+    this->handler = handler;
+}
+
+uint64_t AM79C973::GetMACAddress()
+{
+    return initBlock.physicalAddress;
+}
+
+void AM79C973::SetIPAddress(uint32_t ip)
+{
+    initBlock.logicalAddress = ip;
+}
+
+uint32_t AM79C973::GetIPAddress()
+{
+    return initBlock.logicalAddress;
 }

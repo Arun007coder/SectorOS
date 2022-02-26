@@ -44,6 +44,12 @@ void MouseDriver::activate()
     DataPort.WriteToPort(0xF4);
     DataPort.ReadFromPort();
 }
+
+int MouseDriver::UniquedriverID()
+{
+    return 79154;
+}
+
 uint32_t MouseDriver::HandleInterrupt(uint32_t esp)
 {
     uint8_t status = CommandPort.ReadFromPort();

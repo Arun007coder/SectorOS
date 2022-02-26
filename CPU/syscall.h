@@ -3,8 +3,11 @@
 
 #include "../Include/types.h"
 #include "Interrupts.h"
+#include "../Include/Public_VAR.h"
 #include "PowerControl.h"
 #include "../Drivers/HDD-ATA.h"
+#include "../Drivers/VGADriver.h"
+#include "../Memory/MemoryManagement.h"
 #include "../kernel/MultiTask.h"
 
 class SyscallHandler : public InterruptHandler

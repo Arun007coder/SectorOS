@@ -28,7 +28,6 @@ class InterruptManager
 {
     friend class InterruptHandler;
 protected:
-    static InterruptManager* ActiveInterruptManager;
     InterruptHandler* handlers[256];
     TaskManager *taskManager;
 
@@ -109,7 +108,8 @@ protected:
             bool isTaskAllowed;
 
         public:
-            InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* globalDescriptorTable, TaskManager* taskManager);
+            static InterruptManager *ActiveInterruptManager;
+            InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* globalDescriptorTable);
             ~InterruptManager();
             uint16_t HardwareInterruptOffset();
             uint32_t DoHandleInterrupt(uint8_t interrupt, uint32_t esp);

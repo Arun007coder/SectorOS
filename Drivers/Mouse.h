@@ -33,7 +33,7 @@ public:
     virtual uint32_t HandleInterrupt(uint32_t esp);
     // To activate the Mouse driver
     virtual void activate();
-
+    int UniquedriverID();
 };
 
 #endif

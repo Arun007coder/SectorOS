@@ -8,12 +8,17 @@ ASFLAGS = --32
 LDFLAGS = -melf_i386
 SHELL = /bin/bash
 GRUB = ~/local/bin
+BOCHS=/usr/local/bin/bochs
+DEBUG=-g
 
 objects = LILO/loader.o \
 kernel/gdt.o \
 Memory/MemoryManagement.o \
 Drivers/IOPorts.o \
 CPU/Interrupts.o \
+CPU/Execptions/GPF.o \
+CPU/Execptions/IOC.o \
+CPU/Execptions/DFault.o \
 Drivers/AM79C973.o \
 kernel/MultiTask.o \
 Drivers/Driver.o \
@@ -30,6 +35,12 @@ Drivers/RTC.o \
 Hardcom/SerialPort.o \
 CPU/interruptstab.o \
 Hardcom/pci.o \
+Network/EtherFrame.o \
+Network/arp.o \
+Network/InternetProtocolV4.o \
+Network/ICMP.o \
+Network/udp.o \
+Network/tcp.o \
 kernel/kernel.o
 
 prep:
@@ -45,7 +56,7 @@ CPU/PowerControl.o: CPU/PowerControl.cpp CPU/shutdown.o
 
 %.o: %.s
 	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"
-	$(AS) $(ASFLAGS) -o $@ $<
+	$(AS) $(DEBUG) $(ASFLAGS) -o $@ $<
 
 %.o: %.asm
 	@printf "\e[1;32m[1/3]Compiling $<\n\e[0m"
@@ -87,17 +98,17 @@ move: SectorOS.iso
 	@mv *.iso SectorOS_Kernel.bin Build_files/
 
 runQEMU: SectorOS.iso
-	sudo qemu-system-i386 -boot d -cdrom SectorOS.iso -chardev serial,path=/dev/ttyS0,id=hostusbserial -device pci-serial,chardev=hostusbserial -soundhw pcspk
+	qemu-system-i386 -boot d -cdrom SectorOS.iso -s -m 2048  &
 
 runVBOX: SectorOS.iso
 	@printf "Starting VirtualBox\n";
 	@(killall VirtualBoxVM && sleep 1) || true
-	VirtualBoxVM --startvm 'SectorOS' --dbg
+	VirtualBoxVM --startvm 'SectorOS' --dbg &
 
 runBOCHS: SectorOS.iso
 	@printf "Starting Bochs\n";
 	@(killall bochs && sleep 1) || true
-	bochs -q -f bochsrc.txt 
+	$(BOCHS) -q -f bochsrc.txt &
 
 stopVBOX:
 	killall VirtualBoxVM

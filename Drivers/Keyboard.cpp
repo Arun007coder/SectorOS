@@ -3,9 +3,17 @@
 static bool isCTRLed = false;
 bool canNewLine = true;
 
+void StartWEBServer(uint16_t port);
+
 void PrintPrompt();
 
 bool isUSRChanged = false;
+
+extern void *allocated;
+extern uint32_t *memupper;
+
+size_t heap = 10 * 1024 * 1024;
+
 void printf(char *);
 void printfchar(char st);
 void printHex(uint8_t key);
@@ -29,6 +37,7 @@ PowerControl power;
 
 CustomShell::CustomShell()
 {
+	printf("Event handler init failed\n");
 }
 
 CustomShell::~CustomShell()
@@ -46,16 +55,17 @@ void CustomShell::clearBuffer()
 
 void CustomShell::OnKeyDown(uint8_t key)
 {
+	printf("lol\n");
 }
 
-KeyboardDriver::KeyboardDriver(InterruptManager* manager, CustomShell* shell)
+KeyboardDriver::KeyboardDriver(InterruptManager* manager)
 :InterruptHandler(0x21, manager),
 DataPort(0x60),
 CommandPort(0x64)
 {
+	shell = 0;
 	clear_key_buffer();
 	isTxtMode = false;
-	this->shell = shell;
 
 	for(int i = 0; i < 30; i++)
 	{
@@ -87,22 +97,19 @@ void KeyboardDriver::activate()
 	DataPort.WriteToPort(0xF4);
 }
 
+int KeyboardDriver::UniquedriverID()
+{
+	return UDID_KEYBOARD;
+}
+
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 {
-	esp2 = esp;
-
-	if(isESPChanged)
-	{
-		printf("\n");
-		printHex(esp);
-		printf(":");
-		printHex(esp1);
-		printf("task changed");
-		isESPChanged = false;
-		return esp1;
-	}
 	uint8_t key = DataPort.ReadFromPort(); // The variable where a single keystroke is stored
-	shell->OnKeyDown(key);
+	if (shell != 0 && IsShellDisabled)
+	{
+		shell->OnKeyDown(key);
+	}
+
 	if(key < 0x80 & key != 0x3A & key != 0x2A & key != 0x2A & key != 0x36 & key != 0x3A & key != 0x0E & key != 0x38 & key != 0x1D ){
 		if(!IsShellDisabled)
 		{
@@ -154,7 +161,8 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 					}
 					else
 					{
-						shell->Shell();
+						if (shell != 0)
+							shell->Shell();
 					}
 		break; //Enter
 		case 0x1E:if (!isShift) printf("a"); else printf("A"); break;
@@ -259,7 +267,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 				printf("\6"); 
 				if(key_buffer_index != 0)
 					key_buffer_index++;
-		 break;
+		break;
 			
 		default: // To tell that a unmapped key is pressed on the keyboard
 			if (key < 0x80){
@@ -288,7 +296,8 @@ void KeyboardDriver::clear_key_buffer()
 	}
 	else
 	{
-		shell->clearBuffer();
+		if(shell != 0)
+			shell->clearBuffer();
 	}
 }
 
@@ -351,7 +360,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 				
 			printf("SectorOS ");
 			printf(KERNEL_VERSION);
-			printf("                   ");
+			printf("               ");
 			PrintDate();
 			printf("                        Type: Shell ");
 			canNewLine = false;
@@ -417,7 +426,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 			printf(INTTOCHARPOINT(res));
 		}
 		else if(key_buffer[0] == "t" & key_buffer[1] == "x" & key_buffer[2] == "t")
-		{
+		{                                                                
 			COMNAME = "txt";
 			serialport.logToSerialPort("\ntxt mode starting...");
 			printf("Entering Text editing mode. Please wait....");
@@ -462,7 +471,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 			}
 			else if (key_buffer[8] == "-" && key_buffer[9] == "H")
 			{
-				printf("sysinfo [options] : \n-C : To get CPU information\n-M : To get Memory Info\n-A : To get the Kernel architecture\n-K : To get kernel information\n-O : To get OS name\n-B : To get kernel build date\n-V : To get Kernel Version\n-D : To identify a ATA drive\n-H : To print this message");
+				printf("sysinfo [options] : \n-C : To get CPU information\n-A : To get the Kernel architecture\n-K : To get kernel information\n-O : To get OS name\n-B : To get kernel build date\n-V : To get Kernel Version\n-D : To identify a ATA drive\n-H : To print this message");
 			}
 			else if (key_buffer[8] == "-" && key_buffer[9] == "O")
 			{
@@ -471,6 +480,16 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 			else if (key_buffer[8] == "-" && key_buffer[9] == "D")
 			{
 				PrintSATA();
+			}
+			else if (key_buffer[8] == "-" && key_buffer[9] == "M")
+			{
+				printf("heap: 0x");
+				printHex32(heap);
+				printf("\nallocated: 0x");
+				printHex32((size_t)allocated);
+				printf("\n");
+				printf("Memory on system: 0x");
+				printHex32((*memupper) * 1024);
 			}
 			else if (key_buffer[8] == "-" && key_buffer[9] == "K")
 			{
@@ -490,6 +509,55 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 		{
 			COMNAME = "lspt";
 			PrintPartitions();
+		}
+		else if (key_buffer[0] == "w" && key_buffer[1] == "s" && key_buffer[2] == "e" && key_buffer[3] == "r" && key_buffer[4] == "v" && key_buffer[5] == "e" && key_buffer[6] == "r" )
+		{
+			COMNAME = "wserver";
+			StartWEBServer(1234);
+		}
+		else if (key_buffer[0] == "n" && key_buffer[1] == "e" && key_buffer[2] == "t")
+		{
+			COMNAME = "net";
+			if (DriverManager::ActiveDriverManager->drivers[2] != 0)
+			{
+				AM79C973* eth0 = (AM79C973*)DriverManager::ActiveDriverManager->GetDriver(UDID_AM79C973);
+				if(key_buffer[4] == "-" && key_buffer[5] == "i")
+				{
+					printf("IP: ");
+					printHex32(eth0->GetIPAddress());
+				
+				}
+				else if (key_buffer[4] == "-" && key_buffer[5] == "m")
+				{
+					printf("Mac Address: ");
+					uint64_t MACADDR = eth0->GetMACAddress();
+					printHex((MACADDR >> 40) & 0xFF); printf(":");
+					printHex((MACADDR >> 32) & 0xFF); printf(":");
+					printHex((MACADDR >> 24) & 0xFF); printf(":");
+					printHex((MACADDR >> 16) & 0xFF); printf(":");
+					printHex((MACADDR >> 8) & 0xFF);  printf(":");
+					printHex(MACADDR & 0xFF);
+				}
+				else if (key_buffer[4] == "-" && key_buffer[5] == "h")
+				{
+					printf("net [options] : \n-i : To get IP address\n-m : To get mac address\n-h : To print this message");
+				}
+				else
+				{
+					printf("Mac Address: ");
+					uint64_t MACADDR = eth0->GetMACAddress();
+					printHex((MACADDR >> 40) & 0xFF); printf(":");
+					printHex((MACADDR >> 32) & 0xFF); printf(":");
+					printHex((MACADDR >> 24) & 0xFF); printf(":");
+					printHex((MACADDR >> 16) & 0xFF); printf(":");
+					printHex((MACADDR >> 8) & 0xFF);  printf(":");
+					printHex(MACADDR & 0xFF);
+				}
+			}
+			else
+			{
+				printf("Driver for network card not found");
+			}
 		}
 		else if(key_buffer[0] == "t" && key_buffer[1] == "s" && key_buffer[2] == "k")
 		{
@@ -563,11 +631,24 @@ void KeyboardDriver::returnHScreen()
 
 	printf("SectorOS ");
 	printf(KERNEL_VERSION);
-	printf("                   ");
+	printf("               ");
 	PrintDate();
 	printf("                        Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 	printf("Run help to get the list of commands which is implemented \n \n");
 
 	PrintPrompt();
 	isTxtMode = false;
+}
+
+void KeyboardDriver::ChangeEventHandler(CustomShell* sh)
+{
+	shell = sh;
+	IsShellDisabled = true;
+	printf("Event handler changed to custom shell\n");
+}
+
+void KeyboardDriver::ResetEventHandler()
+{
+	shell = 0;
+	IsShellDisabled = false;
 }

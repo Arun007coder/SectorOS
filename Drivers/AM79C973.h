@@ -7,6 +7,19 @@
 #include "../CPU/Interrupts.h"
 #include "IOPorts.h"
 
+class AM79C973;
+
+class RawDataHandler
+{
+protected:
+    AM79C973 *Backend;
+public:
+    RawDataHandler(AM79C973 *backend);
+    ~RawDataHandler();
+    virtual bool OnRawDataReceived(uint8_t *data, uint32_t length);
+    void Send(uint8_t *data, uint32_t length);
+};
+
 class AM79C973 : public Driver, public InterruptHandler
 {
     struct InitializationBlock
@@ -51,6 +64,8 @@ class AM79C973 : public Driver, public InterruptHandler
     uint8_t recvBuffers[2 * 1024 + 15][8];
     uint8_t currentRecvBuffer;
 
+    RawDataHandler* handler;
+
 public:
     AM79C973(PCIDeviceDescriptor *dev, InterruptManager *interrupts);
     ~AM79C973();
@@ -59,8 +74,16 @@ public:
     void receive();
 
     void activate();
+    int UniquedriverID();
     int reset();
     uint32_t HandleInterrupt(uint32_t esp);
+
+    void setHandler(RawDataHandler* handler);
+
+    uint64_t GetMACAddress();
+
+    void SetIPAddress(uint32_t);
+    uint32_t GetIPAddress();
 };
 
 #endif

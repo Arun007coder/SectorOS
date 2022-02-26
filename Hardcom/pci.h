@@ -3,6 +3,7 @@
 
 
 #include "../Drivers/IOPorts.h"
+#include "../Include/Public_VAR.h"
 #include "../Include/types.h"
 #include "../CPU/Interrupts.h"
 #include "../Memory/MemoryManagement.h"

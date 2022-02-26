@@ -1,5 +1,7 @@
 #include "MultiTask.h"
 
+TaskManager* TaskManager::ActiveManager = 0;
+
 Task::Task(GlobalDescriptorTable *gdt, void entrypoint())
 {
     cpustate = (CPUState*)(stack + 4096 - sizeof(CPUState));
@@ -37,6 +39,7 @@ Task::~Task()
 
 TaskManager::TaskManager()
 {
+    ActiveManager = this;
     numTasks = 0;
     currentTask = -1;
 }
