@@ -55,7 +55,6 @@ void CustomShell::clearBuffer()
 
 void CustomShell::OnKeyDown(uint8_t key)
 {
-	printf("lol\n");
 }
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager)

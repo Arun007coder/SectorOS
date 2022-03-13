@@ -3,6 +3,8 @@
 
 #include "../Drivers/HDD-ATA.h"
 #include "../Include/types.h"
+#include "../Memory/MemoryManagement.h"
+#include "../Include/Public_VAR.h"
 
 struct BiosParameterBlock32
 {

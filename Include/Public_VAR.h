@@ -16,8 +16,8 @@
 inline char *OS_NAME = "SectorOS";
 
 inline char *KERNEL_NAME = "SectorOS";
-inline char *KERNEL_VERSION = "V3.0.1-rc1";
-inline char *KERNEL_BUILD = "Build: 2022-02-26";
+inline char *KERNEL_VERSION = "V3.2.1";
+inline char *KERNEL_BUILD = "Build: 2022-03-13";
 inline char *KERNEL_ARCH = "x86";
 
 inline char *SHELL_NAME = "SOSH";
@@ -32,6 +32,7 @@ inline int SPIndex = 0; // Shell Prompt Index
 inline bool IsShellDisabled = false; // To disable the shell
 inline bool isShift = false;         // To know if the shift key is pressed
 inline bool GlobalBool1 = false;     // Global bool 1
+inline uint8_t INITS[513];           // Init file contents
 // END Kernel variables
 
 // START Common Functions

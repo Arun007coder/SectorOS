@@ -75,7 +75,9 @@ class TransmissionControlProtocolHandler
 public:
     TransmissionControlProtocolHandler();
     ~TransmissionControlProtocolHandler();
-    virtual bool HandleTransmissionControlProtocolMessage(TransmissionControlProtocolSocket* socket, uint8_t* data, uint16_t size);
+    virtual void TEST();
+    virtual void TEST2();
+    virtual bool HandleTransmissionControlProtocolMessage(TransmissionControlProtocolSocket *socket, uint8_t *data, uint16_t size);
 };
 
 
@@ -97,7 +99,7 @@ protected:
 public:
     TransmissionControlProtocolSocket(TransmissionControlProtocolProvider* backend);
     ~TransmissionControlProtocolSocket();
-    virtual bool HandleTransmissionControlProtocolMessage(uint8_t* data, uint16_t size);
+    virtual bool HandleTransmissionControlProtocolMessage(uint8_t *data, uint16_t size);
     virtual void Send(uint8_t* data, uint16_t size);
     virtual void Disconnect();
 };

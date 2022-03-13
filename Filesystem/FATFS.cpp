@@ -3,11 +3,19 @@
 void printf(char*);
 void printfchar(char);
 void printHex(uint8_t Key);
+void Entry();
 
 char *PATH;
 char *lst_dir;
 char *lst_dir2;
+bool IsDir;
+bool IsProgDir;
 int PATHIndex = 0;
+
+void Entry()
+{
+    printf("EXECUTION FAILED");
+}
 
 void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset)
 {
@@ -43,7 +51,20 @@ void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset)
 
         if ((dirent[i].attributes & 0x10) == 0x10) // directory
         {
-            continue;
+            IsDir = true;
+            if(dirent[i].name[0] == 'P' && dirent[i].name[1] == 'R' && dirent[i].name[2] == 'O' && dirent[i].name[3] == 'G' && dirent[i].name[4] == 'S')
+            {
+                IsProgDir = true;
+                printf("\n");
+                printf("prog dir found\n");
+                printf("\n");
+                continue;
+            }
+            else
+            {
+                IsProgDir = false;
+                continue;
+            }
         }
 
         uint32_t firstFileCluster = ((uint32_t)dirent[i].firstClusterHi) << 16 | ((uint32_t)dirent[i].firstClusterLow);
@@ -57,13 +78,33 @@ void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset)
         {
             uint32_t fileSector = dataStart + bpb.sectorsPerCluster * (nextFileCluster - 2);
             int sectorOffset = 0;
-
             for (; SIZE > 0; SIZE -= 512)
             {
-                hd->Read28(fileSector + sectorOffset, buffer, 512);
-
-                buffer[SIZE > 512 ? 512 : SIZE] = '\0';
-                printf((char *)buffer);
+                if (dirent[i].ext[0] == 'C' && dirent[i].ext[1] == 'O' && dirent[i].ext[2] == 'M')
+                {
+                    hd->Read28(fileSector + sectorOffset, (uint8_t *)Entry, 512);
+                    printf("executing ");
+                    printf((char *)dirent[i].name);
+                    printf(".");
+                    printf((char *)dirent[i].ext);
+                    printf("\n");
+                    Entry();
+                }
+                else if (dirent[i].name[0] == 'I' && dirent[i].name[1] == 'N' && dirent[i].name[2] == 'I' && dirent[i].name[3] == 'T')
+                {
+                    hd->Read28(fileSector + sectorOffset, INITS, 512);
+                    INITS[SIZE > 512 ? 512 : SIZE] = '\0';
+                    printf("INIT: ");
+                    printf((char*)INITS);
+                }
+                else
+                {
+                    hd->Read28(fileSector + sectorOffset, buffer, 512);
+                    buffer[SIZE > 512 ? 512 : SIZE] = '\0';
+                    printf((char *)dirent[i].name);
+                    printf(" :\n");
+                    printf((char *)buffer);
+                }
 
                 if (++sectorOffset > bpb.sectorsPerCluster)
                     break;

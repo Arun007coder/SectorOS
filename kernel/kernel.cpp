@@ -1163,6 +1163,16 @@ public:
 class PrintfTCPHandler : public TransmissionControlProtocolHandler
 {
 public:
+    void TEST()
+    {
+        printf("TEST WORKED\n");
+    }
+
+    void TEST2()
+    {
+        printf("TEST2 WORKED\n");
+    }
+
     bool HandleTransmissionControlProtocolMessage(TransmissionControlProtocolSocket *socket, uint8_t *data, uint16_t size)
     {
         printf("SYSMSG: GOT TCP MSG\n");
@@ -1175,10 +1185,10 @@ public:
 
         if (size > 9 && data[0] == 'G' && data[1] == 'E' && data[2] == 'T' && data[3] == ' ' && data[4] == '/' && data[5] == ' ' && data[6] == 'H' && data[7] == 'T' && data[8] == 'T' && data[9] == 'P')
         {
-            socket->Send((uint8_t *)"HTTP/1.1 200 OK\r\nServer: MyOS\r\nContent-Type: text/html\r\n\r\n<html><head><title>SectorOS</title></head><body><b>This is a test webpage which is hosted on SectorOS</b> https://github.com/Arun007coder/SectorOS</body></html>\r\n", 184);
+            printf("SYSMSG: Sending response\n");
+            socket->Send((uint8_t *)"HTTP/1.1 200 OK\r\nServer: SectorOS\r\nContent-Type: text/html\r\n\r\n<html><head><title>SectorOS</title></head><body><b>This is a test webpage which is hosted on SectorOS</b> https://github.com/Arun007coder/SectorOS</body></html>\r\n", 224);
             socket->Disconnect();
         }
-
         return true;
     }
 };
@@ -1196,11 +1206,14 @@ void StartWEBServer(uint16_t port)
         
         printf("Starting webserver\n");
         PrintfTCPHandler tcphandler;
-        tcp.Bind(tcpsocket, &tcphandler);
         printf("WebServer started\n");
         printf("Listening on port ");
         printf(INTTOCHARPOINT(port));
         printf("\n");
+        tcp.Bind(tcpsocket, &tcphandler);
+        while (1)
+            ;
+        /*
         ifkeypress ifkeypress;
         KeyboardDriver *keyboard = (KeyboardDriver*)DriverManager::ActiveDriverManager->GetDriver(UDID_KEYBOARD); //(KeyboardDriver *)DriverManager::ActiveDriverManager->GetDriver(UDID_KEYBOARD);
         keyboard->ChangeEventHandler(&ifkeypress);
@@ -1208,6 +1221,7 @@ void StartWEBServer(uint16_t port)
         while (!GlobalBool1)
             ;
         printf("WebServer Stopped\n");
+        */
     }
 }
 
@@ -1351,7 +1365,6 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
         printf("\n");
 
         arp.BroadcastMACAddress(gip_be);
-        icmp.RequestEchoReply(gip_be);
     }
 
     sp.logToSerialPort("\nHardware initialising stage 3 finished");
@@ -1367,13 +1380,25 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
     PrintDate();
     printf("                  Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 
+    /*
     printf("Initializing ");
     printf(SHELL_NAME);
     printf(" ");
     printf(SHELL_VER);
     printf("\n\n");
+    */
 
     printf("Welcome to SectorOS Shell\nRun help to get the list of commands which is implemented \n \n");
+    printf(" @@@@@@@@@@@@@@\n");
+    printf("@              \n");
+    printf("@              \n");
+    printf("@              \n");
+    printf(" @@@@@@@@@@@@@ \n");
+    printf("              @\n");
+    printf("              @\n");
+    printf("              @\n");
+    printf("@@@@@@@@@@@@@@ \n");
+
     sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 
     SPIndex = set.UserNameLength + set.HostnameLength + 5 + 11;

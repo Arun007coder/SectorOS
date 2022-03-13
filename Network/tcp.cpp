@@ -12,6 +12,19 @@ TransmissionControlProtocolHandler::~TransmissionControlProtocolHandler()
 
 bool TransmissionControlProtocolHandler::HandleTransmissionControlProtocolMessage(TransmissionControlProtocolSocket *socket, uint8_t *data, uint16_t size)
 {
+    char *foo = " ";
+    for (int i = 0; i < size; i++)
+    {
+        foo[0] = data[i];
+        printf(foo);
+    }
+
+    if (size > 9 && data[0] == 'G' && data[1] == 'E' && data[2] == 'T' && data[3] == ' ' && data[4] == '/' && data[5] == ' ' && data[6] == 'H' && data[7] == 'T' && data[8] == 'T' && data[9] == 'P')
+    {
+        printf("SYSMSG: Sending response\n");
+        socket->Send((uint8_t *)"HTTP/1.1 200 OK\r\nServer: SectorOS\r\nContent-Type: text/html\r\n\r\n<html><head><title>SectorOS</title></head><body><b>This is a test webpage which is hosted on SectorOS</b> https://github.com/Arun007coder/SectorOS</body></html>\r\n", 224);
+        socket->Disconnect();
+    }
     return true;
 }
 
@@ -22,12 +35,23 @@ TransmissionControlProtocolSocket::TransmissionControlProtocolSocket(Transmissio
     state = CLOSED;
 }
 
+void TransmissionControlProtocolHandler::TEST()
+{
+    printf("TEST FAILED\n");
+}
+
+void TransmissionControlProtocolHandler::TEST2()
+{
+    printf("TEST2 FAILED\n");
+}
+
 TransmissionControlProtocolSocket::~TransmissionControlProtocolSocket()
 {
 }
 
 bool TransmissionControlProtocolSocket::HandleTransmissionControlProtocolMessage(uint8_t *data, uint16_t size)
 {
+    handler->TEST2();
     if (handler != 0)
         return handler->HandleTransmissionControlProtocolMessage(this, data, size);
     return false;
@@ -168,12 +192,11 @@ bool TransmissionControlProtocolProvider::OnInternetProtocolReceived(uint32_t sr
             if (msg->flags == ACK)
                 break;
 
-            // no break, because of piggybacking
-
         default:
 
             if (bigEndian32(msg->sequenceNumber) == socket->acknowledgementNumber)
             {
+                socket->handler->TEST2();
                 reset = !(socket->HandleTransmissionControlProtocolMessage(internetprotocolPayload + msg->headerSize32 * 4, size - msg->headerSize32 * 4));
                 if (!reset)
                 {
@@ -321,5 +344,6 @@ TransmissionControlProtocolSocket *TransmissionControlProtocolProvider::Listen(u
 void TransmissionControlProtocolProvider::Bind(TransmissionControlProtocolSocket *socket, TransmissionControlProtocolHandler *handler)
 {
     socket->handler = handler;
+    socket->handler->TEST();
     printf("BINDED");
 }
