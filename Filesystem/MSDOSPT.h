@@ -34,8 +34,11 @@ struct MasterBootRecord
 
 class MSDOSPartitionTable
 {
+private:
+    static MasterBootRecord *MBR;
 public:
     static void ReadPartitions(AdvancedTechnologyAttachment *hd);
+    MasterBootRecord* GetMBR();
 };
 
 #endif

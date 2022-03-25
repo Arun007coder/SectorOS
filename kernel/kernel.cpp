@@ -12,6 +12,7 @@
 #include "../CPU/Execptions/IOC.h"
 #include "../CPU/Execptions/DFault.h"
 #include "../Network/ICMP.h"
+#include "../loaders/JD1618.h"
 #include "../Network/udp.h"
 #include "../Network/InternetProtocolV4.h"
 #include "../Drivers/AM79C973.h"
@@ -874,9 +875,6 @@ void PVGA()
 
 void printfchar(char st)
 {
-
-    // static uint16_t* VideoMemory = (uint16_t*)0xb8000;
-
     switch (st)
     {
     case '\n':
@@ -1133,6 +1131,16 @@ public:
     }
 };
 
+void* kmalloc(size_t size)
+{
+    return MemoryManager::ActiveMemoryManager->MemAllocate(size);
+}
+
+void kfree(void* ptr)
+{
+    MemoryManager::ActiveMemoryManager->MemFree(ptr);
+}
+
 void taskB()
 {
     printf("SectorOS TASK2\nPlese restart the os manually\n");
@@ -1223,6 +1231,11 @@ void StartWEBServer(uint16_t port)
         printf("WebServer Stopped\n");
         */
     }
+}
+
+void TestTask()
+{
+    printf("TEST\n");
 }
 
 typedef void (*constructor)();
@@ -1402,6 +1415,17 @@ extern "C" void kernelMain(const void *multiboot_structure, uint32_t multiboot_m
     sp.logToSerialPort("\nKernel initialization surcessful.\nGiving execution access to the kernel.\nAwaiting user input...");
 
     SPIndex = set.UserNameLength + set.HostnameLength + 5 + 11;
+
+    Task task1(&gdt, taskA, (uint8_t *)"Test Task 1", 0);
+    taskManager.AddTask(&task1);
+    Task task2(&gdt, taskB, (uint8_t *)"Test Task 2", 1);
+    taskManager.AddTask(&task2);
+
+    CPUState *state = (CPUState *)OLDESP;
+
+    taskManager.listTasks();
+
+    taskManager.MakeDefault();
 
     PrintPrompt();
 

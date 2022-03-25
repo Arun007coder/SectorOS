@@ -14,6 +14,7 @@
 #include "../Include/Public_VAR.h"
 #include "../Include/multiboot.h"
 #include "HDD-ATA.h"
+#include "../Filesystem/FATFS.h"
 
 class CustomShell
 {

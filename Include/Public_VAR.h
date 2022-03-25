@@ -16,12 +16,12 @@
 inline char *OS_NAME = "SectorOS";
 
 inline char *KERNEL_NAME = "SectorOS";
-inline char *KERNEL_VERSION = "V3.2.1";
-inline char *KERNEL_BUILD = "Build: 2022-03-13";
+inline char *KERNEL_VERSION = "V3.3.2";
+inline char *KERNEL_BUILD = "Build: 2022-03-25";
 inline char *KERNEL_ARCH = "x86";
 
 inline char *SHELL_NAME = "SOSH";
-inline char *SHELL_VER = "V1.1.4";
+inline char *SHELL_VER = "V1.5.0";
 
 // START Environment variables
 inline char *SP[30];    // Shell Prompt
@@ -33,6 +33,8 @@ inline bool IsShellDisabled = false; // To disable the shell
 inline bool isShift = false;         // To know if the shift key is pressed
 inline bool GlobalBool1 = false;     // Global bool 1
 inline uint8_t INITS[513];           // Init file contents
+inline uint32_t ESP;                 // ESP
+inline uint32_t OLDESP;              // EBP
 // END Kernel variables
 
 // START Common Functions
@@ -651,6 +653,25 @@ inline char *KeycodeToASCII(uint8_t Keycode)
         }
     }
     return result;
+}
+
+inline int strcmp(unsigned char str1[], unsigned char str2[])
+{
+    int i = 0;
+
+    if (str1[0] == '\0' && str2[0] == '\0')
+        return 0;
+
+    for (i = 0; str1[i] != '\0'; i++)
+    {
+        if (str1[i] != str2[i])
+            return 1;
+    }
+
+    if (str2[i] != '\0')
+        return 1;
+
+    return 0;
 }
 
 // END Common Functions

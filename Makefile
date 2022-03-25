@@ -28,6 +28,7 @@ Drivers/HDD-ATA.o \
 Drivers/VGADriver.o \
 Shell/Shell.o \
 CPU/syscall.o \
+loaders/JD1618.o \
 Filesystem/MSDOSPT.o \
 Filesystem/FATFS.o \
 Drivers/Mouse.o \

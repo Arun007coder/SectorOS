@@ -103,6 +103,7 @@ int KeyboardDriver::UniquedriverID()
 
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 {
+	OLDESP = esp;
 	uint8_t key = DataPort.ReadFromPort(); // The variable where a single keystroke is stored
 	if (shell != 0 && IsShellDisabled)
 	{
@@ -597,6 +598,25 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 		else if (key_buffer[0] == "b" && key_buffer[1] == "e" && key_buffer[2] == "e" && key_buffer[3] == "p")
 		{
 			beep();
+		}
+		else if (key_buffer[0] == "e" && key_buffer[1] == "x" && key_buffer[2] == "e" && key_buffer[3] == "c")
+		{
+			AdvancedTechnologyAttachment ata0s(0x1F0, false);
+			char FNAME[8];
+			int x = 0;
+			for (int i = 5; key_buffer[i] != "\n" && (i - 5) != 8; i++)
+			{
+				FNAME[i - 5] = key_buffer[i][0];
+				x = (i - 5);
+			}
+			if (!ExecutePRG(FNAME, &ata0s))
+			{
+				printf("Execution failed");
+			}
+			else
+			{
+				printf("Execution successful");
+			}
 		}
 		else
 		{

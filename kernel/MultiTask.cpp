@@ -1,10 +1,23 @@
 #include "MultiTask.h"
 
-TaskManager* TaskManager::ActiveManager = 0;
+char *INTTOCHARPOINT(int num);
+void printf(char *str);
+void printHex(uint8_t num);
 
-Task::Task(GlobalDescriptorTable *gdt, void entrypoint())
+TaskManager *TaskManager::ActiveManager = 0;
+
+Task::Task(GlobalDescriptorTable *gdt, void entrypoint(), uint8_t* name, int id)
 {
-    cpustate = (CPUState*)(stack + 4096 - sizeof(CPUState));
+    cpustate = (CPUState *)(stack + 4096 - sizeof(CPUState));
+
+    printf("Task ");
+    printf((char*)name);
+    printf(" created with ID ");
+    printHex(id & 0xFF);
+    printf("\n");
+
+    TaskName = name;
+    TaskID = id;
 
     cpustate -> eax = 0;
     cpustate -> ebx = 0;
@@ -29,7 +42,6 @@ Task::Task(GlobalDescriptorTable *gdt, void entrypoint())
     cpustate -> cs = gdt->CodeSegmentSelector();
     // cpustate -> ss = ;
     cpustate -> eflags = 0x202;
-
 }
 
 Task::~Task()
@@ -39,7 +51,6 @@ Task::~Task()
 
 TaskManager::TaskManager()
 {
-    ActiveManager = this;
     numTasks = 0;
     currentTask = -1;
 }
@@ -50,8 +61,15 @@ TaskManager::~TaskManager()
 
 bool TaskManager::AddTask(Task* task)
 {
+    printf("Adding task ");
+    printf((char*)task->TaskName);
+    printf(" with ID ");
+    printHex(task->TaskID);
+    printf("\n");
     if(numTasks >= 256)
+    {
         return false;
+    }
     tasks[numTasks++] = task;
     return true;
 }
@@ -71,7 +89,38 @@ CPUState* TaskManager::Schedule(CPUState* cpustate)
 
 CPUState* TaskManager::SwitchTask(int tasknum, CPUState* CSTATE)
 {
-    if(tasknum >= numTasks)
+    if(tasknum <= numTasks)
+    {
+        currentTask = tasknum;
+        printf("TaskManager::SwitchTask: Task switched to ");
+        printf(INTTOCHARPOINT(tasks[tasknum]->TaskID));
+        printf(".\n");
         return tasks[tasknum]->cpustate;
-    return tasks[tasknum]->cpustate;
+    }
+    else
+    {
+        printf("TaskManager::SwitchTask: Task number out of range\n");
+        return CSTATE;
+    }
+}
+
+void TaskManager::listTasks()
+{
+    printf("NumTasks: ");
+    printf(INTTOCHARPOINT(numTasks));
+    printf("\n");
+    printf("Tasks Registered: \n");
+    for(int i = 0; i != numTasks; i++)
+    {
+        printf("Task ");
+        printf(INTTOCHARPOINT(tasks[i]->TaskID));
+        printf(" : ");
+        printf((char*)tasks[i]->TaskName);
+        printf("\n");
+    }
+}
+
+void TaskManager::MakeDefault()
+{
+    ActiveManager = this;
 }

@@ -5,6 +5,16 @@
 #include "../Include/types.h"
 #include "../Memory/MemoryManagement.h"
 #include "../Include/Public_VAR.h"
+#include "../kernel/MultiTask.h"
+#include "../loaders/JD1618.h"
+
+struct Program
+{
+    uint8_t name[8];
+    uint32_t size;
+    uint32_t data;
+    void entrypoint();
+} __attribute__((packed));
 
 struct BiosParameterBlock32
 {
@@ -56,5 +66,7 @@ struct DirectoryEntryFat32
 } __attribute__((packed));
 
 void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset);
+bool ExecutePRG(char name[8], AdvancedTechnologyAttachment *hd);
+void listFiles(AdvancedTechnologyAttachment *HDD);
 
 #endif

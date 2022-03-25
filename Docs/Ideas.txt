@@ -1,0 +1,4 @@
+VFS: Virtual File System
+It is a abstraction for existing file System which helps the programs to read and write easily.
+
+VFS Mode to use: Mount point list

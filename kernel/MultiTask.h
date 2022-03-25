@@ -3,7 +3,7 @@
 
 #include "../Include/types.h"
 #include "../kernel/gdt.h"
-
+#include "../Include/Public_VAR.h"
 
 struct CPUState
 {
@@ -34,23 +34,30 @@ friend class TaskManager;
 private:
     uint8_t stack[4096]; // 4 KiB
     CPUState* cpustate;
+    uint8_t* TaskName;
+    int TaskID;
+
 public:
-    Task(GlobalDescriptorTable *gdt, void entrypoint());
+    Task(GlobalDescriptorTable *gdt, void entrypoint(), uint8_t* name, int id);
     ~Task();
 };
 class TaskManager
 {
 private:
     Task* tasks[256];
-    int numTasks;
     int currentTask;
+    int numTasks;
+
 public:
     TaskManager();
     ~TaskManager();
+    uint32_t TID;
     static TaskManager *ActiveManager;
     bool AddTask(Task *task);
     CPUState* SwitchTask(int tasknum, CPUState* CSTATE);
     CPUState* Schedule(CPUState* cpustate);
+    void listTasks();
+    void MakeDefault();
 };
 
 #endif
