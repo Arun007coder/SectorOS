@@ -1,7 +1,7 @@
 #ifndef __TYPES_H
 #define __TYPES_H
 
-#define NULL ((void *)0)
+#define NULL 0
 
 typedef char int8_t;
 typedef unsigned char uint8_t;

@@ -2,6 +2,7 @@
 #define __MEMORYMANAGEMENT_H
 
 #include "../Include/types.h"
+#include "../Include/string.h"
 
 struct MemoryChunk
 {
@@ -21,6 +22,7 @@ public:
     static MemoryManager* ActiveMemoryManager;
     void* MemAllocate(size_t size);
     void MemFree(void* ptr);
+    void * MemReallocate(void* ptr, size_t size);
 };
 
 void* operator new(unsigned size);

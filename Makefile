@@ -29,6 +29,8 @@ Drivers/VGADriver.o \
 Shell/Shell.o \
 CPU/syscall.o \
 loaders/JD1618.o \
+Include/string.o \
+Structures/list.o \
 Filesystem/MSDOSPT.o \
 Filesystem/FATFS.o \
 Drivers/Mouse.o \

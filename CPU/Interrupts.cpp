@@ -28,9 +28,7 @@ uint32_t InterruptHandler::HandleInterrupt(uint32_t esp)
 }
 
 InterruptManager::GateDescriptor InterruptManager::interruptDescriptorTable[256];
-
 InterruptManager* InterruptManager::ActiveInterruptManager = 0;
-
 
 void InterruptManager::SetInterruptDescriptorTableEntry(uint8_t interrupt,
     uint16_t CodeSegment, void (*handler)(), uint8_t DescriptorPrivilegeLevel, uint8_t DescriptorType)
@@ -147,9 +145,7 @@ void InterruptManager::Deactivate()
     if(ActiveInterruptManager == this)
     {
         ActiveInterruptManager = 0;
-        
         asm("cli");
-        
     }
 }
 
@@ -173,7 +169,7 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
         printf(foo);
         printHex(interrupt);
     }
-    else if(interrupt = 0x20)
+    else if(interrupt == 0x20)
     {
         printTime();
     }
@@ -186,12 +182,4 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp)
     }
 
     return esp;
-}
-
-void InterruptManager::UseMultiTask(int OPT)
-{
-    if(OPT == 1)
-        isTaskAllowed = true;
-    else if(OPT == 0)
-        isTaskAllowed = false;
 }

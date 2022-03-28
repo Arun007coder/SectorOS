@@ -7,6 +7,7 @@
 #include "../Include/Public_VAR.h"
 #include "../kernel/MultiTask.h"
 #include "../loaders/JD1618.h"
+#include "../Structures/list.h"
 
 struct Program
 {
@@ -65,8 +66,9 @@ struct DirectoryEntryFat32
     uint32_t size;
 } __attribute__((packed));
 
+
 void ReadBiosBlock(AdvancedTechnologyAttachment *hd, uint32_t partitionOffset);
-bool ExecutePRG(char name[8], AdvancedTechnologyAttachment *hd);
+void ExecutePRG(char* name,char* EXT, AdvancedTechnologyAttachment *hd);
 void listFiles(AdvancedTechnologyAttachment *HDD);
 
 #endif

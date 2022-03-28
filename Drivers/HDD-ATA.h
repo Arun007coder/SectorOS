@@ -4,7 +4,6 @@
 #include "IOPorts.h"
 #include "../Include/types.h"
 
-
 class AdvancedTechnologyAttachment
 {
 protected:

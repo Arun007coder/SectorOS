@@ -28,6 +28,27 @@ MemoryManager::~MemoryManager()
     }
 }
 
+void * MemoryManager::MemReallocate(void *ptr, size_t size)
+{
+    if(!ptr)
+    {
+        return MemAllocate(size);
+    }
+
+    MemoryChunk* chunk = (MemoryChunk*)((size_t)ptr - sizeof(MemoryChunk));
+    if(chunk->size >= size)
+    {
+        return ptr;
+    }
+
+    void* newPtr = MemAllocate(size);
+    memcpy(newPtr, ptr, chunk->size);
+    MemFree(ptr);
+    return newPtr;
+
+    return 0;
+}
+
 void MemoryManager::MemFree(void* ptr)
 {
     MemoryChunk* chunk = (MemoryChunk*)((size_t)ptr - sizeof(MemoryChunk));

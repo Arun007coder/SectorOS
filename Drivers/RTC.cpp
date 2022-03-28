@@ -14,7 +14,7 @@ RTC::~RTC()
 
 uint8_t RTC::get_RTC_register(int reg) 
 {
-    CMOS.WriteToPort(reg);
+      CMOS.WriteToPort(reg);
     return CMOSDATA.ReadFromPort();
 }
 

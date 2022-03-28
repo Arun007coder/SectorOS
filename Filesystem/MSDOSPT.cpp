@@ -34,6 +34,7 @@ void MSDOSPartitionTable::ReadPartitions(AdvancedTechnologyAttachment *hd)
         printf("Partition ");
         printHex(i & 0xFF);
         printf("\n");
+
         if (mbr.primaryPartition[i].partition_id == 0x00)
             continue;
 

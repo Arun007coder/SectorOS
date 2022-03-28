@@ -1,6 +1,7 @@
 #include "Keyboard.h"
 
 static bool isCTRLed = false;
+void BootSound();
 bool canNewLine = true;
 
 void StartWEBServer(uint16_t port);
@@ -349,7 +350,9 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 			else if (key_buffer[5] == "3")
 				printf("Help page 3:\nspi : To print the data in serial port 0x3F8.\nspo : To write data to serial port 0x3F8.\nsysinfo [option] : To get info about system.\nvga : To use experimental vga graphics.");
 			else if (key_buffer[5] == "4")
-				printf("Help page 4:\nlspt: To list partitions in a drive.\ntsk:to change instance.[EXPERIMENTAL]\nexport [var]=[value] : To change value of a ENV var in shell.");
+				printf("Help page 4:\nlspt: To list partitions in a drive.\ntsk:to change instance.[EXPERIMENTAL]\nexport [var]=[value] : To change value of a ENV var in shell.\nbmus : To play the boot music.");
+			else if (key_buffer[5] == "5")
+				printf("Help page 5:\nwserver <port> : To start a web server on the port.\nnet <options> : To get network information.\nbeep : To make a beep sound.\nls : To list files in the 1st slave drive.\nexec <filename> <extension> : To execute the given file from the 1st slave hard drive.");
 			else
 				printf("Help page 1:\necho <message> : to print the message in the console \nhelp : to show this message \nclear : to clear the screen \nsd <options> : controls the power of the computer ");
 		}
@@ -362,7 +365,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 			printf(KERNEL_VERSION);
 			printf("               ");
 			PrintDate();
-			printf("                        Type: Shell ");
+			printf("                            Type: Shell ");
 			canNewLine = false;
 		}
 		else if (key_buffer[0] == "s" & key_buffer[1] == "d")
@@ -510,6 +513,11 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 			COMNAME = "lspt";
 			PrintPartitions();
 		}
+		else if (key_buffer[0] == "b" && key_buffer[1] == "m" && key_buffer[2] == "u" && key_buffer[3] == "s")
+		{
+			COMNAME = "bmus";
+			BootSound();
+		}
 		else if (key_buffer[0] == "w" && key_buffer[1] == "s" && key_buffer[2] == "e" && key_buffer[3] == "r" && key_buffer[4] == "v" && key_buffer[5] == "e" && key_buffer[6] == "r" )
 		{
 			COMNAME = "wserver";
@@ -556,7 +564,7 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 			}
 			else
 			{
-				printf("Driver for network card not found");
+				printf("Driver for ethernet card not found\n");
 			}
 		}
 		else if(key_buffer[0] == "t" && key_buffer[1] == "s" && key_buffer[2] == "k")
@@ -599,24 +607,39 @@ void KeyboardDriver::CommandInterpreter() // SOSH v1.0.3 [SectorOS SHell]. 11 Co
 		{
 			beep();
 		}
+		else if (key_buffer[0] == "l" && key_buffer[1] == "s")
+		{
+			COMNAME = "ls";
+			AdvancedTechnologyAttachment ata0s(0x1F0, false);
+			listFiles(&ata0s);
+		}
 		else if (key_buffer[0] == "e" && key_buffer[1] == "x" && key_buffer[2] == "e" && key_buffer[3] == "c")
 		{
 			AdvancedTechnologyAttachment ata0s(0x1F0, false);
 			char FNAME[8];
+			char FEXT[3];
 			int x = 0;
-			for (int i = 5; key_buffer[i] != "\n" && (i - 5) != 8; i++)
+			for (int i = 5; key_buffer[i] != " " && (i - 5) != 8; i++)
 			{
 				FNAME[i - 5] = key_buffer[i][0];
-				x = (i - 5);
+				x++;
 			}
-			if (!ExecutePRG(FNAME, &ata0s))
+			char *ARG1 = (char*)0x550;
+			memset(ARG1, 0, sizeof(ARG1));
+			strncpy(ARG1, FNAME, x);
+			canNewLine = false;
+
+			int y = 0;
+			char* ARG2 = (char*)0x780;
+			memset(ARG2, 0, sizeof(ARG2));
+			int XP = (x + 5);
+			for (int i = XP + 1; key_buffer[i] != "\n" && (i - x) != 3; i++)
 			{
-				printf("Execution failed");
+				FEXT[y] = key_buffer[i][0];
+				y++;
 			}
-			else
-			{
-				printf("Execution successful");
-			}
+			strncpy(ARG2, FEXT, y);
+			ExecutePRG(ARG1, ARG2, &ata0s);
 		}
 		else
 		{
@@ -652,7 +675,7 @@ void KeyboardDriver::returnHScreen()
 	printf(KERNEL_VERSION);
 	printf("               ");
 	PrintDate();
-	printf("                        Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
+	printf("                          Type: Shell\nhttps://github.com/Arun007coder/SectorOS \n");
 	printf("Run help to get the list of commands which is implemented \n \n");
 
 	PrintPrompt();

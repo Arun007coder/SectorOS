@@ -113,7 +113,6 @@ protected:
             ~InterruptManager();
             uint16_t HardwareInterruptOffset();
             uint32_t DoHandleInterrupt(uint8_t interrupt, uint32_t esp);
-            void UseMultiTask(int OPT);
             void Activate();
             void Deactivate();
     };

@@ -6,6 +6,8 @@ int numTasks;
 void* EPoints[256];
 int ENTINDEX = 0;
 
+#define PARTITION_NUMBER 0
+
 struct PartitionTableEntry
 {
     uint8_t bootable;
@@ -165,12 +167,9 @@ void listFiles(AdvancedTechnologyAttachment *HDD)
 {
     MasterBootRecord MBR;
     HDD->Read28(0, (uint8_t *)&MBR, sizeof(MasterBootRecord));
-    printf("\nMBR signature: ");
-    printHex(MBR.signature);
-    printf("\n");
     BiosParameterBlock32 bpb32;
-    HDD->Read28(MBR.primaryPartition[1].start_lba, (uint8_t *)&bpb32, sizeof(BiosParameterBlock32));
-    uint32_t fatStart = MBR.primaryPartition[1].start_lba + bpb32.reservedSectors;
+    HDD->Read28(MBR.primaryPartition[PARTITION_NUMBER].start_lba, (uint8_t *)&bpb32, sizeof(BiosParameterBlock32));
+    uint32_t fatStart = MBR.primaryPartition[PARTITION_NUMBER].start_lba + bpb32.reservedSectors;
     uint32_t fatSize = bpb32.tableSize;
 
     uint32_t dataStart = fatStart + fatSize * bpb32.fatCopies;
@@ -180,77 +179,79 @@ void listFiles(AdvancedTechnologyAttachment *HDD)
     DirectoryEntryFat32 Dirent[16];
     HDD->Read28(rootStart, (uint8_t *)&Dirent[0], 16 * sizeof(DirectoryEntryFat32));
 
+    list_t *list = list_create();
+
     printf("Files found: \n");
     for (int x = 0; x < 16; x++)
     {
-        printf((char *)Dirent[x].name);
+        char *foo;
+        for (int y = 0; y < 8 && Dirent[x].name[y] != 0 /*&& Dirent[x].name[y] != ' '*/; y++)
+        {
+            foo[y] = Dirent[x].name[y];
+        }/*
+        printf(INTTOCHARPOINT(x));
+        printf(": ");
+        */
+        printf(foo);
     }
 }
 
 // COM files are basic executable
 // ROM files are executables used by the JD1618 emulator
-bool ExecutePRG(char name[8], AdvancedTechnologyAttachment* HDD)
+void ExecutePRG(char* name, char* EXT, AdvancedTechnologyAttachment* HDD)
 {
     MasterBootRecord MBR;
     HDD->Read28(0, (uint8_t *)&MBR, sizeof(MasterBootRecord));
-    printf("\nMBR signature: ");
-    printHex(MBR.signature);
-    printf("\n");
     BiosParameterBlock32 bpb32;
-    HDD->Read28(MBR.primaryPartition[1].start_lba, (uint8_t *)&bpb32, sizeof(BiosParameterBlock32));
-    uint32_t fatStart = MBR.primaryPartition[1].start_lba + bpb32.reservedSectors;
+    HDD->Read28(MBR.primaryPartition[PARTITION_NUMBER].start_lba, (uint8_t *)&bpb32, sizeof(BiosParameterBlock32));
+
+    uint32_t fatStart = MBR.primaryPartition[PARTITION_NUMBER].start_lba + bpb32.reservedSectors;
     uint32_t fatSize = bpb32.tableSize;
-
     uint32_t dataStart = fatStart + fatSize * bpb32.fatCopies;
-
     uint32_t rootStart = dataStart + bpb32.sectorsPerCluster * (bpb32.rootCluster - 2);
 
     DirectoryEntryFat32 Dirent[16];
     HDD->Read28(rootStart, (uint8_t *)&Dirent[0], 16 * sizeof(DirectoryEntryFat32));
 
-    printf("Files found: \n");
-    for (int x = 0; x < 16; x++)
-    {
-        printf((char *)Dirent[x].name);
-    }
-
     for (int i = 0; i < 16; i++)
     {
-        uint32_t firstFileCluster = ((uint32_t)Dirent[i].firstClusterHi) << 16 | ((uint32_t)Dirent[i].firstClusterLow);
+        char *name1 = (char *)0x00000510;
+        memset(name1, 0, sizeof(name1));
+        int ind = 0;
+        for (int y = 0; y < 8 && Dirent[i].name[y] != 0 && Dirent[i].name[y] != ' '; y++)
+        {
+            ind++;
+        }
+        strncpy(name1, (char*)Dirent[i].name, ind);
 
+        char* ext = (char*)0x620;
+        memset(ext, 0, sizeof(ext));
+        ind = 0;
+        for (int y = 0; y < 3 && Dirent[i].ext[y] != 0 && Dirent[i].ext[y] != ' '; y++)
+        {
+            ind++;
+        }
+        strncpy(ext, (char*)Dirent[i].ext, ind);
+
+        uint32_t firstFileCluster = ((uint32_t)Dirent[i].firstClusterHi) << 16 | ((uint32_t)Dirent[i].firstClusterLow);
         int32_t SIZE = Dirent[i].size;
-        int32_t nextFileCluster = firstFileCluster;
-        uint8_t buffer[513];
         uint8_t fatbuffer[513];
 
         while (SIZE > 0)
         {
-            uint32_t fileSector = dataStart + bpb32.sectorsPerCluster * (nextFileCluster - 2);
+            uint32_t fileSector = dataStart + bpb32.sectorsPerCluster * (firstFileCluster - 2);
             int sectorOffset = 0;
             for (; SIZE > 0; SIZE -= 512)
             {
-                if(Dirent[i].ext[0] == 'C' && Dirent[i].ext[1] == 'O' && Dirent[i].ext[2] == 'M')
+                if (strcmp(name, name1) == 0 && strcmp(EXT, ext) == 0)
                 {
-                    Program* prg = (Program*)MemoryManager::ActiveMemoryManager->MemAllocate(Dirent[i].size);
-                    HDD->Read28(fileSector + sectorOffset, (uint8_t *)Entry, Dirent[i].size);
                     printf("executing ");
-                    printf((char *)Dirent[i].name);
-                    printf(".");
-                    printf((char *)Dirent[i].ext);
-                    printf("\n");
+                    printf(name1);
+                    HDD->Read28(fileSector + sectorOffset, (uint8_t *)Entry, 512);
                     Entry();
-                }
-                else if (Dirent[i].ext[0] == 'R' && Dirent[i].ext[1] == 'O' && Dirent[i].ext[2] == 'M')
-                {
-                    uint8_t *rom;
-                    HDD->Read28(fileSector + sectorOffset, rom, 512);
-                    CPU1618::System sys;
-                    sys.LoadPRG(rom, SIZE);
-                    sys.StartExecution();
+                    return;
                 }
             }
         }
     }
-    printf("\n");
-    return false;
 }
